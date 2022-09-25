@@ -1,7 +1,8 @@
 #include <iostream>
 #include <memory>
 
-struct C { int *data; };
+struct DataA { int *data; };
+struct Data { int a; int b; };
 
 int main()
 {
@@ -17,7 +18,7 @@ int main()
         std::shared_ptr<int> p6(p5);
         std::shared_ptr<int> p7(std::move(p6));
         std::shared_ptr<int> p8(std::unique_ptr<int>(new int));
-        std::shared_ptr<C> obj(new C);
+        std::shared_ptr<DataA> obj(new DataA);
         std::shared_ptr<int> p9(obj, obj->data);
 
         std::cout << "use_count:\n";
@@ -111,6 +112,7 @@ int main()
         std::cout << *a << "\n";
         std::cout << *p << "\n";
     }
+
     // 取对象运算“*”
     // 函数声明：element_type& operator*() const noexcept;
     // 取消引用对象。返回对存储指针指向的对象的引用。等价于：*get()。
@@ -124,13 +126,15 @@ int main()
 
         std::cout << "foo: " << *foo << '\n';
         std::cout << "bar: " << *bar << '\n';
+    }
 
-        // “->”操作符
-        // element_type* operator->() const noexcept; 取消引用对象成员。
-        // 返回一个指向存储指针指向的对象的指针，以便访问其成员之一。
-        // 如果存储的指针是空指针，则不应调用该成员函数，它返回与 get() 相同的值。
-        std::shared_ptr<C> foo;
-        std::shared_ptr<C> bar(new C);
+    // “->”操作符
+    // element_type* operator->() const noexcept; 取消引用对象成员。
+    // 返回一个指向存储指针指向的对象的指针，以便访问其成员之一。
+    // 如果存储的指针是空指针，则不应调用该成员函数，它返回与 get() 相同的值。
+    {
+        std::shared_ptr<Data> foo;
+        std::shared_ptr<Data> bar(new Data);
 
         foo = bar;
 
