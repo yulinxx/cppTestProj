@@ -22,14 +22,14 @@ int main()
     std::chrono::duration<double> elapsed = end - start;
     std::cout << "Elapsed time: " << elapsed.count() << "s";
 
-    auto start = std::chrono::system_clock::now();
+    auto startB = std::chrono::system_clock::now();
     {
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
-    auto end = std::chrono::system_clock::now();
+    auto endB = std::chrono::system_clock::now();
 
-    auto elapsed = end - start;
-    std::cout << "Elapsed time: " << elapsed.count() << "s";
+    auto elapsedB = endB - startB;
+    std::cout << "Elapsed time: " << elapsedB.count() << "s";
 
     //
     // auto让编译器通过初始值来推算变量的类型。当然，其定义的变量必须要有初始值
@@ -58,8 +58,10 @@ int main()
               { return (a % 10) > (b % 10); });
 
     // 用 emplace_back 代替 push_back , emplace_back 就直接在 vector 的末尾构造值（构造函数），少调用了一次拷贝构造函数。
+   {
     std::vector<int> v;
     v.push_back(0);
     v.emplace_back(1);
+   } 
     return 0;
 }
