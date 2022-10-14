@@ -8,6 +8,9 @@
 // change_speed(2.3);        // error: no unit 错误：没有单位
 // change_speed(23m / 10s);  // meters per second 米每秒
 
+#include <iostream>
+using namespace std;
+
 
 /////////////////////////////////////////////////////////
 // 假设我们有如下一个Distance类：
