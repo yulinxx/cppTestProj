@@ -7,6 +7,8 @@ if(glog_FOUND)
     # target_link_libraries(${APP_NAME} PRIVATE glog::glog)
     # target_link_libraries(${APP_NAME} PRIVATE ${glog_LIBRARIES})
     target_link_libraries(${APP_NAME}  glog::glog)
+elseif()
+    message(FATAL_ERROR "------glog Not Found")
 endif()
 
 aux_source_directory(. DIR_SRCS)
