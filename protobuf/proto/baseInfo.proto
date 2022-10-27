@@ -1,0 +1,30 @@
+// .\protoc.exe -I=E:\Proj\CAD\GraphicsComponent_QtExample\GraphicsComponent_QtExample\src\proto\ --cpp_out=E:\Proj\CAD\GraphicsComponent_QtExample\GraphicsComponent_QtExample\src\proto\   E:\Proj\CAD\GraphicsComponent_QtExample\GraphicsComponent_QtExample\src\proto\baseInfo.proto
+
+
+// 指定使用的protobuf版本, 写到 xxx.proto文件的第一行。
+// syntax = "proto3";
+
+// message	类型名/变量名		// 相当于 struct、class、int
+// {
+// 	类型名 变量名 = 编号;	// 编号，必须从1.开始。
+// 	...
+// 	类型名 变量名 = 编号;	
+// }
+// 生成类文件
+// protoc ./xxxx.proto --cpp_out=.
+
+// protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/addressbook.proto
+// -I=$SRC_DIR 为编译时搜索proto的根目录
+// –cpp_out=$DST_DIR为源码输出路径
+// $SRC_DIR/addressbook.proto 为需要编译的proto文件
+
+syntax = "proto3";
+package basePkg;
+
+message Info{
+    string ver = 1;         // 版本
+    string author = 2;      // 作者
+    string create_time = 3; // 创建时间
+    string encrypt = 4;     // 加密
+    string mask = 5;        // 备忘信息
+}

@@ -1,0 +1,22 @@
+//sylar.proto
+package sylarPkg;
+
+message AA {
+    optional string name = 1;
+    optional int32 age = 2;
+}
+
+message Test {
+    optional string name = 1;
+    optional int32 age = 2;
+    repeated string phones = 3;
+    repeated AA aa = 4;
+    optional double dd = 5;
+    optional float ff = 6;
+
+}
+
+message XX {
+    optional string name = 1;
+    repeated AA aa = 4;
+}

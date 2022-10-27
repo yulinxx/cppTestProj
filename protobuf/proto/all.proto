@@ -1,0 +1,14 @@
+syntax = "proto3";//指定版本信息，不指定会报错
+
+package allPkg; //package声明符
+
+import "baseInfo.proto";
+import "message.proto";
+
+message allInfo 
+{
+    int32 num_flag = 1;
+    repeated basePkg.Info  info_obj = 2;
+    repeated MsgPkg.MessageTest msg_obj = 3;
+    string str_flag = 4;
+}

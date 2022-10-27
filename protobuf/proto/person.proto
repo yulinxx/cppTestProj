@@ -1,0 +1,15 @@
+syntax = "proto3";
+// import "baseInfo.proto";
+
+package PesPkg;
+
+message Person {
+    int32 age = 1;
+    string name = 2;
+}
+  
+message Family {
+    Person person = 1;
+    // baseinfo::Info bInfo = 2;
+}
+  
