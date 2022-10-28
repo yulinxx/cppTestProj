@@ -623,14 +623,14 @@ void MainWindow::slotImageSet()
             int nEnhanceAmount = nG;
             double dAngle = nH * 0.1;
 
-            listName << "类型"
-                     << "DPI * 0.05"
-                     << "对比度"
-                     << "亮度"
-                     << "Gamma * 0.01"
-                     << "半径"
-                     << "数量"
-                     << "角度 * 0.1";
+            listName <<QString::fromLocal8Bit( "类型")
+                     <<QString::fromLocal8Bit( "DPI * 0.05")
+                     <<QString::fromLocal8Bit( "对比度")
+                     <<QString::fromLocal8Bit( "亮度")
+                     <<QString::fromLocal8Bit( "Gamma * 0.01")
+                     <<QString::fromLocal8Bit( "半径")
+                     <<QString::fromLocal8Bit( "数量")
+                     <<QString::fromLocal8Bit( "角度 * 0.1");
             matRes = m_pImgProcess->setImgEdgePaperEffect(m_matRes, dLineInterval, dDPI, nContrast, nBrightness, dGamma, nEnhanceRadius, nEnhanceAmount, dAngle);
         }
         break;
