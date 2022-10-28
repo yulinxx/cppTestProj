@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-#include "imgProcess.h"
+#include "ImgProcess.h"
 
 #include <QImage>
 #include <QFileDialog>
 #include <QDebug>
 #include <QStandardPaths>
+#include <QDateTime>
 
 using namespace ImgSpace;
 
@@ -186,7 +187,9 @@ void MainWindow::slotImageResize()
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
-    ui->labelImg->resize(ui->labelImg->pixmap().size());
+
+    auto p = ui->labelImg->pixmap(Qt::ReturnByValue).size();
+    ui->labelImg->resize(p);
 
     float dSize = ui->hSliderResize->value() * 0.1;
     ui->labelResize->setText(QString("%1").arg(dSize));
@@ -228,9 +231,9 @@ void MainWindow::slotImageFit()
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
-    ui->labelImg->resize(ui->labelImg->pixmap().size());
+    ui->labelImg->resize(ui->labelImg->pixmap(Qt::ReturnByValue).size());
 
-    float dSize = ui->hSliderResize->value() * 0.1;
+    float dSize = ui->hSliderResize->value() * 0.1f;
     ui->labelResize->setText(QString("%1").arg(dSize));
 }
 
@@ -280,7 +283,7 @@ void MainWindow::slotOpenImage()
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
-    ui->labelImg->resize(ui->labelImg->pixmap().size());
+    ui->labelImg->resize(ui->labelImg->pixmap(Qt::ReturnByValue).size());
 }
 
 void MainWindow::slotImageSave()
@@ -295,7 +298,8 @@ void MainWindow::slotImageSave()
     else
         strImgPath = QString("%1").arg(picturesLocation.first());
 
-    QDateTime dateTime(QDateTime::currentDateTime());
+    QDateTime dateTime = QDateTime::currentDateTime();
+    // QDateTime dateTime = QDateTime::currentDateTime();
     QString strData = dateTime.toString("yyyy-MM-dd_hh_mm_ss");
     QString strPath = QString("%1/Out_%2.png").arg(strImgPath).arg(strData);
 
@@ -324,7 +328,7 @@ void MainWindow::slotValueReset()
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
-    ui->labelImg->resize(ui->labelImg->pixmap().size());
+    ui->labelImg->resize(ui->labelImg->pixmap(Qt::ReturnByValue).size());
 
     m_matResPrev = m_pImgProcess->getOriginImg();
 }
@@ -650,7 +654,7 @@ void MainWindow::slotImageSet()
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
-    ui->labelImg->resize(ui->labelImg->pixmap().size());
+    ui->labelImg->resize(ui->labelImg->pixmap(Qt::ReturnByValue).size());
 
     QString strValue;
     if (pushBtn)

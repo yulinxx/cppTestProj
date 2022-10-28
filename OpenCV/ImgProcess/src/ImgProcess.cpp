@@ -1,4 +1,4 @@
-#include "imgProcess.h"
+#include "ImgProcess.h"
 // #include <opencv2/freetype.hpp>
 
 using namespace ImgSpace;

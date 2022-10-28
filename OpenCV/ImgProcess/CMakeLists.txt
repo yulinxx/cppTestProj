@@ -2,7 +2,7 @@
 message(" --------- OpenCV  ImgProcess ----- \n")
 
 #################### Lib ##################################
-set(SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/imgProcess.cpp)
+set(SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/ImgProcess.cpp)
 
 add_library(ImgProcess ${SRC_FILES})
 
@@ -20,8 +20,17 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 COMPONENTS Widgets LinguistTools REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools REQUIRED)
+# set(Qt_DIR /opt/Qt/5.15.2/gcc_64/lib/cmake/)
+list(APPEND CMAKE_PREFIX_PATH /opt/Qt/5.15.2/gcc_64/lib/cmake/)
+
+# find_package(Qt NAMES Qt6 COMPONENTS Widgets LinguistTools REQUIRED)
+# find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools REQUIRED)
+find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
+if(Qt5_FOUND)
+
+elseif()
+    message(FATAL_ERROR "------Qt5 Not Found")
+endif()
 
 ######################################################
 
@@ -39,10 +48,14 @@ set(PROJECT_SOURCES
 
 SET(APP_NAME  QtOpenCVTest)
 
-qt_add_executable(${APP_NAME}
-        MANUAL_FINALIZATION 
+add_executable(${APP_NAME}
         ${PROJECT_SOURCES}
     )
+
+# qt_add_executable(${APP_NAME}
+#         MANUAL_FINALIZATION 
+#         ${PROJECT_SOURCES}
+#     )
 
 qt_create_translation(QM_FILES ${EXE_SRC} ${TS_FILES})
 
@@ -69,7 +82,7 @@ set_target_properties(${APP_NAME} PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(${APP_NAME})
-endif()
+# if(QT_VERSION_MAJOR EQUAL 6)
+#     qt_finalize_executable(${APP_NAME})
+# endif()
 
