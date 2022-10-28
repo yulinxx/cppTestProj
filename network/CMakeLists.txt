@@ -1,4 +1,4 @@
-message(" --------- network ----- \n")
+MESSAGE(" --------- network ----- \n")
 
 set(CPP_DIR
     ./

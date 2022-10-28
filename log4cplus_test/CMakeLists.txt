@@ -1,10 +1,10 @@
-message(" --------- log4cplus_test ----- \n")
+MESSAGE(" --------- log4cplus_test ----- \n")
 
 find_package(log4cplus CONFIG REQUIRED)
 if(log4cplus_FOUND)
 
 elseif()
-    message(FATAL_ERROR "------log4cplus Not Found")
+    MESSAGE(FATAL_ERROR "------log4cplus Not Found")
 endif()
 
 aux_source_directory(. DIR_SRCS)

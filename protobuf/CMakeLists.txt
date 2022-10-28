@@ -1,12 +1,12 @@
 
 ############################# Protobuf #############################
-message(" --------- protobuf ----- \n")
+MESSAGE(" --------- protobuf ----- \n")
 
 find_package(Protobuf REQUIRED)
 if(Protobuf_FOUND)
 
 elseif()
-    message(FATAL_ERROR "------Protobuf Not Found")
+    MESSAGE(FATAL_ERROR "------Protobuf Not Found")
 endif()
 
 add_definitions(-DPROTOBUF_USE_DLLS)
@@ -35,8 +35,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB ProtoFiles "${CMAKE_CURRENT_SOURCE_DIR}/proto/*.proto")
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${ProtoFiles})
 
-MESSAGE("5 " ${PROTO_SRCS} ${PROTO_HDRS})
-MESSAGE("6 " ${Protobuf_LIBRARIES})
+MESSAGE("5 " ${PROTO_SRCS} ${PROTO_HDRS} "\n")
+MESSAGE("6 " ${Protobuf_LIBRARIES} "\n")
 
 ####################################################################
 

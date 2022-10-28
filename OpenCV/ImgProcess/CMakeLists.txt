@@ -1,5 +1,5 @@
 ######################################################
-message(" --------- OpenCV  ImgProcess ----- \n")
+MESSAGE(" --------- OpenCV  ImgProcess ----- \n")
 
 #################### Lib ##################################
 set(SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/ImgProcess.cpp)
@@ -38,7 +38,7 @@ find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 if(Qt5_FOUND)
 
 elseif()
-    message(FATAL_ERROR "------Qt5 Not Found")
+    MESSAGE(FATAL_ERROR "------Qt5 Not Found")
 endif()
 
 ######################################################

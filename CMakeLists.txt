@@ -17,7 +17,7 @@ project(cppTest VERSION 0.1.0)
 set (CMAKE_CXX_STANDARD 17)
 
 # 查找所有子目录 
-message("--------- subdir ----- ")
+MESSAGE("--------- subdir ----- ")
 MACRO(SUBDIRLIST result curdir)
 
     FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
@@ -46,22 +46,22 @@ SET(ExclusionList
 
 # 遍历子目录,将排除的子目剔除后,添加至cmake中
 FOREACH(SUBDIR ${SUBDIRS})
-message("\ncur dir----------------------------" ${SUBDIR} )
+MESSAGE("\n----------------------------" ${SUBDIR} )
 
     SET(ADD_DIR TRUE)
     foreach(exc ${ExclusionList})
         if("${SUBDIR}" STREQUAL "${exc}" )
-            message(${SUBDIR}  "   Equal  " ${exc})
+            MESSAGE(" ${SUBDIR}   Equal  ${exc} Skip...")
             SET(ADD_DIR FALSE)
             BREAK()
         endif()
     endforeach()
 
     IF( ADD_DIR )
-        message("add subdir: " ${SUBDIR})
+        MESSAGE("add subdir: " ${SUBDIR})
         ADD_SUBDIRECTORY(${SUBDIR})
     ENDIF()
 
 ENDFOREACH()
 
-message("--------- all done ----- ")
+MESSAGE("--------- all done ----- ")

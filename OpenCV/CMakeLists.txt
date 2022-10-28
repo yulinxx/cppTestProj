@@ -1,17 +1,17 @@
-message(" ---------  OpenCV ----- \n")
+MESSAGE(" ---------  OpenCV ----- \n")
 
 find_package(OpenCV REQUIRED)
 
 if(OpenCV_found)
-    message(status "------Opencv Found")
-    message(status ${OpenCV_INCLUDE_DIRS})
-    message(status ${OpenCV_LIBRARY_DIRS})
-    message(status ${OpenCV_LIBS})
+    MESSAGE(status "------Opencv Found")
+    MESSAGE(status ${OpenCV_INCLUDE_DIRS})
+    MESSAGE(status ${OpenCV_LIBRARY_DIRS})
+    MESSAGE(status ${OpenCV_LIBS})
     
     include_directories(${OpenCV_INCLUDE_DIRS})
     link_directories(${OpenCV_LIBRARY_DIRS})
 elseif()
-    message(FATAL_ERROR "------Opencv Not Found")
+    MESSAGE(FATAL_ERROR "------Opencv Not Found")
 endif()
 
 
@@ -27,19 +27,19 @@ SET(ExclusionList
 
 # 遍历子目录,将排除的子目剔除后,添加至cmake中
 FOREACH(SUBDIR ${SUBDIRS})
-message("\ncur dir----------------------------" ${SUBDIR} )
+MESSAGE("\n----------------------------" ${SUBDIR} )
 
     SET(ADD_DIR TRUE)
     foreach(exc ${ExclusionList})
         if("${SUBDIR}" STREQUAL "${exc}" )
-            message(${SUBDIR}  "   Equal  " ${exc})
+            MESSAGE(" ${SUBDIR}   Equal  ${exc} Skip...")
             SET(ADD_DIR FALSE)
             BREAK()
         endif()
     endforeach()
 
     IF( ADD_DIR )
-        message("add subdir: " ${SUBDIR})
+        MESSAGE("add subdir: " ${SUBDIR})
         ADD_SUBDIRECTORY(${SUBDIR})
     ENDIF()
 

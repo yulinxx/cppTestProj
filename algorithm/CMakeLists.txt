@@ -1,4 +1,4 @@
-message(" --------- algorithm ----- \n")
+MESSAGE(" --------- algorithm ----- \n")
 
 set(CPP_DIR
     ./

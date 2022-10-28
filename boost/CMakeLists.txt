@@ -1,4 +1,4 @@
-message(" --------- boostTestProj----- \n")
+MESSAGE(" --------- boostTestProj----- \n")
 
 set(CPP_DIR
     ./src
@@ -8,20 +8,20 @@ set(CPP_DIR
     ./src/geometry
 )
 
-message(STATUS "__CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
-message(STATUS "__PROJECT_SOURCE_DIR " ${PROJECT_SOURCE_DIR})
+MESSAGE("__CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
+MESSAGE("__PROJECT_SOURCE_DIR " ${PROJECT_SOURCE_DIR})
 
 foreach(SUB_DIR ${CPP_DIR})
-    message(STATUS "---Sub Dir: ${SUB_DIR}")
+    MESSAGE("---Sub Dir: ${SUB_DIR}")
 
     file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/${SUB_DIR}/*.cpp")
-    message(STATUS "---all cpp: ${SRC}")
+    MESSAGE("---all cpp: ${SRC}\n")
 
     foreach(CPP ${SRC})
-        message(STATUS "---Create Exe From: ${CPP}")
-
+    
         STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
-        MESSAGE(" --- FILE_NAME : "  ${FILE_NAME})
+        MESSAGE("---Create Exe From: ${CPP}")
+        MESSAGE("---file name: ${FILE_NAME} \n")
 
         add_executable(BOOST_${FILE_NAME} ${CPP})
 
@@ -29,25 +29,25 @@ foreach(SUB_DIR ${CPP_DIR})
 
 endforeach(SUB_DIR)
 
-message(" --------- Files Test B----- \n")
+MESSAGE(" --------- Files Test B----- \n")
 
 ######################################################
 
 find_package(Boost REQUIRED)
 
 if(Boost_FOUND)
-    message(status "--------------BOOST Found")
-    message(status " ---BOOST Include: ${Boost_INCLUDE_DIRS}")
-    message(status " ---BOOST Library: ${Boost_LIBRARY_DIRS}")
+    MESSAGE(status "--------------BOOST Found")
+    MESSAGE(status " ---BOOST Include: ${Boost_INCLUDE_DIRS}")
+    MESSAGE(status " ---BOOST Library: ${Boost_LIBRARY_DIRS}")
 
     foreach(lib ${Boost_LIBS})
-       message(STATUS " ${lib}")
+       MESSAGE(" ${lib}")
     endforeach(lib )
     
     include_directories(${Boost_INCLUDE_DIRS})
     link_directories(${Boost_LIBRARY_DIRS})
 elseif(Boost_FOUND)
-    message(FATAL_ERROR "------Boost Not Found")
+    MESSAGE(FATAL_ERROR "------Boost Not Found")
 endif(Boost_FOUND)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)

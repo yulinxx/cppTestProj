@@ -1,4 +1,4 @@
-message(" --------- base ----- \n")
+MESSAGE(" --------- base ----- \n")
 
 set(CPP_DIR
     ./
