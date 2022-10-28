@@ -3,7 +3,8 @@
 /////////////////////////////////////////////////////////////
 int main()
 {
-    initLog(std::string("Test Application"));
+    std::string str("Test Application");
+    initLog(str);
 
     WRITE_INFOLOG(__FUNCTION__);
     WRITE_INFOLOG(__LINE__);
@@ -19,8 +20,8 @@ int main()
 
     WRITE_ERRORLOG("WRITE_ERRORLOG initial opengl 初始化OpenGL");
 
-    std::string str = "WRITE_ERRORLOG initial opengl 初始化OpenGL";
-    WRITE_ERRORLOG(str.c_str()); 
+    std::string strError("2 WRITE_ERRORLOG initial opengl 初始化OpenGL");
+    WRITE_ERRORLOG(strError.c_str()); 
 
 
     closeLog();

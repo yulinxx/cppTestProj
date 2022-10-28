@@ -24,7 +24,7 @@ int main()
 {
 
     Obj<int> objA;
-    Obj3<int, 2> objBError();
+    Obj3<int, 2> objBError;
     // Obj<std::string, 2> objC();
     // Obj<int, 4> objD;
 
