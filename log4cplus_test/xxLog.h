@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _XX_LOG_H_
+#define _XX_LOG_H_
 
 #include "log4cplus/loglevel.h"
 #include "log4cplus/ndc.h"
@@ -63,87 +64,87 @@ using namespace log4cplus::helpers;
 /////////////////////////////////////////
 // ------ 日志管理 ------ 
 // 打开日志,记录所有信息
-#define RDLOG_ON()   \
+#define XXLOG_ON()   \
 { \
 	log4cplus::initialize();	\
 	xxLog::m_logger.setLogLevel(ALL_LOG_LEVEL); \
 }
 
 // 关闭日志
-#define RDLOG_OFF()   \
+#define XXLOG_OFF()   \
 { \
 	xxLog::m_logger.setLogLevel(OFF_LOG_LEVEL); \
 }
 
 // 记录所有日志 
-#define RDLOG_REC_ALL()   \
+#define XXLOG_REC_ALL()   \
 { \
 	xxLog::m_logger.setLogLevel(ALL_LOG_LEVEL); \
 }
 
 // // 仅记录调试与错误日志 
-#define RDLOG_REC_DEBUG()   \
+#define XXLOG_REC_DEBUG()   \
 { \
 	xxLog:m_logger.:setLogLevel(DEBUG_LOG_LEVEL); \
 }
 
 // 仅记录错误日志 
-#define RDLOG_REC_ERROR()   \
+#define XXLOG_REC_ERROR()   \
 { \
 	xxLog::m_logger.setLogLevel(ERROR_LOG_LEVEL); \
 }
 
 // 彻底关闭日志功能(在程序退出时调用)
-#define RDLOG_CLOSE()\
+#define XXLOG_CLOSE()\
 { \
 	log4cplus::deinitialize();	\
 }
 
 // ------ 日志写入 ------ 
 // 追踪日志
-#define RDLOG_TRACE(msg)   \
+#define XXLOG_TRACE(msg)   \
 { \
 	xxLog::instance(); \
 	LOG4CPLUS_TRACE(xxLog::m_logger, msg); \
 }
 
 // 调试日志
-#define RDLOG_DEBUG(msg)   \
+#define XXLOG_DEBUG(msg)   \
 { \
 	xxLog::instance(); \
 	LOG4CPLUS_DEBUG(xxLog::m_logger, msg); \
 }
 
 // 信息日志
-#define RDLOG_INFO(msg)    \
+#define XXLOG_INFO(msg)    \
 { \
 	xxLog::instance();\
 	LOG4CPLUS_INFO(xxLog::m_logger, msg);\
 }
 
 // 警告日志
-#define RDLOG_WARN(msg) \
+#define XXLOG_WARN(msg) \
 { \
 	xxLog::instance(); \
 	LOG4CPLUS_WARN(xxLog::m_logger, msg); \
 }
 
 // 错误日志
-#define RDLOG_ERROR(msg)   \
+#define XXLOG_ERROR(msg)   \
 { \
 	xxLog::instance(); \
 	LOG4CPLUS_ERROR(xxLog::m_logger, msg); \
 }
 
 // 致命日志
-#define RDLOG_FATAL(msg)  \
+#define XXLOG_FATAL(msg)  \
 { \
 	xxLog::instance(); \
 	LOG4CPLUS_FATAL(xxLog::m_logger, msg); \
 }
 
 
-
+///////////////////////////////////////
 
 using namespace std;
 class xxLog
@@ -162,3 +163,5 @@ private:
 
     static xxLog *m_lpxxLog;
 };
+
+#endif //_XX_LOG_H_
