@@ -1,4 +1,6 @@
 //sylar.proto
+syntax = "proto3";
+
 package sylarPkg;
 
 message AA {
