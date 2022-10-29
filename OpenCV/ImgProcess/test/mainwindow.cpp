@@ -158,12 +158,12 @@ void MainWindow::setSliderTip(QStringList listTip)
     }
 
     size_t nCount = m_vecLabelName.size() > listTip.size() ? listTip.size() : m_vecLabelName.size();
-    for (size_t i = 0; i < m_vecLabelName.size(); i++)
+    for (int i = 0; i < m_vecLabelName.size(); i++)
     {
         m_vecLabelName[i]->setText("");
     }
 
-    for (size_t i = 0; i < nCount; i++)
+    for (int i = 0; i < nCount; i++)
     {
         m_vecLabelName[i]->setText(listTip[i]);
     }
@@ -623,14 +623,14 @@ void MainWindow::slotImageSet()
             int nEnhanceAmount = nG;
             double dAngle = nH * 0.1;
 
-            listName <<QString::fromLocal8Bit( "类型")
-                     <<QString::fromLocal8Bit( "DPI * 0.05")
-                     <<QString::fromLocal8Bit( "对比度")
-                     <<QString::fromLocal8Bit( "亮度")
-                     <<QString::fromLocal8Bit( "Gamma * 0.01")
-                     <<QString::fromLocal8Bit( "半径")
-                     <<QString::fromLocal8Bit( "数量")
-                     <<QString::fromLocal8Bit( "角度 * 0.1");
+            listName <<QString::fromLocal8Bit("类型")
+                     <<QString::fromLocal8Bit("DPI * 0.05")
+                     <<QString::fromLocal8Bit("dui bi du")
+                     <<QString::fromLocal8Bit("亮度")
+                     <<QString::fromLocal8Bit("Gamma * 0.01")
+                     <<QString::fromLocal8Bit("半径")
+                     <<QString::fromLocal8Bit("数量")
+                     <<QString::fromLocal8Bit("角度 * 0.1");
             matRes = m_pImgProcess->setImgEdgePaperEffect(m_matRes, dLineInterval, dDPI, nContrast, nBrightness, dGamma, nEnhanceRadius, nEnhanceAmount, dAngle);
         }
         break;

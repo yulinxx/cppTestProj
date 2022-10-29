@@ -36,9 +36,9 @@ MESSAGE(" --------- Files Test B----- \n")
 find_package(Boost REQUIRED)
 
 if(Boost_FOUND)
-    MESSAGE(status "--------------BOOST Found")
-    MESSAGE(status " ---BOOST Include: ${Boost_INCLUDE_DIRS}")
-    MESSAGE(status " ---BOOST Library: ${Boost_LIBRARY_DIRS}")
+    MESSAGE( "--------------BOOST Found")
+    MESSAGE( " ---BOOST Include: ${Boost_INCLUDE_DIRS}")
+    MESSAGE( " ---BOOST Library: ${Boost_LIBRARY_DIRS}")
 
     foreach(lib ${Boost_LIBS})
        MESSAGE(" ${lib}")
