@@ -44,6 +44,9 @@ int token9 = 9;
 // 则B(a)即'a'，B(1)即'1'，但B(abc)却不甚有效。
 #define ToChar(x) #@x 
 
+#define TESTX(x) \
+    std::cout << ##x##x #x #x << std::endl;
+
 int main()
 {
     paster(9); // printf_s("token" "9" " = %d", token9)
@@ -71,12 +74,20 @@ int main()
     char a = ToChar(1); // '1'
     char b = ToChar(123);   // '123'
 
+    TESTX("abcdef");    // std::cout <<"abcdef""abcdef" "\"abcdef\"" "\"abcdef\"" << std::endl;
+
     return 0;
 }
 
 /*
 
-token9 = 9"str test"
+token9 = 9"str test"        
 "abcdefg"
+value32 = 999
+ hello
+"world"
+world
+hello world
+abcdefabcdef"abcdef""abcdef"
 
 */
