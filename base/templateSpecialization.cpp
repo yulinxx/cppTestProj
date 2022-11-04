@@ -54,6 +54,47 @@ public:
     }
 };
 
+
+
+
+
+template <typename NumType, size_t Dimension>
+struct Vec
+{
+    Vec(const NumType& v) {
+        for (size_t i = 0; i < Dimension; ++i) {
+            val[i] = v;
+        }
+    }
+
+    typedef NumType value_type;
+    NumType val[Dimension];
+};
+
+template <typename NumType>
+struct Vec<NumType, 2>
+{
+    typedef NumType value_type;
+
+    union{
+        struct { NumType val[2]; };
+        struct{
+            union {NumType x, s, u; };
+            union {NumType y, t, v; };
+        };
+    };
+};
+
+
+typedef Vec<double, 2> Vec2;
+typedef std::vector<Vec2> Vec2_Vector;
+typedef std::vector<Vec2_Vector> Vec2_2D_Vector;
+typedef std::vector<Vec2_2D_Vector> Vec2_3D_Vector;
+
+
+
+
+
 int main()
 {
     // 调用非特化版本
