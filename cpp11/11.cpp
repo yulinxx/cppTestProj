@@ -37,9 +37,9 @@ int main()
     // decltype(变量)可以获取变量的类型
     decltype(a) b = 2;
 
-    //注意下，decltype((a))的结果是引用，此时创建新的变量就将会报错，或者说：
-    // int &b = a;
-    // decltype(b) c;//也报错，因为b是a的引用，decltype(b)就会报错，效果同decltype((a))
+    // 注意下，decltype((a))的结果是引用，此时创建新的变量就将会报错，或者说：
+    //  int &b = a;
+    //  decltype(b) c;//也报错，因为b是a的引用，decltype(b)就会报错，效果同decltype((a))
 
     // Lambda
     //  Lambda，基本形式如下：
@@ -58,10 +58,27 @@ int main()
               { return (a % 10) > (b % 10); });
 
     // 用 emplace_back 代替 push_back , emplace_back 就直接在 vector 的末尾构造值（构造函数），少调用了一次拷贝构造函数。
-   {
-    std::vector<int> v;
-    v.push_back(0);
-    v.emplace_back(1);
-   } 
+    {
+        std::vector<int> v;
+        v.push_back(0);
+        v.emplace_back(1);
+    }
+
+    // 取整  C/C++取整函数ceil（向上取整）和floor（向下取整） 四舍五入round
+    std::cout<<"\n-----------------------"<<std::endl;
+    std::cout << "std::ceil(1.2):" << std::ceil(1.2) << std::endl;   // 1.2向上取整 std::ceil(1.2):2
+    std::cout << "std::ceil(0.0):" << std::ceil(0.0) << std::endl;   // 0.0向上取整 std::ceil(0.0):0
+    std::cout << "std::ceil(-1.2):" << std::ceil(-1.2) << std::endl; // -1.2向上取整 std::ceil(-1.2):-1
+
+    std::cout << "std::floor(1.2)" << std::floor(1.2) << std::endl;     // std::ceil(0.0)   std::floor(1.2)1
+    std::cout << "std::floor(0.0):" << std::floor(0.0) << std::endl;   // 0.0向下取整   std::floor(0.0):0
+    std::cout << "std::floor(-1.2):" << std::floor(-1.2) << std::endl; // std::ceil(0.0)    std::floor(-1.2):-2
+
+    std::cout << "std::round(1.2):" << std::round(1.4) << std::endl;   // std::ceil(0.0)    std::round(1.2):1
+    std::cout << "std::round(1.5):" << std::round(1.5) << std::endl;   // std::ceil(0.0)    std::round(1.5):2
+    std::cout << "std::round(0.0):" << std::round(0.0) << std::endl;   // std::ceil(0.0)    std::round(0.0):0
+    std::cout << "std::round(-1.4):" << std::round(-1.4) << std::endl; // std::ceil(0.0)    std::round(-1.4):-1
+    std::cout << "std::round(-1.5):" << std::round(-1.5) << std::endl; // std::ceil(0.0)    std::round(-1.5):-2
+
     return 0;
 }
