@@ -1,8 +1,8 @@
 #include "MemoryPool.h"
 
+#include <iostream>
 #include <chrono>
 #include <random>
-
 
 class TestClass
 {
@@ -16,7 +16,8 @@ public:
 
 int main()
 {
-    int testItemNum = 10000;
+	std::cout<<"---- Mem Pool Test ----"<<std::endl;
+    int testItemNum = 100000;
 
 	unsigned seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 	std::mt19937 randGen(seed);
@@ -67,7 +68,6 @@ int main()
 
 	t3 = std::chrono::system_clock::now();
 
-
 	// 打印时间
 	std::chrono::duration<double, std::milli> msNew = t2 - t1;	// new
 	std::chrono::duration<double, std::milli> msPool = t3 - t2;	// pool
@@ -75,6 +75,8 @@ int main()
     double dA = msNew.count();
     double dB = msPool.count();
 
-	return;
+	std::cout << " ---new:" << dA << " ----- mem pool:" << dB << std::endl;
+
+	return 0;
 }
 
