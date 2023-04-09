@@ -29,24 +29,42 @@ int sum(int cnt, ...)
     return sum;
 }
 
-
-void fun(int a,...)
+void fun(int a, ...)
 {
     va_list pp;
-    int n=1;
-    va_start(pp,a);
+    int n = 1;
+    va_start(pp, a);
     do
     {
-        printf("第 %d 个参数 =%d\n",n++,a);
-        a=va_arg(pp,int);
-    }
-    while (a!=0);
+        printf("第 %d 个参数 =%d\n", n++, a);
+        a = va_arg(pp, int);
+    } while (a != 0);
     va_end(pp);
 }
 
-
+#include <string>
+#include <stdio.h>
 int main()
 {
+    char *pCh = nullptr;
+    int sz = 27755 * 13582;
+    pCh = (char *)malloc(sz);
+    auto szA = strlen(pCh);
+    memset(pCh, 3, sz);
+    auto szB = strlen(pCh);
+
+    // pCh += sz;
+    pCh[sz - 2] = 'a';
+    pCh[sz - 1] = 'b';
+
+    for (int i = 0; i < sz; i++)
+    {
+        pCh = (char *)i;
+        pCh++;
+    }
+    // pCh = 'a';
+    auto szC = strlen(pCh);
+
     int result = sum(3, 1, 2, 3);
     printf("the result is %d\n", result);
 
