@@ -5,49 +5,51 @@
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/box.hpp>
 
+template<typename T>
 struct PointTest
 {
     // PointTest(double xx, double yy, int i = 0) : x(xx), y(yy), id(i)
-    PointTest(double xx, double yy) : x(xx), y(yy)
+    PointTest(T xx, T yy) : x(xx), y(yy)
     {
     }
 
-    double x = 0.0;
-    double y = 0.0;
+    T x = 0.0;
+    T y = 0.0;
 };
 
+template<typename T>
 struct RectTest
 {
-    RectTest(PointTest p1, PointTest p2, PointTest p3, PointTest p4) :
+    RectTest(PointTest<T> p1, PointTest<T> p2, PointTest<T> p3, PointTest<T> p4) :
         lb(p1), rb(p2), rt(p3), lt(p4)
     {
     }
 
-    PointTest lbPt(){
+    PointTest<T> lbPt(){
         return lb;
     }
 
-    PointTest rbPt(){
+    PointTest<T> rbPt(){
         return rb;
     }
 
-    PointTest rtPt(){
+    PointTest<T> rtPt(){
         return rt;
     }
-    PointTest ltPt(){
+    PointTest<T> ltPt(){
         return lt;
     }
 
     
-    PointTest lb;
-    PointTest rb;
-    PointTest rt;
-    PointTest lt;
+    PointTest<T> lb;
+    PointTest<T> rb;
+    PointTest<T> rt;
+    PointTest<T> lt;
 };
 
 // 将MyPoint注册到bg的native类型中
 // 点
-BOOST_GEOMETRY_REGISTER_POINT_2D(PointTest, double, cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D(PointTest<double>, double, cs::cartesian, x, y)
 
 // 包络框
 // BOOST_GEOMETRY_REGISTER_BOX(RectTest, PointTest, PointTest, PointTest)
@@ -55,10 +57,10 @@ BOOST_GEOMETRY_REGISTER_POINT_2D(PointTest, double, cs::cartesian, x, y)
 // BOOST_GEOMETRY_REGISTER_BOX_2D_4VALUES(RectTest, PointTest, lbPt(), rbPt(), rtPt(), ltPt())
 
 namespace bgi = boost::geometry::index;
-using PtPair = std::pair<PointTest, int>;
+using PtPair = std::pair<PointTest<double>, int>;
 using PtRTree = bgi::rtree<PtPair, bgi::quadratic<16>>;
 
-using RectPair = std::pair<RectTest, int>;
+using RectPair = std::pair<PointTest<double>, int>;
 using RectRTree = bgi::rtree<RectPair, bgi::quadratic<16>>;
 
 int main()
@@ -66,13 +68,13 @@ int main()
     std::cout << "RTree Test" << std::endl;
 
     PtRTree ptTree;
-    ptTree.insert(std::make_pair(PointTest(0, 0), 100));
-    ptTree.insert({PointTest(10, 0), 101}); // C++11 赋值方式
-    ptTree.insert({PointTest(10, 10), 102});
-    ptTree.insert({PointTest(0, 10), 103});
+    ptTree.insert(std::make_pair(PointTest<double>(0, 0), 100));
+    ptTree.insert({PointTest<double>(10, 0), 101}); // C++11 赋值方式
+    ptTree.insert({PointTest<double>(10, 10), 102});
+    ptTree.insert({PointTest<double>(0, 10), 103});
     std::cout << "Point Tree have:" << ptTree.size() << std::endl;
 
-    auto iter = ptTree.qbegin(bgi::contains(PointTest(10, 0)));
+    auto iter = ptTree.qbegin(bgi::contains(PointTest<double>(10, 0)));
     // auto iter = tree.qbegin(bgi::intersects(PointTest(10, 0)));
     for (; iter != ptTree.qend(); iter++)
     {
