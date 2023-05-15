@@ -14,8 +14,9 @@ namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
 
 // 自定义矩形数据结构
+template<typename T>
 struct MyRect {
-    int x1, y1, x2, y2;
+    T x1, y1, x2, y2;
 };
 
 
@@ -45,35 +46,35 @@ namespace boost
             //     }
             // };
 
-            template <>
-            struct tag<MyRect>
+            template <typename T>
+            struct tag<MyRect<T>>
             {
                 typedef box_tag type;
             };
-            template <>
-            struct point_type<MyRect>
+            template <typename T>
+            struct point_type<MyRect<T>>
             {
                 typedef point_t type;
             };
-            template <>
-            struct indexed_access<MyRect, min_corner, 0>
+            template <typename T>
+            struct indexed_access<MyRect<T>, min_corner, 0>
             {
-                static inline double get(const MyRect &b) { return b.x1; }
+                static inline double get(const MyRect<T> &b) { return b.x1; }
             };
-            template <>
-            struct indexed_access<MyRect, min_corner, 1>
+            template <typename T>
+            struct indexed_access<MyRect<T>, min_corner, 1>
             {
-                static inline double get(const MyRect &b) { return b.y1; }
+                static inline double get(const MyRect<T> &b) { return b.y1; }
             };
-            template <>
-            struct indexed_access<MyRect, max_corner, 0>
+            template <typename T>
+            struct indexed_access<MyRect<T>, max_corner, 0>
             {
-                static inline double get(const MyRect &b) { return b.x2; }
+                static inline double get(const MyRect<T> &b) { return b.x2; }
             };
-            template <>
-            struct indexed_access<MyRect, max_corner, 1>
+            template <typename T>
+            struct indexed_access<MyRect<T>, max_corner, 1>
             {
-                static inline double get(const MyRect &b) { return b.y2; }
+                static inline double get(const MyRect<T> &b) { return b.y2; }
             };
         }
     }
@@ -81,14 +82,14 @@ namespace boost
 
 int main() {
     // 创建一个rtree对象
-    bgi::rtree<MyRect, bgi::quadratic<16>> rtree;
+    bgi::rtree<MyRect<double>, bgi::quadratic<16>> rtree;
 
     // 添加一些矩形到rtree中
-    rtree.insert(MyRect{0, 0, 10, 10});
-    rtree.insert(MyRect{20, 20, 30, 30});
+    rtree.insert(MyRect<double>{0, 0, 10, 10});
+    rtree.insert(MyRect<double>{20, 20, 30, 30});
 
     // 查询包含某个点的所有矩形
-    std::vector<MyRect> result;
+    std::vector<MyRect<double>> result;
     bg::model::point<int, 2, bg::cs::cartesian> point(5, 5);
     rtree.query(bgi::intersects(point), std::back_inserter(result));
 
@@ -97,8 +98,11 @@ int main() {
         std::cout << "MyRect: (" << rect.x1 << ", " << rect.y1 << "), (" << rect.x2 << ", " << rect.y2 << ")" << std::endl;
     }
 
+    result.clear();
+    std::cout<<"\n ---- \n";
+
     // MyRect qBox{9, 9, 25, 25};
-    MyRect qBox{11, 10, 25, 25};
+    MyRect<double> qBox{21, 21, 25, 25};
     rtree.query(bgi::intersects(qBox), std::back_inserter(result));
 
     // 输出查询结果
