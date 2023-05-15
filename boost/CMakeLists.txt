@@ -2,6 +2,7 @@ MESSAGE(" --------- boostTestProj----- \n")
 
 set(CPP_DIR
     ./src
+    ./src/other
     ./src/serialization
     ./src/StateMachine
     ./src/k-dimensional_tree
