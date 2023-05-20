@@ -39,7 +39,7 @@ public:
 
 
 /////////////////////////////////////////////
-
+// 将自定义的点,转成Boost可识别的点数据结构
 namespace boost { namespace geometry { namespace traits
 {
 
@@ -71,7 +71,6 @@ struct access<XPoint<T>, 1> {
 /////////////////////////////////////////////
 int main()
 {
-    // typedef bgi::rtree<std::pair<XPoint<T>, int>, bgi::quadratic<12>> PtRTree;
     typedef std::pair<XPoint<double>, int> XPtPair;
     typedef bgi::rtree<std::pair<XPoint<double>, int>, bgi::quadratic<12>> PtRTree;
 
@@ -83,11 +82,6 @@ int main()
     ptTree.insert({XPoint(12.0, 0.0), 3});
     ptTree.insert({XPoint(0.0, 12.0), 4});
 
-    // auto iter = ptTree.qbegin(XPoint(10.0, 10.0));
-    // for(; iter != ptTree.end(); iter++)
-    // {
-    //     // std::cout<<(*iter).getX()<<" Y:"<<*iter.getY()<<std::endl;
-    // }
 
     std::cout<<"------------intersects\n";
     auto qPt = XPoint(10.0, 10.0);
