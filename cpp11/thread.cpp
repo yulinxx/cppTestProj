@@ -36,14 +36,14 @@ int main()
     // 1.函数传递方式
     std::thread thread_test(myThread); //定义 线程变量 定义的时候线程就会开始执行
     thread_test.join();                //等待线程结束
+
     std::thread thread_test1(myThread1, 2);
     thread_test1.join();
 
     // 2.lambda表达式
-    std::thread threadLambda([]()
-                             {
-                            for(int i = 0;i<10;i++)
-                                std::cout<<i<<endl; });
+    std::thread threadLambda([](){
+            for(int i = 0;i<10;i++)
+                std::cout<<i<<endl; });
     threadLambda.join();
 
     // 3.重载运算符
