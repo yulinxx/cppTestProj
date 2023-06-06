@@ -109,59 +109,62 @@ int main()
     return 0;
 }
 
+/*
 //////////////////////////////////////////////////////////////
 
-// #include <iostream>
-// #include <boost/geometry.hpp>
-// #include <boost/geometry/geometries/register/point.hpp>
-// struct MyPoint //自定义的点
-// {
-// 	MyPoint(double x, double y, int id) :m_x(x), m_y(y), m_id(id) {}
-// 	double m_x;
-// 	double m_y;
-// 	int m_id; //标识id
-// };
-// //将MyPoint注册到bg的native类型中
-// BOOST_GEOMETRY_REGISTER_POINT_2D(MyPoint, double, cs::cartesian, m_x, m_y)
-// namespace bg = boost::geometry;
-// int main(int argc, char *argv[])
-// {
-// 	using geo_point = MyPoint;
-// 	geo_point gp1(0,0,1), gp2(1,0,2);
-// 	auto dis = bg::distance(gp1,gp2);
-// 	std::cout << bg::dsv(gp1) << " distant from " << bg::dsv(gp2) << " is " << dis <<std::endl;
-// 	return 0;
-// }
+#include <iostream>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/register/point.hpp>
+struct MyPoint //自定义的点
+{
+	MyPoint(double x, double y, int id) :m_x(x), m_y(y), m_id(id) {}
+	double m_x;
+	double m_y;
+	int m_id; //标识id
+};
+//将MyPoint注册到bg的native类型中
+BOOST_GEOMETRY_REGISTER_POINT_2D(MyPoint, double, cs::cartesian, m_x, m_y)
+namespace bg = boost::geometry;
+int main(int argc, char *argv[])
+{
+	using geo_point = MyPoint;
+	geo_point gp1(0,0,1), gp2(1,0,2);
+	auto dis = bg::distance(gp1,gp2);
+	std::cout << bg::dsv(gp1) << " distant from " << bg::dsv(gp2) << " is " << dis <<std::endl;
+	return 0;
+}
 // 原文链接：https://blog.csdn.net/iLuoPu/article/details/124034790
 
-//////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // 将自定义类,用BOOST_GEOMETRY_REGISTER*宏，注册到boost的native geometry type中
-// #include <boost/geometry.hpp>
-// #include <boost/geometry/index/rtree.hpp>
-// #include <boost/geometry/geometries/box.hpp>
-// #include <boost/geometry/geometries/register/point.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/index/rtree.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/geometries/register/point.hpp>
 
-// namespace bg = boost::geometry;
-// namespace bgi = boost::geometry::index;
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
 
-// #include <glm/vec3.hpp>
-// // BOOST_GEOMETRY_REGISTER_POINT_3D(glm::vec3, float, bg::cs::cartesian, x, y, z)
+#include <glm/vec3.hpp>
+// BOOST_GEOMETRY_REGISTER_POINT_3D(glm::vec3, float, bg::cs::cartesian, x, y, z)
 
-// #include <iostream>
-// int main() {
+#include <iostream>
+int main() {
 
-//     using IndexedPoint = std::pair<glm::vec3, uint32_t>;
-//     // using RTree = boost::geometry::index::rtree<IndexedPoint, bgi::rstar<8>>;
-//     using RTree = boost::geometry::index::rtree<IndexedPoint, bgi::quadratic<16>>;
+    using IndexedPoint = std::pair<glm::vec3, uint32_t>;
+    // using RTree = boost::geometry::index::rtree<IndexedPoint, bgi::rstar<8>>;
+    using RTree = boost::geometry::index::rtree<IndexedPoint, bgi::quadratic<16>>;
 
-//     RTree rtree;
-//     rtree.insert({glm::vec3(1,1,1), 1});
-//     rtree.insert({glm::vec3(2,2,2), 2});
-//     rtree.insert({glm::vec3(3,3,3), 3});
-//     rtree.insert({glm::vec3(4,4,4), 4});
+    RTree rtree;
+    rtree.insert({glm::vec3(1,1,1), 1});
+    rtree.insert({glm::vec3(2,2,2), 2});
+    rtree.insert({glm::vec3(3,3,3), 3});
+    rtree.insert({glm::vec3(4,4,4), 4});
 
-//     auto it = rtree.qbegin(bgi::nearest(glm::vec3(2.9, 2.9, 2.9), 99));
+    auto it = rtree.qbegin(bgi::nearest(glm::vec3(2.9, 2.9, 2.9), 99));
 
-//     auto p = it->first;
-//     std::cout << "Nearest: # " << it->second << " (" << p.x << ", " << p.y << " " << p.z << ")\n";
-// }
+    auto p = it->first;
+    std::cout << "Nearest: # " << it->second << " (" << p.x << ", " << p.y << " " << p.z << ")\n";
+}
+
+*/
