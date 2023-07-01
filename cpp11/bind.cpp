@@ -18,6 +18,23 @@ public:
     }
 };
 
+
+template<typename T, typename M>
+int compair(T* begin, T* end, M func)
+{
+    int count = 0;
+
+    for (; begin != end; begin++)
+    {
+        if (func(*begin))
+            count++;
+    }
+
+    return count;
+}
+
+
+
 int main()
 {
     /////////////////////////////////
@@ -42,6 +59,18 @@ int main()
 
     // 调用函数对象，传入参数 a
     boundFunc2(42);
+
+    //// C++函数的进化 函数→函数指针→函数模板→仿函数|函数对象→lambda表达式
+    // https://www.bilibili.com/video/BV1zo4y1N7No/
+    int nArray[] = {2, 32, 13, 55, 23, 6, 10, 13};
+    int nSize = sizeof(nArray) / sizeof(int);
+
+    auto func = [](auto& val){
+        return val > 20;
+    };
+    
+    int nRes = compair(nArray, nArray + nSize, func);
+    std::cout << "Size is :" << nRes << std::endl;
 
     return 0;
 }
