@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 struct MyStruct
 {
@@ -28,8 +29,17 @@ MyStruct getStruct()
 // 它们的类型分别是int 和std::string。
 auto [id, val] = getStruct(); // id 和val 分别对应返回结构体的i 和 s 成员
 
+
+// [[nodiscard]]可以鼓励编译器在某个函数的返回值未被使用时给出警告。
+[[nodiscard]] char *fooNodiscard()
+{
+    char *p = new char[100];
+    return p;
+};
+
 int main()
 {
+    // --- 结构化绑定 1
     // 结构化绑定的两点优势
     // 一是无需再用成员运算符间接访问，而是可以直接访问成员，简化代码
     // 二是可以将值绑定到一个能体现语义的变量名上，增强代码的可读性
@@ -37,5 +47,73 @@ int main()
     ms.s = "axax";
     auto [u, v] = ms;
     std::cout<<"u"<<u<<" v"<<v<<std::endl;
+
+
+    // --- 结构化绑定 2 
+    std::map<int, std::string> mapTest;
+    mapTest.insert({1, "abc"});
+    mapTest.insert({2, "bcd"});
+    mapTest[3] = "cde";
+
+    for(const auto& [k, v] : mapTest)
+    {
+        std::cout<<" Map key:"<<k<<" value:"<<v<<std::endl;
+    }
+
+    auto funcTest = [](int n){
+        return (n % 3); 
+    };
+
+    if( int n = funcTest(32); n == 2)
+    {
+        std::cout<<"带初始化的if语句"<<std::endl;
+        // std::cout<<"带if语句中初始化了一个变量n，这个变量仅在整个if语句中可访问的。"<<std::endl;
+    }
+
+    // --- 聚合体扩展
+    // C++17 之前就有一种聚合体专有的始化方法，叫做聚合体初始化。
+    // 这是从 C 语言引入的初始化方式，是用大括号括起来的一组值来初始化类：
+    struct Data
+    {
+        std::string name;
+        double value;
+    };
+    Data x = {"test1", 6.778};
+
+    // C++17 对聚合体的概念进行了扩展，聚合体可以拥有基类了。
+    // 也就是说像下面这样的派生类，也可以使用聚合体初始化：
+    struct MoreData : Data
+    {
+        bool done;
+    };
+    MoreData y{{"test1", 6.778}, false}; // {"test1", 6.778} 用来初始化基类
+
+    // --- 新属性
+    auto foo = [](int error)
+    {
+        switch (error)
+        {
+        case 1:
+            // [[fallthrough]]可以避免编译器在switch语句中，当某一个标签缺少break语句时发出警告。
+            [[fallthrough]];
+
+        case 2:
+            std::cout << "Error happened";
+            break;
+
+        default:
+            std::cout << "OK";
+            break;
+        }
+    };
+
+
+    foo(1);
+
+
+    // warning C4834: 放弃具有 "nodiscard" 属性的函数的返回值 
+    fooNodiscard(); // 编译器发出警告
+
+
     return 0;
 }
