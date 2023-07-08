@@ -1,3 +1,4 @@
+
 // Copyright 2010 Christophe Henry
 // henry UNDERSCORE christophe AT hotmail DOT com
 // This is an extended version of the state machine available in the boost::mpl library
@@ -148,7 +149,7 @@ namespace
         struct transition_table : mpl::vector<
             //    Start     Event         Next      Action               Guard
             //  +---------+-------------+---------+---------------------+----------------------+
-          a_row < Stopped , play        , Playing , &p::start_playback    ,&p::good_disk_format                        >,
+          a_row < Stopped , play        , Playing , &p::start_playback                         >,
           a_row < Stopped , open_close  , Open    , &p::open_drawer                            >,
            _row < Stopped , stop        , Stopped                                              >,
             //  +---------+-------------+---------+---------------------+----------------------+

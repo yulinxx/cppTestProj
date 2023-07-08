@@ -18,6 +18,11 @@
 namespace msm = boost::msm;
 using namespace msm::front;
 
+
+namespace msm = boost::msm;
+namespace mpl = boost::mpl;
+using namespace msm::front;
+
 namespace
 {
     // events
