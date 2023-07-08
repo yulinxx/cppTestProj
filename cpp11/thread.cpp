@@ -1,5 +1,9 @@
 // https://blog.csdn.net/weixin_42193704/article/details/113920419
 
+// 一旦启动线程之后，我们必须决定是要等待直接它结束（通过join），还是让它独立运行（通过detach），
+// 我们必须二者选其一。如果在thread对象销毁的时候我们还没有做决定，
+// 则thread对象在析构函数出将调用std::terminate()从而导致我们的进程异常退出。
+
 #include <iostream>
 #include <thread>
 using namespace std;
