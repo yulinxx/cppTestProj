@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <any>
 
 struct MyStruct
 {
@@ -114,6 +115,24 @@ int main()
     // warning C4834: 放弃具有 "nodiscard" 属性的函数的返回值 
     fooNodiscard(); // 编译器发出警告
 
+    std::cout<<std::endl;
+    std::cout<<u8"带if语句中初始化了一个变量n，这个变量仅在整个if语句中可访问的。"<<std::endl;
+    std::cout<<"带if语句中初始化了一个变量n，这个变量仅在整个if语句中可访问的。"<<std::endl;
 
+    // std::any  std::any可以存储任何类型的单个值。
+    std::any a;            // a 为空
+    std::any b = 4.3;      // b 有类型为 double 的值 4.3
+    a = 42;                // a 有类型为 int 的值 42
+    b = std::string{"hi"}; // b 有类型为 std::string 的值 "hi"
+
+    if (a.type() == typeid(std::string))
+    {
+        std::string s = std::any_cast<std::string>(a);
+        // useString(s);
+    }
+    else if (a.type() == typeid(int))
+    {
+        // useInt(std::any_cast<int>(a));
+    }
     return 0;
 }
