@@ -10,22 +10,22 @@ template <typename NumType>
 class Obj
 {
 };
-template <typename NumType>
-class Obj1<NumType, 9>
-{
-public:
-    NumType array[]
-};
+// template <typename NumType>
+// class Obj1<NumType, 9>
+// {
+// public:
+//     NumType array[]
+// };
 
 // 偏特化模板
 template <typename NumType, int count = 9>
 class Obj2
 {
 public:
-    NumType array[count]
+    NumType array[count];
 };
 
-template <typename T, typename N, float d = 9.9>
+template <typename T, typename N, int d = 9>
 class Obj3
 {
 public:
@@ -33,17 +33,17 @@ public:
     N arrayB[3];
 };
 
-template <typename T, size_t size>
-class Array
-{
-public:
-    Array() {}
-    T &at() {}
-    size_t size() const {}
+// template <typename T,  size_t size>
+// class Array
+// {
+// public:
+//     Array() {}
+//     T &at(int n) {return data_[n];}
+//     size_t size() const {}
 
-private:
-    T data_[size];
-};
+// private:
+//     T data_[size];
+// };
 
 // 函数类型模板参数
 template <void func()>
@@ -62,11 +62,18 @@ public:
     static void f3() {} // 静态成员函数
 };
 
+// 变参模板 https://blog.csdn.net/fl2011sx/article/details/128077440
+template <typename... Args>
+auto sum(Args... args)
+{
+    return (... + args);
+}
+
 int main()
 {
-
-    Obj<int> objA;
-    Obj2<int, 2> objBError;
+    Obj<int> obj;
+    Obj2<int, 2> obj2;
+    Obj3<int, float, 3> obj3;
 
     // Obj<std::string, 2> objC();
     // Obj<int, 4> objD;
@@ -76,10 +83,9 @@ int main()
 
     // Obj<int, 2> testB(test);
 
-    int m = 00;
 
-    Array<int, 5> arr; // 实例化，并创建对象
-    arr.at(1) = 6;
+    // Array<int, 5> arr; // 实例化，并创建对象
+    // arr.at(1) = 6;
 
     // 函数类型模板参数 使用
     void (*pf1)() = &f1;           // 局部变量
@@ -90,5 +96,11 @@ int main()
     f<Test::f3>();  // OK
     f<&Test::f3>(); // OK
     f<pf2>();       // OK
+
+    // 变参模板 的使用
+    auto a = sum(1, 2, 3, 4);                       // 10
+    auto b = sum(1.5, 2, 3l);                       // 6.5
+    auto c = sum(std::string("abc"), "def", "111"); // std::string("abcdef111")
+    auto d = sum(2);                                // 2
     return 0;
 }
