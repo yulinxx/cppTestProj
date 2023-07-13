@@ -76,13 +76,13 @@ int main()
         }
     }
     
-
     // --- 文件属性查询：
     // 查询文件大小
     std::uintmax_t fileSize = fs::file_size("myfile.txt");
 
     // 查询文件修改时间
-    std::chrono::system_clock::time_point modTime = fs::last_write_time("myfile.txt");
+    std::filesystem::file_time_type modTime = fs::last_write_time("myfile.txt");
+
 
     // 查询文件权限
     fs::perms permissions = fs::status("myfile.txt").permissions();

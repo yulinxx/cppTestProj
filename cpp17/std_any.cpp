@@ -81,7 +81,7 @@ int main()
     anyValue.reset();
     if (!anyValue.has_value())
     {
-        std::cout << "值已被清除" << std::endl;
+        std::cout << "Clear..." << std::endl;
     }
 
     std::vector<std::any> v;

@@ -21,9 +21,9 @@
 
 void processString(std::string_view str) 
 {
-    std::cout << "字符串长度：" << str.size() << std::endl;
-    std::cout << "是否为空：" << std::boolalpha << str.empty() << std::endl;
-    std::cout << "前5个字符：" << str.substr(0, 5) << std::endl;
+    std::cout << "Len:" << str.size() << std::endl;
+    std::cout << "Is Empty:" << std::boolalpha << str.empty() << std::endl;
+    std::cout << "5 chars:" << str.substr(0, 5) << std::endl;
 }
 
 int main()

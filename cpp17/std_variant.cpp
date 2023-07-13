@@ -18,59 +18,61 @@
 // 4. 值访问：可以使用 std::visit 函数对 std::variant 中的值进行访问，
 // 提供一组访问函数对象（Visitor）或 Lambda 表达式，以根据当前存储的值类型执行相应的操作。
 
-
 #include <iostream>
 #include <variant>
 #include <string>
 
 int main()
 {
-    std::variant<int, double, std::string> myVariant;
-
-    myVariant = 42; // 存储 int 类型的值
-    std::cout << std::get<int>(myVariant) << std::endl;
-
-    myVariant = 3.14; // 存储 double 类型的值
-    std::cout << std::get<double>(myVariant) << std::endl;
-
-    myVariant = "Hello, world!"; // 存储 std::string 类型的值
-    std::cout << std::get<std::string>(myVariant) << std::endl;
-
-    std::variant<int, double, std::string> myVariant;                    // 默认构造，无值
-    std::variant<int, double, std::string> myVariantWithValue(42);       // 使用值初始化
-    std::variant<int, double, std::string> myVariantWithString("Hello"); // 使用字符串初始化
-
-    if (std::holds_alternative<int>(myVariant))
     {
-        // 值是 int 类型
-    }
-    else if (std::holds_alternative<double>(myVariant))
-    {
-        // 值是 double 类型
-    }
-    else if (std::holds_alternative<std::string>(myVariant))
-    {
-        // 值是 std::string 类型
+        std::variant<int, double, std::string> myVariant;
+
+        myVariant = 42; // 存储 int 类型的值
+        std::cout << std::get<int>(myVariant) << std::endl;
+
+        myVariant = 3.14; // 存储 double 类型的值
+        std::cout << std::get<double>(myVariant) << std::endl;
+
+        myVariant = "Hello, world!"; // 存储 std::string 类型的值
+        std::cout << std::get<std::string>(myVariant) << std::endl;
     }
 
-    // 使用 holds_alternative 函数来检查当前存储的值的类型，并使用 get 函数来获取特定类型的值
-    // std::holds_alternative 是 C++17 中引入的标准库函数，用于检查 std::variant 中存储的值是否与指定的类型匹配。
-    if (std::holds_alternative<int>(myVariant))
     {
-        int value = std::get<int>(myVariant); // 获取 int 类型的值，如果类型不匹配则抛出 std::bad_variant_access 异常
-    }
-    else if (std::holds_alternative<double>(myVariant))
-    {
-        double value = std::get<double>(myVariant); // 获取 double 类型的值，如果类型不匹配则抛出 std::bad_variant_access 异常
-    }
-    else if (std::holds_alternative<std::string>(myVariant))
-    {
-        std::string value = std::get<std::string>(myVariant); // 获取 std::string 类型的值，如果类型不匹配则抛出 std::bad_variant_access 异常
-    }
+        std::variant<int, double, std::string> myVariant;                    // 默认构造，无值
+        std::variant<int, double, std::string> myVariantWithValue(42);       // 使用值初始化
+        std::variant<int, double, std::string> myVariantWithString("Hello"); // 使用字符串初始化
 
+        if (std::holds_alternative<int>(myVariant))
+        {
+            // 值是 int 类型
+        }
+        else if (std::holds_alternative<double>(myVariant))
+        {
+            // 值是 double 类型
+        }
+        else if (std::holds_alternative<std::string>(myVariant))
+        {
+            // 值是 std::string 类型
+        }
+
+        // 使用 holds_alternative 函数来检查当前存储的值的类型，并使用 get 函数来获取特定类型的值
+        // std::holds_alternative 是 C++17 中引入的标准库函数，用于检查 std::variant 中存储的值是否与指定的类型匹配。
+        if (std::holds_alternative<int>(myVariant))
+        {
+            int value = std::get<int>(myVariant); // 获取 int 类型的值，如果类型不匹配则抛出 std::bad_variant_access 异常
+        }
+        else if (std::holds_alternative<double>(myVariant))
+        {
+            double value = std::get<double>(myVariant); // 获取 double 类型的值，如果类型不匹配则抛出 std::bad_variant_access 异常
+        }
+        else if (std::holds_alternative<std::string>(myVariant))
+        {
+            std::string value = std::get<std::string>(myVariant); // 获取 std::string 类型的值，如果类型不匹配则抛出 std::bad_variant_access 异常
+        }
+    }
+    
     return 0;
 }
-
 
 // 在这个示例中，我们创建了一个 std::variant 类型的变量 myVariant，
 // 它可以存储 int、double 和 std::string 三种类型的值。
@@ -78,4 +80,3 @@ int main()
 
 // std::variant 提供了一种灵活的方式来处理多类型值的情况，使得代码更具表达力和可维护性。
 // 需要注意的是，使用 std::variant 时应格外注意类型转换和异常处理，以避免出现不正确的类型访问或未处理的异常。
-
