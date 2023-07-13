@@ -242,8 +242,10 @@ namespace Decay
     // ...
   }
 }
-////////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+namespace InlTest
+{
 class inlFileTestClass
 {
 public:
@@ -251,6 +253,67 @@ public:
 };
 
 #include "baseTemplate.inl" // 包含 .inl 文件
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// 模板匹配 问题
+namespace Fit
+{
+  template <typename T1, typename T2, typename T3>
+  struct Test
+  {
+  }; // 【0】
+
+  template <typename T1, typename T2>
+  struct Test<T1, T2, int>
+  {
+  }; // 【1】
+
+  template <typename T>
+  struct Test<T, int, int>
+  {
+  }; // 【2】
+
+  void Demo()
+  {
+    Test<double, int, int> t; // 匹配【2】而不是【1】
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+namespace Fit2
+{
+  // 在给定的代码中，存在模板特化和模板偏特化，这可能导致匹配问题和二义性问题。
+  // 具体问题如下：
+  // 在代码中，存在三个模板定义，分别是【0】、【1】和【2】。它们使用了不同的模板参数列表进行定义。
+  // 在函数 Demo() 中，尝试创建一个类型为 Test<int, int, int> 的对象 t。
+  // 问题是，在这种情况下，根据模板特化和偏特化规则，存在多个匹配的模板定义，导致模板的选择变得不明确：
+  // Test<T1, T2, int> （【1】）特化匹配了 T1 和 T2 为 int，同时 T3 为 int 的情况。
+  // Test<int, int, T> （【2】）偏特化匹配了 T 为 int，同时 T1 和 T2 为 int 的情况。
+  // 由于存在多个匹配，编译器无法确定应该选择哪个模板定义，从而导致编译错误或二义性错误。
+  // 为了解决这个问题，可以考虑调整模板定义的顺序，或者通过重载解析规则来消除二义性。
+  template <typename T1, typename T2, typename T3>
+  struct Test
+  {
+  }; // 【0】
+
+  template <typename T1, typename T2>
+  struct Test<T1, T2, int>
+  {
+  }; // 【1】
+
+  template <typename T>
+  struct Test<int, int, T>
+  {
+  }; // 【2】
+
+  void Demo()
+  {
+    // Test<int, int, int> t; // 匹配问题和二义性问题
+  }
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 int main()
@@ -275,10 +338,14 @@ int main()
   Demo();
   Demo2();
 
-  inlFileTestClass inlObj;
+  InlTest::inlFileTestClass inlObj;
   inlObj.foo();
 
   Simple::Demo();
   Decay::Demo();
+
+  Fit::Demo();
+  Fit2::Demo();
+
   return 0;
 }
