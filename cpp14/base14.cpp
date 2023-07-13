@@ -1,6 +1,8 @@
 
 #include <iostream>
+#include <tuple>
 #include <string>
+#include <memory>
 
 // 泛型 lambda 函数遵循模板参数推导的规则。
 struct unnamed_lambda

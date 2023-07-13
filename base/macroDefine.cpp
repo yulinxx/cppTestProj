@@ -22,7 +22,7 @@
 #include <stdio.h>
 
 int token9 = 9;
-#define paster(n) printf_s("token" #n " = %d", token##n)
+#define paster(n) printf("token" #n " = %d", token##n)
 
 #define STR(str) #str
 
@@ -39,13 +39,14 @@ int token9 = 9;
 // 测试两个 # 号的效果    ##前后可随意加上一些空格>
 #define DOUBLE_NUMBER_SIGN(x, y) x  ##   y
 
+// Linux下编译不过
 // 连接符#@：它将单字符标记符变换为单字符，即加单引号。例如：
 // #define B(x) #@x
 // 则B(a)即'a'，B(1)即'1'，但B(abc)却不甚有效。
-#define ToChar(x) #@x 
+// #define ToChar(x) #@x 
 
-#define TESTX(x) \
-    std::cout << ##x##x #x #x << std::endl;
+// #define TESTX(x) \
+//     std::cout << ##x##x #x #x << std::endl;
 
 int main()
 {
@@ -71,8 +72,8 @@ int main()
     // 测试两个 # 号的效果：连接两个对象
     printf("%s\n", DOUBLE_NUMBER_SIGN(xx, yy)); //  xxyy
 
-    char a = ToChar(1); // '1'
-    char b = ToChar(123);   // '123'
+    // char a = ToChar(1); // '1'
+    // char b = ToChar(123);   // '123'
 
     TESTX("abcdef");    // std::cout <<"abcdef""abcdef" "\"abcdef\"" "\"abcdef\"" << std::endl;
 
