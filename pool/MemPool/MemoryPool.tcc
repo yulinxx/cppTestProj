@@ -23,6 +23,8 @@
 #ifndef MEMORY_BLOCK_TCC
 #define MEMORY_BLOCK_TCC
 
+#include <cstdint>
+#include <utility>
 
 
 template <typename T, size_t BlockSize>
