@@ -75,7 +75,7 @@ int main()
     // char a = ToChar(1); // '1'
     // char b = ToChar(123);   // '123'
 
-    TESTX("abcdef");    // std::cout <<"abcdef""abcdef" "\"abcdef\"" "\"abcdef\"" << std::endl;
+    // TESTX("abcdef");    // std::cout <<"abcdef""abcdef" "\"abcdef\"" "\"abcdef\"" << std::endl;
 
     return 0;
 }
