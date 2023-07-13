@@ -116,8 +116,8 @@ int main()
     fooNodiscard(); // 编译器发出警告
 
     std::cout<<std::endl;
-    std::cout<<u8"带if语句中初始化了一个变量n，这个变量仅在整个if语句中可访问的。"<<std::endl;
-    std::cout<<"带if语句中初始化了一个变量n，这个变量仅在整个if语句中可访问的。"<<std::endl;
+    std::cout<<u8"abc"<<std::endl;
+    std::cout<<"def"<<std::endl;
 
     // std::any  std::any可以存储任何类型的单个值。
     std::any a;            // a 为空
