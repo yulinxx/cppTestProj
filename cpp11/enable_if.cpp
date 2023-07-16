@@ -38,9 +38,9 @@ using namespace std;
 // https://blog.csdn.net/zhuikefeng/article/details/107046375
 namespace DemoA
 {
-    // 首先gt_zero是一个模板函数，typename std::enable_if<std::is_integral<T>::value,bool>::type是函数的返回值类型，
-    // std::enable_if<>一般是由两部分组成，第一个参数是一个判定式，当判定式为真时，
-    // 这个type数据成员存在，且值为bool，如果没有第二个参数，则默认值为void。
+    // gt_zero是一个模板函数，typename std::enable_if<std::is_integral<T>::value,bool>::type是函数的返回值类型，
+    // std::enable_if<>一般是由两部分组成，
+    // 第一个参数是一个判定式，当判定式为真时，这个type数据成员存在，且值为bool，如果没有第二个参数，则默认值为void。
 
     // typename std::enable_if<!std::is_integral<T>::value, bool>::type 是一个类型特征，
     // 用于检查 T 是否不是整数类型。如果 T 不是整数类型，则类型特征的类型将是 bool。
@@ -48,22 +48,25 @@ namespace DemoA
 
     // 如果判定式为假，type这个数据成员就是未定义的，更不存在值是什么。
 
-    // 但是编译器并不会因为type值不存在就报错，因为泛型编程中存在一个最优匹配原则，这个模板不成立，就去推断其他模板，所以gt_zero实际上同时是一个重载函数。
+    // 但是编译器并不会因为type值不存在就报错，因为泛型编程中存在一个最优匹配原则，这个模板不成立，就去推断其他模板，
+    // 所以gt_zero实际上同时是一个重载函数。
 
     // 当第一个参数std::is_integral<T>::value为假时，!std::is_integral<T>::value肯定为真，
     // 所以第二个模板函数符合要求，同样std::enable_if<std::is_integral<T>::value,bool>::type的值为true。
 
     // is_integral：检查一个类型是否是整数类型。
 
+    // 传入int型和非int型 :
+    // typename std::enable_if<std::is_integral<T>::value, bool>::type
+    // 如果你传入 int 类型，那么函数会展开成 bool。
+    // 如果你传入非 int 类型，那么函数会展开成 void
+
     // gt_zero() 是一个模板函数，它有一个类型参数 T，表示传递给函数的值的类型。
     // 第二个类型参数 是一个类型特征，用于检查 T 是否不是整数类型。
     // 如果 T 不是整数类型，则函数将被调用。否则，函数将不会被调用。
 
-    // cout << "is NOT integral"; 语句只会在 T 不是整数类型时执行。
-    // return i > 0; 语句只会在 T 是整数类型且 i 大于 0 时执行。
-
-    // 传入int型, 函数展开为: bool gt_zero(short int i, bool j = false)
-    // 传非int型, 函数展开为: bool gt_zero(float i, void j = void())
+    // 传入int型, 函数展开为: bool gt_zero(int i)
+    // 传非int型, 函数展开为: void gt_zero(T i)
 
     template <typename T>
     typename std::enable_if<std::is_integral<T>::value, bool>::type // 函数的返回值类型
@@ -73,8 +76,8 @@ namespace DemoA
         return i > 0;
     }
 
-    // 传入int型: bool gt_zero(short int i, void j = void())
-    // 传非int型: bool gt_zero(float i, bool j = false)
+    // 传入int型: void gt_zero(T i)
+    // 传非int型: bool gt_zero(int i)
     template <typename T>
     typename std::enable_if<!std::is_integral<T>::value, bool>::type
     gt_zero(T i)
