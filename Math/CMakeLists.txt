@@ -2,6 +2,7 @@ MESSAGE(" --------- MathTestProj----- \n")
 
 add_subdirectory(Eigen)
 add_subdirectory(CGAL)
+add_subdirectory(OpenCASCADE)
 
 # # 从 CMakeLists.txt 中查找所有一级子目录并将它们添加到 add_subdirectory 中
 
