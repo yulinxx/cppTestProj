@@ -1,6 +1,3 @@
-// TSP_旅行商问题 - 遗传算法（四）-CSDN博客  https://blog.csdn.net/houchaoqun_xmu/article/details/54584264
-
-
 #ifndef _GeneticAlgorithm_H_
 #define _GeneticAlgorithm_H_
 
@@ -28,14 +25,14 @@ typedef struct
 {
 	double pathLen;				// 路径长度
 	int pathArray[CITY_NUM];	// 路径数组
-	double P_Reproduction;		// 繁殖概率
-}TSP_solution;
+	double dPReproduction;		// 繁殖概率
+}TSPSolution;
 
 ////////////////////////////////////////////////////////
 //全局变量:
 
-TSP_solution gTspGroups[GROUP_NUM];		// 存储群体
-TSP_solution gSonSolution[SON_NUM];		// 存储杂交后的个体
+TSPSolution gTspGroups[GROUP_NUM];		// 存储群体
+TSPSolution gSonSolution[SON_NUM];		// 存储杂交后的个体
 
 int gSonSolitonLen = 0;				// 遗传产生的孩子的个数
 
@@ -49,7 +46,7 @@ void CreateGraph(Graph* pGraph);
 void InitialGroup(Graph* pGraph);
 
 //计算路径长度，根据给定的图和路径信息。
-double CalculateLength(Graph* pGraph, TSP_solution newSolution);
+double CalculateLength(Graph* pGraph, TSPSolution newSolution);
 
 //遗传算法的演化过程，包括选择、交叉、变异和更新群体。
 //循环进行一定次数的迭代，每次迭代都执行选择、交叉、变异和更新操作。
@@ -63,7 +60,7 @@ void TspEvolution(Graph* pGraph);	// 模拟生物进化 - 解决TSP问题
 int EvoSelect(Graph* pGraph);		// 选择函数
 
 //交叉操作，使用中间杂交方式，在两个个体的交叉点之间互换基因段，处理交叉后的冲突。
-void EvoCross(Graph* pGraph, TSP_solution TSP_Father, TSP_solution TSP_Mother);	// 杂交函数
+void EvoCross(Graph* pGraph, TSPSolution TSP_Father, TSPSolution TSP_Mother);	// 杂交函数
 
 //变异操作，随机交换两个城市的位置。
 void EvoVariation(Graph* pGraph, int Index_Variation);	// 变异函数
@@ -75,16 +72,16 @@ void EvoUpdateGroup(Graph* pGraph);
 //评价函数，选择路径最短的个体作为最优解。
 void TspEvaluate(Graph* pGraph);		// TSP - 评价函数
 
-int* GetConflict(int Conflict_Father[], int Conflict_Mother[], int Length_Cross, int& Length_Conflict);	// 返回冲突的数组
-TSP_solution HandleConflict(Graph* pGraph, TSP_solution ConflictSolution, int* Detection_Conflict, int* Model_Conflict, int Length_Conflict);	// 解决冲突
+int* GetConflict(int nConflictFather[], int nConflictMother[], int nLengthCross, int& nLengthConflict);	// 返回冲突的数组
+TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDetectionConflict, int* nModelConflict, int nLengthConflict);	// 解决冲突
 
 //计算每个个体的繁殖概率，用于后续选择操作。
 void CalcProbablity(Graph* pGraph, double dTotalLength);	// 计算概率
 
 //检查路径是否合法，即是否存在重复的城市。
-bool CheckPath(Graph* pGraph, TSP_solution CurrentSolution);
+bool CheckPath(Graph* pGraph, TSPSolution curSolution);
 
 //void Display(Graph* pGraph);
 
 
-#endif  // _GeneticAlgorithm_H_
+#endif	// _GeneticAlgorithm_H_

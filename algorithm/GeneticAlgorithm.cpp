@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <ctime>
+#include <random>
 #include <fstream>
 #include <iomanip>	// 本文用于输出对齐
 #include <iostream>
@@ -7,9 +8,7 @@
 
 #include <fstream>
 
-#include "GeneticAlgorithm.h"
-
-using namespace std;
+#include "GA.h"
 
 //用于记录交叉过程中的索引
 int indexCrossI;
@@ -19,7 +18,7 @@ int indexCrossJ;
 
 int main()
 {
-	time_t T_begin = clock();
+	time_t tmBegin = clock();
 	Graph* pGraph = new Graph();	// 创建一个图对象
 
 	int temp = sizeof(pGraph);
@@ -35,9 +34,9 @@ int main()
 	// 运行 旅行推销员问题（TSP）的遗传算法进化过程
 	TspEvolution(pGraph);	// 遗传算法
 
-	time_t T_end = clock();
-	double RunningTime = double(T_end - T_begin) / CLOCKS_PER_SEC;
-	cout << endl << "【 程序运行时间 RunningTime = " << RunningTime << " 】" << endl;
+	time_t tmEnd = clock();
+	double RunningTime = double(tmEnd - tmBegin) / CLOCKS_PER_SEC;
+	std::cout << std::endl << "【 程序运行时间 RunningTime = " << RunningTime << " 】" << std::endl;
 
 	system("pause");
 	return 0;
@@ -47,22 +46,22 @@ int main()
 //这个函数从文件中读取图的信息，包括顶点数、顶点信息、邻接矩阵等，并将其存储在 Graph 结构体对象中。
 void CreateGraph(Graph* pGraph)
 {
-	ifstream read_in;
-	read_in.open("GeneticAlgorithmCityData150.txt");
-	if (!read_in.is_open())
+	std::ifstream fReadIn;
+	fReadIn.open("C:/Users/april/source/repos/Win32Test/GA/city_150.txt");
+	if (!fReadIn.is_open())
 	{
-		cout << "从文件中读取图数据失败." << endl;
+		std::cout << "从文件中读取图数据失败." << std::endl;
 		return;
 	}
 
-	read_in >> pGraph->vexNum;
-	// read_in >> pGraph->arcNum;
+	fReadIn >> pGraph->vexNum;	// 存储 150
+	// fReadIn >> pGraph->arcNum;
 	pGraph->arcNum = 0;
 
 	// 读取顶点信息和邻接矩阵
 	for (int i = 0; i < pGraph->vexNum; i++)
 	{
-		read_in >> pGraph->vexs[i];
+		fReadIn >> pGraph->vexs[i];	// 存储 1 - 150
 	}
 	pGraph->vexs[pGraph->vexNum] = '\0';	// char的结束符.
 
@@ -71,7 +70,7 @@ void CreateGraph(Graph* pGraph)
 	{
 		for (int j = 0; j < pGraph->vexNum; j++)
 		{
-			read_in >> pGraph->arcs[i][j];
+			fReadIn >> pGraph->arcs[i][j];	// 保存距离
 
 			// calculate the arcNum
 			if (pGraph->arcs[i][j] > 0)
@@ -82,27 +81,27 @@ void CreateGraph(Graph* pGraph)
 	}
 
 	// 输出图的信息
-	cout << "无向图创建完毕，相关信息如下：" << endl;
-	cout << "【顶点数】 pGraph->vexNum = " << pGraph->vexNum << endl;
-	cout << "【边数】 pGraph->arcNum = " << pGraph->arcNum << endl;
-	cout << "【顶点向量】 vexs[max_vexNum] = ";
+	std::cout << "无向图创建完毕，相关信息如下：" << std::endl;
+	std::cout << "【顶点数】 pGraph->vexNum = " << pGraph->vexNum << std::endl;
+	std::cout << "【边数】 pGraph->arcNum = " << pGraph->arcNum << std::endl;
+	std::cout << "【顶点向量】 vexs[max_vexNum] = ";
 
 	for (int i = 0; i < pGraph->vexNum; i++)
 	{
-		cout << pGraph->vexs[i] << " ";
+		std::cout << pGraph->vexs[i] << " ";
 	}
 
-	cout << endl << "【邻接矩阵】 arcs[max_vexNum][max_vexNum] 如下：" << endl;
-/*
-	for (int i = 0; i < pGraph->vexNum;i++)
-	{
-		for (int j = 0; j < pGraph->vexNum; j++)
+	std::cout << std::endl << "【邻接矩阵】 arcs[max_vexNum][max_vexNum] 如下：" << std::endl;
+	/*
+		for (int i = 0; i < pGraph->vexNum;i++)
 		{
-			cout << pGraph->arcs[i][j]<<" ";
+			for (int j = 0; j < pGraph->vexNum; j++)
+			{
+				std::cout << pGraph->arcs[i][j]<<" ";
+			}
+			std::cout<<std::endl;
 		}
-		cout<<endl;
-	}
-*/
+	*/
 }
 
 // 初始化遗传算法的个体群体
@@ -111,13 +110,13 @@ void CreateGraph(Graph* pGraph)
 
 void InitialGroup(Graph* pGraph)
 {
-	//cout << "----------------------【遗传算法参数】-----------------------" << endl;
-	//cout << "【城市个数】 CITY_NUM =" << CITY_NUM << endl;
-	//cout << "【群体规模】 GROUP_NUM = " << GROUP_NUM << endl;
-	//cout << "【子代规模】 SON_NUM = " << SON_NUM << endl;
-	//cout << "【变异概率】 P_INHERIATANCE = " << P_INHERIATANCE << endl;
-	//cout << "【杂交概率】 P_COPULATION = " << P_COPULATION << endl;
-	//cout << "【迭代次数】 ITERATION_NUM = " << ITERATION_NUM << endl;
+	//std::cout << "----------------------【遗传算法参数】-----------------------" << std::endl;
+	//std::cout << "【城市个数】 CITY_NUM =" << CITY_NUM << std::endl;
+	//std::cout << "【群体规模】 GROUP_NUM = " << GROUP_NUM << std::endl;
+	//std::cout << "【子代规模】 SON_NUM = " << SON_NUM << std::endl;
+	//std::cout << "【变异概率】 P_INHERIATANCE = " << P_INHERIATANCE << std::endl;
+	//std::cout << "【杂交概率】 P_COPULATION = " << P_COPULATION << std::endl;
+	//std::cout << "【迭代次数】 ITERATION_NUM = " << ITERATION_NUM << std::endl;
 
 	// 对每个个体随机生成路径
 	double dTotalLength = 0.0;
@@ -129,7 +128,7 @@ void InitialGroup(Graph* pGraph)
 		}
 
 		// 随机打乱路径
-		random_shuffle(gTspGroups[i].pathArray + 1, gTspGroups[i].pathArray + pGraph->vexNum);
+		std::random_shuffle(gTspGroups[i].pathArray + 1, gTspGroups[i].pathArray + pGraph->vexNum);
 
 		// 检查路径是否合法，计算路径长度
 		if (CheckPath(pGraph, gTspGroups[i]))
@@ -139,9 +138,9 @@ void InitialGroup(Graph* pGraph)
 		}
 		else
 		{
-			cout << "【error！城市路径产生重复城市！】" << endl;
+			std::cout << "【error！城市路径产生重复城市！】" << std::endl;
 			gTspGroups[i].pathLen = MAX_INT;
-			gTspGroups[i].P_Reproduction = 0;
+			gTspGroups[i].dPReproduction = 0;
 		}
 	}
 
@@ -153,20 +152,20 @@ void InitialGroup(Graph* pGraph)
 // 处理对象：每次新产生的群体, 计算每个个体的概率
 // 问题：解决TSP问题, 路径越短概率应该越高
 // 方案：对于当前总群, 将所有个体路径取倒数, 然后乘以该总群的总路径得到大于1的值, 然后进行归一化, 取得概率
-// 归一化：累加当前所有大于1的个体的伪概率, 得到TempTotal_P, 每个概率再分别除以 TempTotal_P 进行归一化
+// 归一化：累加当前所有大于1的个体的伪概率, 得到nTempTotalP, 每个概率再分别除以 nTempTotalP 进行归一化
 void CalcProbablity(Graph* pGraph, double dTotalLength)
 {
-	double TempTotal_P = 0.0;
+	double nTempTotalP = 0.0;
 
 	for (int i = 0; i < GROUP_NUM; i++)
 	{
-		gTspGroups[i].P_Reproduction = (1.0 / gTspGroups[i].pathLen) * dTotalLength;
-		TempTotal_P += gTspGroups[i].P_Reproduction;
+		gTspGroups[i].dPReproduction = (1.0 / gTspGroups[i].pathLen) * dTotalLength;
+		nTempTotalP += gTspGroups[i].dPReproduction;
 	}
 
 	for (int i = 0; i < GROUP_NUM; i++)
 	{
-		gTspGroups[i].P_Reproduction = gTspGroups[i].P_Reproduction / TempTotal_P;
+		gTspGroups[i].dPReproduction = gTspGroups[i].dPReproduction / nTempTotalP;
 	}
 }
 
@@ -177,40 +176,40 @@ void CalcProbablity(Graph* pGraph, double dTotalLength)
 void TspEvolution(Graph* pGraph)
 {
 	/* */
-	int iter = 0;
-	while (iter < ITERATION_NUM)
+	int nIter = 0;
+	while (nIter < ITERATION_NUM)
 	{
-		// cout<<"***********************【第次"<<(iter + 1)<<"迭代】*************************"<<endl;
+		// std::cout<<"***********************【第次"<<(nIter + 1)<<"迭代】*************************"<<std::endl;
 
 		// 1. 选择
-		int Father_index = EvoSelect(pGraph);
-		int Mother_index = EvoSelect(pGraph);
+		int nFatherIndex = EvoSelect(pGraph);
+		int nMotherIndex = EvoSelect(pGraph);
 
-		while (Mother_index == Father_index)
+		while (nMotherIndex == nFatherIndex)
 		{
-			// 防止Father和Mother都是同一个个体 -> 自交( 父母为同一个个体时, 母亲重新选择, 直到父母为不同的个体为止 )
-			// cout<<"Warning!【Father_index = Mother_index】"<<endl;
-			Mother_index = EvoSelect(pGraph);
+			// 防止tspFather和tspMother都是同一个个体 -> 自交( 父母为同一个个体时, 母亲重新选择, 直到父母为不同的个体为止 )
+			// std::cout<<"Warning!【nFatherIndex = nMotherIndex】"<<std::endl;
+			nMotherIndex = EvoSelect(pGraph);
 		}
 
 		// gTspGroups[]为当前总群
-		TSP_solution Father = gTspGroups[Father_index];
-		TSP_solution Mother = gTspGroups[Mother_index];
+		TSPSolution tspFather = gTspGroups[nFatherIndex];
+		TSPSolution tspMother = gTspGroups[nMotherIndex];
 
 		// 2. 交叉, 存储在全局变脸 gSonSolution[] 数组 - 通过M次杂交, 产生2M个新个体, 2M >= GROUP_NUM
 		int M = GROUP_NUM - GROUP_NUM / 2;
 		gSonSolitonLen = 0;	// 遗传产生的个体个数, 置零重新累加
 		while (M)
 		{
-			double Is_COPULATION = ((rand() % 100 + 0.0) / 100);
-			if (Is_COPULATION > P_COPULATION)
+			double dIsCopulation = ((rand() % 100 + 0.0) / 100.0);
+			if (dIsCopulation > P_COPULATION)
 			{
-				// cout<<"[ 这两个染色体不进行杂交 ]Is_COPULATION = "<<Is_COPULATION<<endl;
+				// std::cout<<"[ 这两个染色体不进行杂交 ]dIsCopulation = "<<dIsCopulation<<std::endl;
 			}
 			else
 			{
 				// 杂交, 将结果存储于遗传个体总群,全局变量gSonSolution[]
-				EvoCross(pGraph, Father, Mother);
+				EvoCross(pGraph, tspFather, tspMother);
 				M--;
 			}
 		}
@@ -220,9 +219,9 @@ void TspEvolution(Graph* pGraph)
 
 		for (int indexVariation = 0; indexVariation < gSonSolitonLen; indexVariation++)
 		{
-			double RateVariation = (rand() % 100) / 100.0;
+			double dRateVariation = (rand() % 100) / 100.0;
 			// 产生的随机数小于变异概率 则该个体进行变异
-			if (RateVariation < P_INHERIATANCE)
+			if (dRateVariation < P_INHERIATANCE)
 			{
 				EvoVariation(pGraph, indexVariation);
 			}
@@ -230,7 +229,7 @@ void TspEvolution(Graph* pGraph)
 			// 经过变异处理后 重新计算路径值
 			if (!CheckPath(pGraph, gSonSolution[indexVariation]))
 			{
-				cout << "【Error! 路径有重复!】" << endl;
+				std::cout << "【Error! 路径有重复!】" << std::endl;
 			}
 
 			// 产生新个体, 计算新路径和新概率
@@ -241,14 +240,14 @@ void TspEvolution(Graph* pGraph)
 		CalcProbablity(pGraph, dTotalLength);
 
 		/*
-		cout<<"【遗传产生的子代个体如下...】"<<endl;
+		std::cout<<"【遗传产生的子代个体如下...】"<<std::endl;
 		for (int i = 0; i < gSonSolitonLen; i++)
 		{
 			for (int j = 0;j < pGraph->vexNum;j++)
 			{
-				cout<<gSonSolution[i].pathArray[j]<<" -> ";
+				std::cout<<gSonSolution[i].pathArray[j]<<" -> ";
 			}
-			cout<<gSonSolution[i].pathArray[0]<<"    pathLen = "<<gSonSolution[i].pathLen<<"    P_Reproduction = "<<gSonSolution[i].P_Reproduction<<endl;
+			std::cout<<gSonSolution[i].pathArray[0]<<"    pathLen = "<<gSonSolution[i].pathLen<<"    dPReproduction = "<<gSonSolution[i].dPReproduction<<std::endl;
 		}
 		*/
 
@@ -256,8 +255,8 @@ void TspEvolution(Graph* pGraph)
 		// 参与对象：父代 + 遗传的子代
 		EvoUpdateGroup(pGraph);
 
-		iter++;
-		// _iter = iter + 1;
+		nIter++;
+		// _iter = nIter + 1;
 	}
 }
 
@@ -276,19 +275,19 @@ void TspEvolution(Graph* pGraph)
 */
 int EvoSelect(Graph* pGraph)
 {
-	double selection_P = ((rand() % 100 + 0.0) / 100);
-	// cout<<"selection_P = "<<selection_P<<endl;
+	double selection_P = ((rand() % 100 + 0.0) / 100.0);
+	// std::cout<<"selection_P = "<<selection_P<<std::endl;
 
 	double distribution_P = 0.0;
 	for (int i = 0; i < GROUP_NUM; i++)
 	{
-		distribution_P += gTspGroups[i].P_Reproduction;
+		distribution_P += gTspGroups[i].dPReproduction;
 		if (selection_P < distribution_P)
 		{
 			return i;
 		}
 	}
-	cout << "【ERROR!】EvoSelect() 轮盘赌选择有误..." << endl;
+	std::cout << "【ERROR!】EvoSelect() 轮盘赌选择有误..." << std::endl;
 	return 0;
 }
 
@@ -302,13 +301,13 @@ int EvoSelect(Graph* pGraph)
 */
 /*
 	TSP_杂交具体方法：
-	1. 随机选取两个交叉点i和j,记为 Father_Cross 和 Mother_Cross
+	1. 随机选取两个交叉点i和j,记为 nFatherCross 和 nMotherCross
 	2. 将两交叉点中间的基因段互换
-	3. 分别对Father和Mother的路径进行冲突处理：
-		-- 以Father为例, 保持Father_Cross基因段不变, 基因段以外的部分与Father_Cross基因段冲突的城市, 用Father_Cross和Mother_Cross对应的位置去互换, 直到没有冲突.
-		-- 冲突城市的确定: Father_Cross 和 Mother_Cross去补集,存放于数组 Conflict[] 中.
+	3. 分别对tspFather和tspMother的路径进行冲突处理：
+		-- 以tspFather为例, 保持nFatherCross基因段不变, 基因段以外的部分与nFatherCross基因段冲突的城市, 用nFatherCross和nMotherCross对应的位置去互换, 直到没有冲突.
+		-- 冲突城市的确定: nFatherCross 和 nMotherCross去补集,存放于数组 Conflict[] 中.
 */
-void EvoCross(Graph* pGraph, TSP_solution TSP_Father, TSP_solution TSP_Mother)
+void EvoCross(Graph* pGraph, TSPSolution TSP_Father, TSPSolution TSP_Mother)
 {
 	// 杂交过程：随机产生杂交的位置, 保证 indexCrossI < indexCrossJ【全局变量】
 	indexCrossI = rand() % (CITY_NUM - 1) + 1;	// 不能取到起始城市
@@ -323,74 +322,76 @@ void EvoCross(Graph* pGraph, TSP_solution TSP_Father, TSP_solution TSP_Mother)
 
 	if (indexCrossJ == CITY_NUM || indexCrossI == 0)
 	{
-		cout << "[ 杂交过程的随机数产生有问题... ]" << endl;
+		std::cout << "[ 杂交过程的随机数产生有问题... ]" << std::endl;
 	}
 
 	// 杂交基因段
-	int Father_Cross[CITY_NUM];	// 父亲遗传基因段
-	int Mother_Cross[CITY_NUM];	// 母亲遗传基因段
-	int Length_Cross = 0;		// 杂交的个数
+	int nFatherCross[CITY_NUM]{};	// 父亲遗传基因段
+	int nMotherCross[CITY_NUM]{};	// 母亲遗传基因段
+	int nLengthCross = 0;		// 杂交的个数
+
 	for (int i = indexCrossI; i <= indexCrossJ; i++)
 	{
-		Father_Cross[Length_Cross] = TSP_Father.pathArray[i];
-		Mother_Cross[Length_Cross] = TSP_Mother.pathArray[i];
-		Length_Cross++;
+		nFatherCross[nLengthCross] = TSP_Father.pathArray[i];
+		nMotherCross[nLengthCross] = TSP_Mother.pathArray[i];
+		nLengthCross++;
 	}
 
-	// 开始杂交 - 处理 TSP_Father：找到Father_Cross[]中会产生冲突的城市
-	int* Conflict_Father;		// 存储冲突的位置
-	int* Conflict_Mother;
-	int Length_Conflict = 0;	// 冲突的个数
-	Conflict_Father = GetConflict(Father_Cross, Mother_Cross, Length_Cross, Length_Conflict);
-	Conflict_Mother = GetConflict(Mother_Cross, Father_Cross, Length_Cross, Length_Conflict);
+	// 开始杂交 - 处理 TSP_Father：找到nFatherCross[]中会产生冲突的城市
+	int* nConflictFather;		// 存储冲突的位置
+	int* nConflictMother;
+	int nLengthConflict = 0;	// 冲突的个数
+	nConflictFather = GetConflict(nFatherCross, nMotherCross, nLengthCross, nLengthConflict);
+	nConflictMother = GetConflict(nMotherCross, nFatherCross, nLengthCross, nLengthConflict);
 
-	// Father and Mother 交换基因段
-	int city_temp;
+	// tspFather and tspMother 交换基因段
+	int nCityTemp;
 	for (int i = indexCrossI; i <= indexCrossJ; i++)
 	{
-		city_temp = TSP_Father.pathArray[i];
+		nCityTemp = TSP_Father.pathArray[i];
 		TSP_Father.pathArray[i] = TSP_Mother.pathArray[i];
-		TSP_Mother.pathArray[i] = city_temp;
+		TSP_Mother.pathArray[i] = nCityTemp;
 	}
 
-	// 开始杂交 - 处理 TSP_Mother, 其中Length_Conflict会在函数GetConflict()中改变并保存
-	TSP_solution Descendant_ONE = HandleConflict(pGraph, TSP_Father, Conflict_Father, Conflict_Mother, Length_Conflict);	// 解决 TSP_Father 的冲突
-	TSP_solution Descendant_TWO = HandleConflict(pGraph, TSP_Mother, Conflict_Mother, Conflict_Father, Length_Conflict);	// 解决 TSP_Mother 的冲突
+	// 开始杂交 - 处理 TSP_Mother, 其中nLengthConflict会在函数GetConflict()中改变并保存
+	TSPSolution descendantA = HandleConflict(pGraph, TSP_Father, nConflictFather, nConflictMother, nLengthConflict);	// 解决 TSP_Father 的冲突
+	TSPSolution descendantB = HandleConflict(pGraph, TSP_Mother, nConflictMother, nConflictFather, nLengthConflict);	// 解决 TSP_Mother 的冲突
 
-	gSonSolution[gSonSolitonLen++] = Descendant_ONE;
-	gSonSolution[gSonSolitonLen++] = Descendant_TWO;
+	gSonSolution[gSonSolitonLen++] = descendantA;
+	gSonSolution[gSonSolitonLen++] = descendantB;
 }
 
-TSP_solution HandleConflict(Graph* pGraph, TSP_solution ConflictSolution, int* Detection_Conflict, int* Model_Conflict, int Length_Conflict)
+TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDetectionConflict, int* nModelConflict, int nLengthConflict)
 {
 	/*
-	cout<<"[ HandleConflict ]"<<endl<<"Detection_Conflict = ";
-	for (int i = 0;i < Length_Conflict; i++)
+	std::cout<<"[ HandleConflict ]"<<std::endl<<"nDetectionConflict = ";
+	for (int i = 0;i < nLengthConflict; i++)
 	{
-		cout<<Detection_Conflict[i]<<" ";
+		std::cout<<nDetectionConflict[i]<<" ";
 	}
-	cout<<endl<<"Model_Conflict = ";
-	for (int i = 0;i < Length_Conflict; i++)
+	std::cout<<std::endl<<"nModelConflict = ";
+	for (int i = 0;i < nLengthConflict; i++)
 	{
-		cout<<Model_Conflict[i]<<" ";
+		std::cout<<nModelConflict[i]<<" ";
 	}
-	cout<<endl;
+	std::cout<<std::endl;
 
-	cout<<"【存在冲突】基因组为：";
+	std::cout<<"【存在冲突】基因组为：";
 	for (int i = 0;i < pGraph->vexNum;i++)
 	{
-		cout<<ConflictSolution.pathArray[i]<<" -> ";
+		std::cout<<conflictSolution.pathArray[i]<<" -> ";
 	}
-	cout<<ConflictSolution.pathArray[0]<<endl;
+	std::cout<<conflictSolution.pathArray[0]<<std::endl;
 	*/
-	for (int i = 0; i <= Length_Conflict; i++)
+	for (int i = 0; i <= nLengthConflict; i++)
 	{
 		bool flag_FindCity = false;
 		int index = 0;
+
 		// [0, indexCrossI) 寻找冲突
 		for (index = 0; index < indexCrossI; index++)
 		{
-			if (Model_Conflict[i] == ConflictSolution.pathArray[index])
+			if (nModelConflict[i] == conflictSolution.pathArray[index])
 			{
 				flag_FindCity = true;
 				break;
@@ -403,76 +404,77 @@ TSP_solution HandleConflict(Graph* pGraph, TSP_solution ConflictSolution, int* D
 			// [indexCrossI + 1, pGraph->vexNum) 寻找冲突
 			for (index = indexCrossJ + 1; index < pGraph->vexNum; index++)
 			{
-				if (Model_Conflict[i] == ConflictSolution.pathArray[index])
+				if (nModelConflict[i] == conflictSolution.pathArray[index])
 				{
 					break;
 				}
 			}
 		}
 
-		// 9 8 [1 4 0 3 2] 3 2 0 --> ConflictSolution
+		// 9 8 [1 4 0 3 2] 3 2 0 --> conflictSolution
 		// 8 7 [4 5 6 7 1] 9 6 5
-		// [0 3 2] --> Detection_Conflict
-		// [4 5 6] --> Model_Conflict
-		// 解决冲突, index 为当前i冲突的位置, 用Model_Conflict去替换.
-		// cout<<"index = "<<index<<endl;
-		ConflictSolution.pathArray[index] = Detection_Conflict[i];
+		// [0 3 2] --> nDetectionConflict
+		// [4 5 6] --> nModelConflict
+		// 解决冲突, index 为当前i冲突的位置, 用nModelConflict去替换.
+		// std::cout<<"index = "<<index<<std::endl;
+		conflictSolution.pathArray[index] = nDetectionConflict[i];
 	}
 
 	/*
-	cout<<endl<<"【解决冲突】基因组为：";
+	std::cout<<std::endl<<"【解决冲突】基因组为：";
 	for (int i = 0;i < pGraph->vexNum;i++)
 	{
-		cout<<ConflictSolution.pathArray[i]<<" -> ";
+		std::cout<<conflictSolution.pathArray[i]<<" -> ";
 	}
-	cout<<ConflictSolution.pathArray[0]<<endl;
+	std::cout<<conflictSolution.pathArray[0]<<std::endl;
 
 	// 重新计算新路径的长度
-	// CalculateLength(pGraph, ConflictSolution);
+	// CalculateLength(pGraph, conflictSolution);
 	*/
-	if (!CheckPath(pGraph, ConflictSolution))
+	if (!CheckPath(pGraph, conflictSolution))
 	{
-		cout << "【error - 冲突未解决......】" << endl;
+		std::cout << "【error - 冲突未解决......】" << std::endl;
 	}
-	// cout<<"  pathLen = "<<ConflictSolution.pathLen<<"    P_Reproduction = "<<ConflictSolution.P_Reproduction<<endl;
 
-	return ConflictSolution;
+	// std::cout<<"  pathLen = "<<conflictSolution.pathLen<<"    dPReproduction = "<<conflictSolution.dPReproduction<<std::endl;
+
+	return conflictSolution;
 }
 
-int* GetConflict(int Detection_Cross[], int Model_Cross[], int Length_Cross, int& Length_Conflict)
+int* GetConflict(int nDetectionCross[], int nModelCross[], int nLengthCross, int& nLengthConflict)
 {
-	// 同时存在于 Father_Cross 和 Mother_Cross 为不冲突的城市, 反之是冲突的城市.
-	// Detection_Cross[]:表示当前搜索的个体, 即找冲突的对象
-	// Model_Cross[]:
+	// 同时存在于 nFatherCross 和 nMotherCross 为不冲突的城市, 反之是冲突的城市.
+	// nDetectionCross[]:表示当前搜索的个体, 即找冲突的对象
+	// nModelCross[]:
 	// int Conflict[CITY_NUM];
 	int* Conflict = new int[CITY_NUM];
-	Length_Conflict = 0;
-	for (int i = 0; i < Length_Cross; i++)
+	nLengthConflict = 0;
+	for (int i = 0; i < nLengthCross; i++)
 	{
 		bool flag_Conflict = true;	// 判断是否属于冲突
-		for (int j = 0; j < Length_Cross; j++)
+		for (int j = 0; j < nLengthCross; j++)
 		{
-			if (Detection_Cross[i] == Model_Cross[j])
+			if (nDetectionCross[i] == nModelCross[j])
 			{
 				// 结束第二层循环
-				j = Length_Cross;
+				j = nLengthCross;
 				flag_Conflict = false;	// 该城市不属于冲突
 			}
 		}
 		if (flag_Conflict)
 		{
-			Conflict[Length_Conflict] = Detection_Cross[i];
-			Length_Conflict++;
+			Conflict[nLengthConflict] = nDetectionCross[i];
+			nLengthConflict++;
 		}
 	}
 
 	/*
-	cout<<"Conflict[] = ";
-	for (int i = 0; i < Length_Conflict; i++)
+	std::cout<<"Conflict[] = ";
+	for (int i = 0; i < nLengthConflict; i++)
 	{
-		cout<<Conflict[i]<<"  ";
+		std::cout<<Conflict[i]<<"  ";
 	}
-	cout<<endl;
+	std::cout<<std::endl;
 	*/
 	return Conflict;
 }
@@ -483,35 +485,35 @@ int* GetConflict(int Detection_Cross[], int Model_Cross[], int Length_Cross, int
 	输出：通过变异策略, 以一定的变异概率（确定变异个数）随机选择个体进行变异
 	变异策略：随机交换染色体的片段, TSP - 随机交换两个城市的位置
 */
-void EvoVariation(Graph* pGraph, int Index_Variation)
+void EvoVariation(Graph* pGraph, int nIndexVariation)
 {
 	// 随机产生两个随机数表示两个城市的位置, 并进行位置交换
-	int City_i = (rand() % (CITY_NUM - 1)) + 1;	// [1, CITY_NUM - 1]起始城市不变异
-	int City_j = (rand() % (CITY_NUM - 1)) + 1;	//
+	int nCityI = (rand() % (CITY_NUM - 1)) + 1;	// [1, CITY_NUM - 1]起始城市不变异
+	int nCityJ = (rand() % (CITY_NUM - 1)) + 1;	//
 
-	while (City_i == City_j)
+	while (nCityI == nCityJ)
 	{
-		City_j = (rand() % (CITY_NUM - 1)) + 1;
+		nCityJ = (rand() % (CITY_NUM - 1)) + 1;
 	}
 
 	/*
-	cout<<"-----------------"<<endl;
-	cout<<"变异位置如下:"<<endl;
-	cout<<"City_i = "<<City_i<<endl;
-	cout<<"City_j = "<<City_j<<endl;
+	std::cout<<"-----------------"<<std::endl;
+	std::cout<<"变异位置如下:"<<std::endl;
+	std::cout<<"nCityI = "<<nCityI<<std::endl;
+	std::cout<<"nCityJ = "<<nCityJ<<std::endl;
 	*/
 
 	// 交换城市位置 - 变异
-	int temp_City = gSonSolution[Index_Variation].pathArray[City_i];
-	gSonSolution[Index_Variation].pathArray[City_i] = gSonSolution[Index_Variation].pathArray[City_j];
-	gSonSolution[Index_Variation].pathArray[City_j] = temp_City;
+	int nTempCity = gSonSolution[nIndexVariation].pathArray[nCityI];
+	gSonSolution[nIndexVariation].pathArray[nCityI] = gSonSolution[nIndexVariation].pathArray[nCityJ];
+	gSonSolution[nIndexVariation].pathArray[nCityJ] = nTempCity;
 }
 
 // 父代 - gTspGroups[]
 // 子代 - gSonSolution[]
 void EvoUpdateGroup(Graph* pGraph)
 {
-	TSP_solution tempSolution;
+	TSPSolution tempSolution;
 	// 先对子代 - gSonSolution[] 依据路径长度进行排序 - 降序[按路径从大到小]
 	for (int i = 0; i < gSonSolitonLen; i++)
 	{
@@ -527,10 +529,10 @@ void EvoUpdateGroup(Graph* pGraph)
 	}
 
 	/*
-	cout<<"【冒泡排序后...】"<<endl;
+	std::cout<<"【冒泡排序后...】"<<std::endl;
 	for (int i = 0; i < gSonSolitonLen; i++)
 	{
-		cout<<"pathLen = "<<gSonSolution[i].pathLen<<endl;
+		std::cout<<"pathLen = "<<gSonSolution[i].pathLen<<std::endl;
 	}
 	 */
 
@@ -550,44 +552,46 @@ void EvoUpdateGroup(Graph* pGraph)
 	TspEvaluate(pGraph);
 }
 
-double CalculateLength(Graph* pGraph, TSP_solution newSolution)
+double CalculateLength(Graph* pGraph, TSPSolution newSolution)
 {
-	double _length = 0;
+	double dLength = 0;
 
 	for (int i = 0; i < pGraph->vexNum - 1; i++)
 	{
-		int _startCity = newSolution.pathArray[i] - 1;	// 路径下标是从 1 开始存储
-		int _endCity = newSolution.pathArray[i + 1] - 1;
-		if (pGraph->arcs[_startCity][_endCity] == -1)
+		int startCity = newSolution.pathArray[i] - 1;	// 路径下标是从 1 开始存储
+		int endCity = newSolution.pathArray[i + 1] - 1;
+		if (pGraph->arcs[startCity][endCity] == -1)
 		{
 			return MAX_INT;
 		}
 		else
 		{
-			_length += pGraph->arcs[_startCity][_endCity];
+			dLength += pGraph->arcs[startCity][endCity];
 		}
 	}
 
 	// 判断该路径是否能回到起始城市
-	if (pGraph->arcs[newSolution.pathArray[pGraph->vexNum - 1]][newSolution.pathArray[0] - 1] == -1)
+	auto a = newSolution.pathArray[pGraph->vexNum - 1];
+	auto b = newSolution.pathArray[0] - 1;
+	if (pGraph->arcs[a][b] == -1)
 	{
 		return MAX_INT;
 	}
 	else
 	{
-		_length += pGraph->arcs[newSolution.pathArray[pGraph->vexNum - 1] - 1][newSolution.pathArray[0] - 1];
-		// cout<<"_length = "<<_length<<endl;
-		return _length;
+		dLength += pGraph->arcs[a - 1][b];
+		// std::cout<<"dLength = "<<dLength<<std::endl;
+		return dLength;
 	}
 }
 
-bool CheckPath(Graph* pGraph, TSP_solution CurrentSolution)
+bool CheckPath(Graph* pGraph, TSPSolution curSolution)
 {
 	for (int i = 0; i < pGraph->vexNum; i++)
 	{
 		for (int j = i + 1; j < pGraph->vexNum; j++)
 		{
-			if (CurrentSolution.pathArray[i] == CurrentSolution.pathArray[j])
+			if (curSolution.pathArray[i] == curSolution.pathArray[j])
 			{
 				return false;
 			}
@@ -604,41 +608,39 @@ bool CheckPath(Graph* pGraph, TSP_solution CurrentSolution)
 */
 void TspEvaluate(Graph* pGraph)
 {
-	TSP_solution bsetSolution;
-	bsetSolution = gTspGroups[0];
+	TSPSolution& bestSolution = gTspGroups[0];
 	for (int i = 1; i < GROUP_NUM; i++)
 	{
-		if (bsetSolution.pathLen > gTspGroups[i].pathLen)
+		if (bestSolution.pathLen > gTspGroups[i].pathLen)
 		{
-			bsetSolution = gTspGroups[i];
+			bestSolution = gTspGroups[i];
 		}
 	}
 
-	// cout<<"----------------------- 【当前总群】 --------------------"<<endl;
-	/*
-	for (int i = 0;i < GROUP_NUM; i++)
+	// std::cout<<"----------------------- 【当前总群】 --------------------"<<std::endl;
+	for (int i = 0; i < GROUP_NUM; i++)
 	{
-		cout<<"【第 "<<i + 1<<" 号染色体】：";
+		std::cout << "【第 " << i + 1 << " 号染色体】：";
 		for (int j = 0; j < pGraph->vexNum; j++)
 		{
-			cout<<gTspGroups[i].pathArray[j]<<" -> ";
+			std::cout << gTspGroups[i].pathArray[j] << " -> ";
 		}
-		cout<<gTspGroups[i].pathArray[0]<<"    ";
-		cout<<"length = "<<gTspGroups[i].pathLen<<"    P_Reproduction = "<<gTspGroups[i].P_Reproduction<<endl;
+		std::cout << gTspGroups[i].pathArray[0] << "    ";
+		std::cout << "length = " << gTspGroups[i].pathLen << "    dPReproduction = " << gTspGroups[i].dPReproduction << std::endl;
 	}
-	*/
+
 	// 打开文件流
-	ofstream outputFile("D:/result.txt");
+	std::ofstream outputFile("D:/result.txt");
 
 	static int i = 0;
 	if (outputFile.is_open())
 	{
-		cout <<"\n"<< i++ << " :当前最优个体 bsetSolution =\n";
+		std::cout << "\n" << i++ << " :当前最优个体 bestSolution =\n";
 		for (int i = 0; i < pGraph->vexNum; i++)
 		{
-			cout << bsetSolution.pathArray[i] << " -> ";
+			std::cout << bestSolution.pathArray[i] << " -> ";
 
-			outputFile << bsetSolution.pathArray[i];
+			outputFile << bestSolution.pathArray[i];
 
 			// 如果不是最后一个元素，则添加逗号
 			if (i < pGraph->vexNum - 1)
@@ -648,21 +650,21 @@ void TspEvaluate(Graph* pGraph)
 		}
 	}
 
-	cout << bsetSolution.pathArray[0] << "\nlength = " << bsetSolution.pathLen << endl;
+	std::cout << bestSolution.pathArray[0] << "\nlength = " << bestSolution.pathLen << std::endl;
 }
 
 /*
 void Display(Graph pGraph){
-	cout<<"----------------------- 【遗传算法 - 当前总群】 --------------------"<<endl;
+	std::cout<<"----------------------- 【遗传算法 - 当前总群】 --------------------"<<std::endl;
 	for (int i = 0;i < GROUP_NUM;i++)
 	{
-		cout<<"【第 "<<i + 1<<" 号染色体】：";
+		std::cout<<"【第 "<<i + 1<<" 号染色体】：";
 		for (int j = 0; j < pGraph->vexNum; j++)
 		{
-			cout<<gTspGroups[i].pathArray[j]<<" -> ";
+			std::cout<<gTspGroups[i].pathArray[j]<<" -> ";
 		}
-		cout<<gTspGroups[i].pathArray[0]<<"    ";
-		cout<<"length = "<<gTspGroups[i].pathLen<<"    P_Reproduction = "<<gTspGroups[i].P_Reproduction<<endl;
+		std::cout<<gTspGroups[i].pathArray[0]<<"    ";
+		std::cout<<"length = "<<gTspGroups[i].pathLen<<"    dPReproduction = "<<gTspGroups[i].dPReproduction<<std::endl;
 	}
 }
 */
