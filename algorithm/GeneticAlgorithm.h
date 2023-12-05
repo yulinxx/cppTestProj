@@ -1,14 +1,23 @@
 #ifndef _GeneticAlgorithm_H_
 #define _GeneticAlgorithm_H_
 
-#define CITY_NUM 150				// TSP_城市个数
-#define GROUP_NUM 30				// 群体规模
-#define SON_NUM 32					// 产生儿子的个数	SON_NUM = GROUP_NUM + 2
+//在遗传算法中，变异是指对个体进行随机操作以产生新的个体，从而提高种群的多样性。
+//变异操作可以根据需要进行多种设计，常用的变异操作包括：
+//
+//位变异：在个体的染色体中随机选择一个位置，然后将该位置的值进行随机替换。
+//交换变异：在个体的染色体中随机选择两个位置，然后将这两个位置的值进行交换。
+//插入变异：在个体的染色体中随机选择一个位置，然后将一个随机值插入到该位置之后。
+//删除变异：在个体的染色体中随机选择一个位置，然后删除该位置之后的值。
+//在此代码中，变异操作采用位变异，即在个体的染色体中随机选择一个位置，然后将该位置的值进行随机替换。
 
-const double P_INHERIATANCE = 0.01;	// 变异概率
-const double P_COPULATION = 0.8;	// 杂交概率
-const int ITERATION_NUM = 1500;		// 遗传次数(迭代次数)
+#define CITY_150NUM 150				// TSP_城市个数
+#define GROUP_30NUM 30				// 群体规模
+#define SON_32NUM 32				// 产生儿子的个数	SON_32NUM = GROUP_30NUM + 2
+
 const double MAX_INT = 9999999.0;
+const double P_COPULATION = 0.8;	// 杂交概率
+const double P_INHERIATANCE = 0.01;	// 变异概率,即每 100 个个体中有一个个体会进行变异。
+const int ITERATION_NUM = 1500;		// 遗传次数(迭代次数)
 
 ////////////////////////////////////////////////////////
 //定义了图的结构体 Graph，包括顶点数、边数、顶点向量和邻接矩阵。
@@ -17,24 +26,28 @@ typedef struct
 {
 	int vexNum;				// 顶点数，表示图中城市的数量。
 	int arcNum;				// 边数，这里对于TSP问题，边的数量是确定的，即每个城市与其他所有城市都有一条边。
-	int vexs[CITY_NUM];					// 顶点向量，存储城市名称
-	double arcs[CITY_NUM][CITY_NUM];	// 邻接矩阵
+	int vexs[CITY_150NUM];					// 顶点向量，存储城市名称
+	double arcs[CITY_150NUM][CITY_150NUM];	// 邻接矩阵
 }Graph;
 
 typedef struct
 {
 	double pathLen;				// 路径长度
-	int pathArray[CITY_NUM];	// 路径数组
+	int pathArray[CITY_150NUM];	// 路径数组,路径城市序列
 	double dPReproduction;		// 繁殖概率
 }TSPSolution;
 
 ////////////////////////////////////////////////////////
 //全局变量:
 
-TSPSolution gTspGroups[GROUP_NUM];		// 存储群体
-TSPSolution gSonSolution[SON_NUM];		// 存储杂交后的个体
+TSPSolution g_tspGroups[GROUP_30NUM];		// 存储群体
+TSPSolution g_tspSonSolution[SON_32NUM];	// 存储杂交后的个体
 
-int gSonSolitonLen = 0;				// 遗传产生的孩子的个数
+int g_nSonSolutionLen = 0;					// 遗传产生的孩子的个数
+
+//用于记录交叉过程中的索引
+int g_nCrossI;
+int g_nCrossJ;
 
 ////////////////////////////////////////////////////////
 
@@ -72,14 +85,17 @@ void EvoUpdateGroup(Graph* pGraph);
 //评价函数，选择路径最短的个体作为最优解。
 void TspEvaluate(Graph* pGraph);		// TSP - 评价函数
 
-int* GetConflict(int nConflictFather[], int nConflictMother[], int nLengthCross, int& nLengthConflict);	// 返回冲突的数组
-TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDetectionConflict, int* nModelConflict, int nLengthConflict);	// 解决冲突
+// 返回冲突的数组
+int* GetConflict(int nFatherConflictArray[], int nMotherConflictArray[], int nCrossLength, int& nLengthConflict);
+
+// 解决冲突
+TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDetectionConflictArray, int* nModelConflictArray, int nLengthConflict);
 
 //计算每个个体的繁殖概率，用于后续选择操作。
 void CalcProbablity(Graph* pGraph, double dTotalLength);	// 计算概率
 
 //检查路径是否合法，即是否存在重复的城市。
-bool CheckPath(Graph* pGraph, TSPSolution curSolution);
+bool CheckPath(Graph* pGraph, TSPSolution& curSolution);
 
 //void Display(Graph* pGraph);
 
