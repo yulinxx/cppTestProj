@@ -8,7 +8,7 @@
 
 #include <fstream>
 
-#include "GA.h"
+#include "GeneticAlgorithm.h"
 
 
 // int _iter = 0;
