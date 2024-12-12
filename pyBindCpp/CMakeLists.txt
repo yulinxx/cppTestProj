@@ -5,4 +5,5 @@ find_package(pybind11 CONFIG REQUIRED)
 
 # add_subdirectory(callCpp)
 add_subdirectory(callPy1)
-add_subdirectory(callPy2)
+add_subdirectory(callNumpy)
+add_subdirectory(callPyDPI)
