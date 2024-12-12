@@ -12,8 +12,15 @@ int main()
     py::scoped_interpreter guard{};
 
     try {
+         // 获取 Python 的 sys 模块，并修改 sys.path
+        py::module sys = py::module::import("sys");
+        py::object path = sys.attr("path");
+        
+        // 将当前工作目录添加到 sys.path
+        path.attr("append")(".");
+
         // 导入 Python 模块
-        // 需要将 python_script.py 复至 exe 同级目录中
+        // 若不要上面三句代码,则需要将 python_script.py 复至 exe 同级目录中
         py::module module = py::module::import("python_script");
 
         // 调用 Python 函数 greet
