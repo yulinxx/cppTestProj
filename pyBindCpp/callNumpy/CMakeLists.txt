@@ -21,7 +21,7 @@ endif(Python3_FOUND)
 
 
 # 添加可执行文件
-set(APP_NAME CallPy2)
+set(APP_NAME callNumpy)
 add_executable(${APP_NAME} main.cpp)
 
 # 设置 C++ 标准
