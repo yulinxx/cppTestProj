@@ -4,7 +4,8 @@
 
 namespace py = pybind11;
 
-int main() {
+int main() 
+{
     std::cout<<"　Welcome Here is CPP "<<std::endl;
     
     // 初始化 Python 解释器
@@ -12,6 +13,7 @@ int main() {
 
     try {
         // 导入 Python 模块
+        // 需要将 python_script.py 复至 exe 同级目录中
         py::module module = py::module::import("python_script");
 
         // 调用 Python 函数 greet
