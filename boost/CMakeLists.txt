@@ -21,8 +21,8 @@ foreach(SUB_DIR ${CPP_DIR})
     foreach(CPP ${SRC})
     
         STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
-        MESSAGE("---Create Exe From: ${CPP}")
-        MESSAGE("---file name: ${FILE_NAME} \n")
+        # MESSAGE("---Create Exe From: ${CPP}")
+        # MESSAGE("---file name: ${FILE_NAME} \n")
 
         add_executable(BOOST_${FILE_NAME} ${CPP})
 

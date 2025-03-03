@@ -28,3 +28,4 @@ target_include_directories(${LIB_NAME} PUBLIC ../LibExportInterface/)
 target_link_libraries(${LIB_NAME} PUBLIC LibExportInterface)
 target_link_libraries(${LIB_NAME} PUBLIC  Qt5::Core Qt5::Widgets)
 
+add_subdirectory(unitTest)

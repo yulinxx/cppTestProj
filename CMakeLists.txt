@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.10)
 
 # 使用vcpkg进行包管理
 if(WIN32)
@@ -28,26 +28,38 @@ elseif(APPLE)
 endif(WIN32)
 
 
-# 查找所有子目录 
+# 查找所有子目录
+# 查找所有子目录并排除某些目录
 MESSAGE("--------- subdir ----- ")
-MACRO(SUBDIRLIST result curdir)
 
+# 定义要排除的目录列表
+SET(EXCLUDE_DIRS ".vs" ".vscode" ".git" "out" )
+
+MACRO(SUBDIRLIST result curdir)
+    # 获取当前目录下的所有子项
     FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
 
+    # 初始化目录列表
     SET(dirlist "")
 
+    # 遍历所有子项
     FOREACH(child ${children})
-
+        # 检查是否是目录
         IF(IS_DIRECTORY ${curdir}/${child})
-            LIST(APPEND dirlist ${child})
+            # 检查是否在排除列表中
+            LIST(FIND EXCLUDE_DIRS ${child} _index)
+            IF(_index EQUAL -1)  # 如果不在排除列表中
+                LIST(APPEND dirlist ${child})
+            ENDIF()
         ENDIF()
     ENDFOREACH()
-    
+
+    # 设置最终的目录列表
     SET(${result} ${dirlist})
 ENDMACRO()
 
 # 查找当前文件夹下的子目录
-SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR}) 
+SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
 # 设置要排除的子目录
 SET(ExclusionList

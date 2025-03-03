@@ -13,23 +13,23 @@
 int server_fd;
 int client_fd;
 
-void OnClientDumpRequestCallabck(void *context, const ClientInfo *client_info, const string *file_path)
-{
-}
+// void OnClientDumpRequestCallabck(void *context, const ClientInfo *client_info, const string *file_path)
+// {
+// }
 
 int main(void)
 {
-    CrashGenerationServer::CreateReportChannel(&server_fd, &client_fd);
+    // CrashGenerationServer::CreateReportChannel(&server_fd, &client_fd);
 
-    CrashGenerationServer crash_server(
-        server_fd,
-        &OnClientDumpReuqestCallabck,
-        NULL,
-        NULL,
-        NULL,
-        true,
-        "/tmp");
-    crash_server.Start();
+    // CrashGenerationServer crash_server(
+    //     server_fd,
+    //     &OnClientDumpReuqestCallabck,
+    //     NULL,
+    //     NULL,
+    //     NULL,
+    //     true,
+    //     "/tmp");
+    // crash_server.Start();
 
     // 拉起检查崩溃进程，并且传入client_fd, 在崩溃检查进程中初始化ExceptionHandler类，最后一个参数传入client_fd
 }

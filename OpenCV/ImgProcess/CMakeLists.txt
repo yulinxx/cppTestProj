@@ -20,6 +20,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+######################################################
 # set(Qt_DIR /opt/Qt/5.15.2/gcc_64/lib/cmake/)
 
 # if(WIN32)

@@ -1,11 +1,11 @@
 # 查找Python库
-find_package(Python3 COMPONENTS Development REQUIRED) 
+find_package(Python3 COMPONENTS Development REQUIRED)
 if (Python3_FOUND)
     include_directories( ${Python3_INCLUDE_DIRS} )
     # add_definitions( ${Python3_DEFINITIONS} )
     # target_include_directories(addtest PRIVATE ${Python3__INCLUDE_DIR})
     # target_link_libraries( ${Python3_LIBRARY})
-    
+
     include_directories(${Python3_INCLUDE_DIRS})
     link_directories(${Python3_LIBRARY_DIRS})
 else(Python3_FOUND)
@@ -25,12 +25,13 @@ set(APP_NAME callPyDPI)
 add_executable(${APP_NAME} main.cpp)
 
 # 设置 C++ 标准
+set_target_properties(MyPyBind11Example PROPERTIES
+    CXX_STANDARD 14
 set_target_properties(${APP_NAME} PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
 )
-
 
 # 包含 PyBind11 头文件
 target_include_directories(${APP_NAME} PRIVATE ${pybind11_INCLUDE_DIRS})

@@ -21,3 +21,4 @@ set(CMAKE_AUTOGEN_MOC_MACROS "Q_MOC_RUNNER")
 add_subdirectory(LibExportInterface)
 add_subdirectory(LibExportImplementation)
 add_subdirectory(LibExportMain)
+
