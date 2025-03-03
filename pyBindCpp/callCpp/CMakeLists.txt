@@ -1,6 +1,8 @@
  
 # add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-find_package(Python3 COMPONENTS Development REQUIRED) 
+# find_package(Python3 COMPONENTS Development REQUIRED) 
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
 find_package(pybind11 CONFIG REQUIRED)
 
 pybind11_add_module(example example.cpp)

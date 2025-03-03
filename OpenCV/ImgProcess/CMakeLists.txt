@@ -22,14 +22,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # set(Qt_DIR /opt/Qt/5.15.2/gcc_64/lib/cmake/)
 
-if(WIN32)
-    # set(VCPKG_PATH D:/Install/vcpkg/scripts/buildsystems/vcpkg.cmake)
-    list(APPEND CMAKE_PREFIX_PATH C:/Install/Qt/5.15.2/msvc2019_64/lib/cmake)
-elseif(UNIX AND NOT APPLE)
-    # set(VCPKG_PATH /home/x/install/vcpkg//scripts/buildsystems/vcpkg.cmake)
-    list(APPEND CMAKE_PREFIX_PATH /opt/Qt/5.15.2/gcc_64/lib/cmake/)
-elseif(APPLE)
-endif(WIN32)
+# if(WIN32)
+#     # set(VCPKG_PATH D:/Install/vcpkg/scripts/buildsystems/vcpkg.cmake)
+#     list(APPEND CMAKE_PREFIX_PATH C:/Install/Qt/5.15.2/msvc2019_64/lib/cmake)
+# elseif(UNIX AND NOT APPLE)
+#     # set(VCPKG_PATH /home/x/install/vcpkg//scripts/buildsystems/vcpkg.cmake)
+#     list(APPEND CMAKE_PREFIX_PATH /opt/Qt/5.15.2/gcc_64/lib/cmake/)
+# elseif(APPLE)
+# endif(WIN32)
 
 
 # find_package(Qt NAMES Qt6 COMPONENTS Widgets LinguistTools REQUIRED)

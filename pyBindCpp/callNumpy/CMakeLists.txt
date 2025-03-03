@@ -20,14 +20,12 @@ endif(Python3_FOUND)
 # include_directories("C:/Install/vcpkg/installed/x64-windows/include")
 
 
-
-
 # 添加可执行文件
-add_executable(MyPyBind11Example my_module.cpp)
-
+set(APP_NAME callNumpy)
+add_executable(${APP_NAME} main.cpp)
 
 # 设置 C++ 标准
-set_target_properties(MyPyBind11Example PROPERTIES
+set_target_properties(${APP_NAME} PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
@@ -35,9 +33,9 @@ set_target_properties(MyPyBind11Example PROPERTIES
 
 
 # 包含 PyBind11 头文件
-target_include_directories(MyPyBind11Example PRIVATE ${pybind11_INCLUDE_DIRS})
+target_include_directories(${APP_NAME} PRIVATE ${pybind11_INCLUDE_DIRS})
 
 # 链接 Python 库
-target_link_libraries(MyPyBind11Example PRIVATE ${Python3_LIBRARIES})
+target_link_libraries(${APP_NAME} PRIVATE ${Python3_LIBRARIES})
 
-target_link_libraries(MyPyBind11Example PRIVATE ${pybind11_LIBRARIES})
+target_link_libraries(${APP_NAME} PRIVATE ${pybind11_LIBRARIES})
