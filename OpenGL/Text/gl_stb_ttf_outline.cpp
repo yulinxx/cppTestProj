@@ -1,16 +1,16 @@
-#include <glad/glad.h> 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp> 
-#include <glm/gtc/type_ptr.hpp>         
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h" 
+#include "stb_truetype.h"
 
 
 ////////////////////////////////////////////////////////
@@ -237,7 +237,10 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
-        renderTextOutline(&font, "Hello, OpenGL!", 100.0f, 300.0f, 0.1f); // 调整 scale 和位置
+        renderTextOutline(&font, "Hello, OpenGL!", 100.0f, 500.0f, 0.08f); // 调整 scale 和位置
+        renderTextOutline(&font, "ABCDEFGHIJKLMN!", 100.0f, 300.0f, 0.08f);
+        renderTextOutline(&font, "OPQRSTUVWXYZ!", 100.0f, 200.0f, 0.08f);
+        renderTextOutline(&font, "~!@#$%^&*()_+abcde", 100.0f, 100.0f, 0.06f);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
