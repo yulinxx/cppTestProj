@@ -6,55 +6,58 @@
 #include <vector>    // 添加 vector 头文件
 
 // [着色器代码保持不变]
-const char *vertexShaderSource = "#version 400\n"
-    "layout (location = 0) in vec2 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
-    "}\0";
+const char* vertexShaderSource = "#version 400\n"
+"layout (location = 0) in vec2 aPos;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
+"}\0";
 
-const char *geometryShaderSource = "#version 400\n"
-    "layout (lines) in;\n"
-    "layout (triangle_strip, max_vertices = 4) out;\n"
-    "uniform float thickness = 0.003;\n"
-    "void main()\n"
-    "{\n"
-    "   vec2 p0 = gl_in[0].gl_Position.xy;\n"
-    "   vec2 p1 = gl_in[1].gl_Position.xy;\n"
-    "   vec2 dir = normalize(p1 - p0);\n"
-    "   vec2 normal = vec2(-dir.y, dir.x);\n"
-    "   vec2 offset = normal * thickness;\n"
-    "   gl_Position = vec4(p0 - offset, 0.0, 1.0);\n"
-    "   EmitVertex();\n"
-    "   gl_Position = vec4(p0 + offset, 0.0, 1.0);\n"
-    "   EmitVertex();\n"
-    "   gl_Position = vec4(p1 - offset, 0.0, 1.0);\n"
-    "   EmitVertex();\n"
-    "   gl_Position = vec4(p1 + offset, 0.0, 1.0);\n"
-    "   EmitVertex();\n"
-    "   EndPrimitive();\n"
-    "}\0";
+const char* geometryShaderSource = "#version 400\n"
+"layout (lines) in;\n"
+"layout (triangle_strip, max_vertices = 4) out;\n"
+"uniform float thickness = 0.003;\n"
+"void main()\n"
+"{\n"
+"   vec2 p0 = gl_in[0].gl_Position.xy;\n"
+"   vec2 p1 = gl_in[1].gl_Position.xy;\n"
+"   vec2 dir = normalize(p1 - p0);\n"
+"   vec2 normal = vec2(-dir.y, dir.x);\n"
+"   vec2 offset = normal * thickness;\n"
+"   gl_Position = vec4(p0 - offset, 0.0, 1.0);\n"
+"   EmitVertex();\n"
+"   gl_Position = vec4(p0 + offset, 0.0, 1.0);\n"
+"   EmitVertex();\n"
+"   gl_Position = vec4(p1 - offset, 0.0, 1.0);\n"
+"   EmitVertex();\n"
+"   gl_Position = vec4(p1 + offset, 0.0, 1.0);\n"
+"   EmitVertex();\n"
+"   EndPrimitive();\n"
+"}\0";
 
-const char *fragmentShaderSource = "#version 400\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
-    "}\0";
+const char* fragmentShaderSource = "#version 400\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+"}\0";
 
 // 生成随机顶点的函数，返回 vector
-std::vector<float> generateRandomVertices(int numPoints) {
+std::vector<float> generateRandomVertices(int numPoints)
+{
     std::vector<float> vertices(numPoints * 2);  // 每个点需要2个float (x,y)
 
     // 随机数种子，只需初始化一次
     static int seeded = 0;
-    if (!seeded) {
+    if (!seeded)
+    {
         srand((unsigned int)time(NULL));
         seeded = 1;
     }
 
     // 生成随机坐标，范围在 [-1, 1]
-    for (int i = 0; i < numPoints * 2; i += 2) {
+    for (int i = 0; i < numPoints * 2; i += 2)
+    {
         vertices[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;     // x坐标
         vertices[i + 1] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; // y坐标
     }
@@ -62,13 +65,16 @@ std::vector<float> generateRandomVertices(int numPoints) {
     return vertices;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
     glViewport(0, 0, width, height);
 }
 
-int main() {
+int main()
+{
     // [GLFW和GLAD初始化代码保持不变]
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         printf("GLFW initialization failed\n");
         return -1;
     }
@@ -78,7 +84,8 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "Thick Polyline", NULL, NULL);
-    if (!window) {
+    if (!window)
+    {
         printf("Window creation failed\n");
         glfwTerminate();
         return -1;
@@ -87,7 +94,8 @@ int main() {
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         printf("Failed to initialize GLAD\n");
         return -1;
     }
@@ -132,7 +140,8 @@ int main() {
     glEnableVertexAttribArray(0);
 
     // 渲染循环
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 

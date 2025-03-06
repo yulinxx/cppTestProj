@@ -26,7 +26,6 @@
 // 使用Boost Statechart Library可以创建复杂的状态机，并通过状态之间的转换和事件处理来控制系统的行为。
 // 该库提供了清晰的接口和丰富的功能，帮助开发人员构建可靠和可扩展的状态机应用程序。
 
-
 // Boost 提供了一个功能强大的状态机库，称为 Boost.Statechart。
 // 使用 Boost.Statechart，你可以方便地定义和管理复杂的状态机，以实现状态的转换和行为的控制。
 
@@ -44,12 +43,20 @@ struct State2;
 struct State3;
 
 // 定义事件
-struct Event1 : sc::event<Event1> {};
-struct Event2 : sc::event<Event2> {};
-struct Event3 : sc::event<Event3> {};
+struct Event1 : sc::event<Event1>
+{
+};
+struct Event2 : sc::event<Event2>
+{
+};
+struct Event3 : sc::event<Event3>
+{
+};
 
 // 定义状态机
-struct StateMachine : sc::state_machine<StateMachine, State1> {};
+struct StateMachine : sc::state_machine<StateMachine, State1>
+{
+};
 
 // 定义状态1
 struct State1 : sc::simple_state<State1, StateMachine>

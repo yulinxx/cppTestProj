@@ -11,7 +11,6 @@
 
 using namespace ImgSpace;
 
-
 #define CONNECT_BTN(N)                                                                        \
     {                                                                                         \
         connect(ui->pushBtnTest_##N, &QPushButton::clicked, this, &MainWindow::slotImageSet); \
@@ -21,7 +20,7 @@ using namespace ImgSpace;
 #define CONNECT_SLIDER(N) connect(ui->hSlider##N, &QSlider::sliderReleased, \
                                   this, &MainWindow::slotImageSet);
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -181,9 +180,9 @@ void MainWindow::slotImageResize()
     if (matResize.channels() < 3)
         f = QImage::Format_Grayscale8;
 
-    qImg = QImage((const unsigned char *)(matResize.data),
-                  matResize.cols, matResize.rows, matResize.cols * matResize.channels(),
-                  f);
+    qImg = QImage((const unsigned char*)(matResize.data),
+        matResize.cols, matResize.rows, matResize.cols * matResize.channels(),
+        f);
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
@@ -207,11 +206,11 @@ void MainWindow::slotImageFit()
     double dImgW = m_matResPrev.cols;
     double dImgH = m_matResPrev.rows;
 
-    double dImgRatio = dImgW / dImgH; 
-    double dLabelRatio = dLabelW / dLabelH; 
+    double dImgRatio = dImgW / dImgH;
+    double dLabelRatio = dLabelW / dLabelH;
 
     double dResizeRatio = 1.0;
-    if (dImgRatio > dLabelRatio) 
+    if (dImgRatio > dLabelRatio)
         dResizeRatio = dLabelH / dImgH;
     else // 适应宽
         dResizeRatio = dLabelW / dImgW;
@@ -225,9 +224,9 @@ void MainWindow::slotImageFit()
     if (matResize.channels() < 3)
         f = QImage::Format_Grayscale8;
 
-    qImg = QImage((const unsigned char *)(matResize.data),
-                  matResize.cols, matResize.rows, matResize.cols * matResize.channels(),
-                  f);
+    qImg = QImage((const unsigned char*)(matResize.data),
+        matResize.cols, matResize.rows, matResize.cols * matResize.channels(),
+        f);
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
@@ -240,7 +239,7 @@ void MainWindow::slotImageFit()
 void MainWindow::slotOpenImage()
 {
     ui->labelProcessTip->setText("Start...");
-    QPushButton *pushBtn = qobject_cast<QPushButton *>(sender());
+    QPushButton* pushBtn = qobject_cast<QPushButton*>(sender());
     if (!pushBtn)
     {
         std::cout << "Null" << std::endl;
@@ -277,9 +276,9 @@ void MainWindow::slotOpenImage()
     m_matResPrev = m_matRes;
     /////////////////////////////////////////////
 
-    QImage qImg = QImage((const unsigned char *)(m_matRes.data),
-                         m_matRes.cols, m_matRes.rows, m_matRes.cols * m_matRes.channels(),
-                         f);
+    QImage qImg = QImage((const unsigned char*)(m_matRes.data),
+        m_matRes.cols, m_matRes.rows, m_matRes.cols * m_matRes.channels(),
+        f);
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
@@ -322,9 +321,9 @@ void MainWindow::slotValueReset()
     if (matImg.channels() < 3)
         f = QImage::Format_Grayscale8;
 
-    QImage qImg = QImage((const unsigned char *)(matImg.data),
-                         matImg.cols, matImg.rows, matImg.cols * matImg.channels(),
-                         f);
+    QImage qImg = QImage((const unsigned char*)(matImg.data),
+        matImg.cols, matImg.rows, matImg.cols * matImg.channels(),
+        f);
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));
@@ -373,7 +372,7 @@ void MainWindow::slotImageSet()
     ui->labelProcessTip->setText("Start...");
     this->update();
 
-    QPushButton *pushBtn = qobject_cast<QPushButton *>(sender());
+    QPushButton* pushBtn = qobject_cast<QPushButton*>(sender());
     if (pushBtn) // 按钮
         m_nType = pushBtn->property("Index").toInt();
     else // 滑动块
@@ -416,7 +415,7 @@ void MainWindow::slotImageSet()
         switch (m_nType)
         {
         case 0: // 混合
-                //    matRes = m_pImgProcess->setImgMix(m_matRes, );
+            //    matRes = m_pImgProcess->setImgMix(m_matRes, );
             break;
         case 2: // 灰度
             matRes = m_pImgProcess->getGray(m_matRes);
@@ -453,38 +452,38 @@ void MainWindow::slotImageSet()
             break;
         case 12: // 腐蚀
             listName << "A"
-                     << "B"
-                     << "C";
+                << "B"
+                << "C";
             matRes = m_pImgProcess->setErodeImg(m_matRes, nA, nB, nC);
             break;
         case 13: // 模糊
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setBlurImg(m_matRes, nA, nB);
             break;
         case 14: // 提边"
             listName << "A"
-                     << "B"
-                     << "C"
-                     << "D";
+                << "B"
+                << "C"
+                << "D";
             matRes = m_pImgProcess->setCannyImg(m_matRes, nA, nB, nC, nD);
             break;
         case 15: // 二值化
             listName << "A"
-                     << "B"
-                     << "C";
+                << "B"
+                << "C";
             matRes = m_pImgProcess->setThreshold(m_matRes, nA, nB, nC);
             break;
         case 16: // 亮度对比度
             listName << "A"
-                     << "B"
-                     << "C";
+                << "B"
+                << "C";
             matRes = m_pImgProcess->setContrastAndBright(m_matRes, nA, nB, nC);
             break;
         case 17: //图像锐化(image sharpening)
             listName << "A"
-                     << "B"
-                     << "C";
+                << "B"
+                << "C";
             matRes = m_pImgProcess->setSharpening(m_matRes, nA, nB, nC);
             break;
         case 18: // 绘制轮廓
@@ -493,42 +492,42 @@ void MainWindow::slotImageSet()
             break;
         case 19: // 几种滤波
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setImgBlur(m_matRes, nA, nB);
             break;
         case 20: // 马赛克
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setMosaic(m_matRes, nA, nB);
             break;
         case 21: // 浮雕
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setRelief(m_matRes, nA, nB);
             break;
         case 22: // 素描
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setImgSketch(m_matRes, nA, nB);
             break;
         case 23: // 颜色变换
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setColorStyle(m_matRes, nA);
             break;
         case 24: // 油画
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setImgOilPaint(m_matRes, nA, nB);
             break;
         case 25: // 报纸
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setDotPaint(m_matRes, nA, nB);
             break;
         case 26: // 散点图
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setDither(m_matRes, nA, nB);
             break;
         case 27:
@@ -542,18 +541,18 @@ void MainWindow::slotImageSet()
             break;
         case 30: // 镜像
             listName << "X镜像"
-                     << "Y镜像";
+                << "Y镜像";
             matRes = m_pImgProcess->setImgMirror(m_matRes, nA);
             break;
         case 31:
             listName << "A"
-                     << "B";
+                << "B";
             matRes = m_pImgProcess->setBeautify(m_matRes, nA, nB);
             break;
         case 32: // 自动白平衡
             listName << "A"
-                     << "B"
-                     << "C";
+                << "B"
+                << "C";
             matRes = m_pImgProcess->setAutoWhithBalance(m_matRes, nA, nB, nC);
             break;
         case 33: // 色温
@@ -562,14 +561,14 @@ void MainWindow::slotImageSet()
             break;
         case 34: // 激光线
             listName << "A"
-                     << "B"
-                     << "C";
+                << "B"
+                << "C";
             matRes = m_pImgProcess->drawLaserLine(m_matRes, nA, nB, nC);
             break;
         case 35: // 边缘加强
             listName << "A"
-                     << "B"
-                     << "C * 0.1";
+                << "B"
+                << "C * 0.1";
             matRes = m_pImgProcess->setImgEdgeStrong(m_matRes, nA, nB, nC * 0.1);
             break;
         case 36: // 提取
@@ -584,8 +583,8 @@ void MainWindow::slotImageSet()
             break;
         case 39: // 透明
             listName << "A"
-                     << "B"
-                     << "C";
+                << "B"
+                << "C";
             matRes = m_pImgProcess->imgTransparent(m_matRes, nA, nB, nC);
             break;
         case 40: // 添加文字
@@ -597,7 +596,7 @@ void MainWindow::slotImageSet()
             std::string strFont = "/usr/share/fonts/truetype/freefont/FreeSans.ttf";
 
             listName << "文字大小"
-                     << "反转";
+                << "反转";
             bool bReverse = false;
             if (nB % 2 == 0)
                 bReverse = true;
@@ -623,14 +622,14 @@ void MainWindow::slotImageSet()
             int nEnhanceAmount = nG;
             double dAngle = nH * 0.1;
 
-            listName <<QString::fromLocal8Bit("类型")
-                     <<QString::fromLocal8Bit("DPI * 0.05")
-                     <<QString::fromLocal8Bit("dui bi du")
-                     <<QString::fromLocal8Bit("亮度")
-                     <<QString::fromLocal8Bit("Gamma * 0.01")
-                     <<QString::fromLocal8Bit("半径")
-                     <<QString::fromLocal8Bit("数量")
-                     <<QString::fromLocal8Bit("角度 * 0.1");
+            listName << QString::fromLocal8Bit("类型")
+                << QString::fromLocal8Bit("DPI * 0.05")
+                << QString::fromLocal8Bit("dui bi du")
+                << QString::fromLocal8Bit("亮度")
+                << QString::fromLocal8Bit("Gamma * 0.01")
+                << QString::fromLocal8Bit("半径")
+                << QString::fromLocal8Bit("数量")
+                << QString::fromLocal8Bit("角度 * 0.1");
             matRes = m_pImgProcess->setImgEdgePaperEffect(m_matRes, dLineInterval, dDPI, nContrast, nBrightness, dGamma, nEnhanceRadius, nEnhanceAmount, dAngle);
         }
         break;
@@ -648,9 +647,9 @@ void MainWindow::slotImageSet()
     if (matRes.channels() < 3)
         f = QImage::Format_Grayscale8;
 
-    qImg = QImage((const unsigned char *)(matRes.data),
-                  matRes.cols, matRes.rows, matRes.cols * matRes.channels(),
-                  f);
+    qImg = QImage((const unsigned char*)(matRes.data),
+        matRes.cols, matRes.rows, matRes.cols * matRes.channels(),
+        f);
 
     ui->labelImg->clear();
     ui->labelImg->setPixmap(QPixmap::fromImage(qImg));

@@ -13,7 +13,6 @@
 #include "client/linux/handler/exception_handler.h"
 #endif
 
-
 // static bool dumpCallback(const google_breakpad::MinidumpDescriptor &descriptor,
 //                          void *context, bool succeeded)
 // {
@@ -21,20 +20,16 @@
 //     return succeeded;
 // }
 
-
-
-
-
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 
 static bool dumpCallback(const wchar_t* dump_path, const wchar_t* id,
-                             void* context, EXCEPTION_POINTERS* exinfo,
-                             MDRawAssertionInfo* assertion,
-                             bool succeeded)
-{        
+    void* context, EXCEPTION_POINTERS* exinfo,
+    MDRawAssertionInfo* assertion,
+    bool succeeded)
+{
     size_t nSz = 64;
     size_t nRes;
-    char* chID = (char *)malloc( nSz );
+    char* chID = (char*)malloc(nSz);
     size_t ret = wcstombs_s(&nRes, chID, nSz, id, nSz);
 
     char chOut[126];
@@ -56,7 +51,7 @@ static bool dumpCallback(const wchar_t* dump_path, const wchar_t* id,
 
 #elif defined(__APPLE__) && (defined(__GNUC__) || defined(__xlC__) || defined(__xlc__))
 
-static bool dumpCallback(const char *dump_path, const char *id, void *context, bool succeeded)
+static bool dumpCallback(const char* dump_path, const char* id, void* context, bool succeeded)
 {
     if (succeeded)
     {
@@ -78,19 +73,13 @@ static google_breakpad::ExceptionHandler eh(".", nullptr, minidumpCallback, null
 
 #endif
 
-
-
-
-
-
-
 void crash()
 {
-    volatile int *a = (int *)(NULL);
+    volatile int* a = (int*)(NULL);
     *a = 1;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // google_breakpad::ExceptionHandler eh(L"./", NULL, dumpCallback, NULL, true, -1);
     google_breakpad::ExceptionHandler eh(L".", nullptr, dumpCallback, nullptr, true, nullptr);

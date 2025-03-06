@@ -91,7 +91,7 @@
 constexpr float X = 4.0f; // 初始世界坐标范围（-X 到 X）
 
 // Vertex Shader: 传递控制点位置和累计长度
-const char *vertexShaderSource = R"(
+const char* vertexShaderSource = R"(
 #version 400 core
 layout(location = 0) in vec2 in_pos;   // 输入控制点坐标
 layout(location = 1) in float in_len;  // 输入累计长度
@@ -106,7 +106,7 @@ void main() {
 )";
 
 // Tessellation Control Shader: 设置细分级别
-const char *tessControlShaderSource = R"(
+const char* tessControlShaderSource = R"(
 #version 400 core
 layout(vertices = 4) out;
 
@@ -135,7 +135,7 @@ void main() {
 )";
 
 // Tessellation Evaluation Shader: 计算曲线上的点和长度
-const char *tessEvaluationShaderSource = R"(
+const char* tessEvaluationShaderSource = R"(
 #version 400 core
 layout(isolines, equal_spacing) in;
 
@@ -178,7 +178,7 @@ void main() {
 )";
 
 // Fragment Shader: 实现虚线样式
-const char *fragmentShaderSource = R"(
+const char* fragmentShaderSource = R"(
 #version 400 core
 in float dashParam;
 uniform vec4 color;
@@ -271,7 +271,7 @@ struct LineSegment
 };
 
 // 生成随机线条（直线和曲线混合）
-void generateRandomMixedLines(std::vector<LineSegment> &lines, int numLines, int numSegments)
+void generateRandomMixedLines(std::vector<LineSegment>& lines, int numLines, int numSegments)
 {
     lines.resize(numLines * numSegments);
     int lineIdx = 0;
@@ -282,7 +282,7 @@ void generateRandomMixedLines(std::vector<LineSegment> &lines, int numLines, int
         float dAccLen = 0.0f;
         for (int i = 0; i < numSegments; ++i)
         {
-            LineSegment &segment = lines[lineIdx++];
+            LineSegment& segment = lines[lineIdx++];
             segment.isCurve = rand() % 2 == 0;
 
             if (segment.isCurve)
@@ -316,15 +316,15 @@ void generateRandomMixedLines(std::vector<LineSegment> &lines, int numLines, int
 }
 
 // 更新顶点和索引缓冲区
-void updateBuffers(GLuint VBO, GLuint EBO, std::vector<LineSegment> &lines,
-                   std::vector<float> &vertices, std::vector<unsigned int> &indices)
+void updateBuffers(GLuint VBO, GLuint EBO, std::vector<LineSegment>& lines,
+    std::vector<float>& vertices, std::vector<unsigned int>& indices)
 {
     vertices.clear();
     indices.clear();
     size_t vertexOffset = 0;
     size_t indexOffset = 0;
 
-    for (auto &segment : lines)
+    for (auto& segment : lines)
     {
         segment.vertexOffset = vertexOffset;
         segment.indexOffset = indexOffset;
@@ -367,9 +367,9 @@ void updateBuffers(GLuint VBO, GLuint EBO, std::vector<LineSegment> &lines,
 }
 
 // 旋转线段
-void rotateLine(std::vector<LineSegment> &lines, int lineIdx, float angle, GLuint VBO)
+void rotateLine(std::vector<LineSegment>& lines, int lineIdx, float angle, GLuint VBO)
 {
-    auto &segment = lines[lineIdx];
+    auto& segment = lines[lineIdx];
     glm::mat2 rotation = glm::mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
     std::vector<float> updatedVertices;
 
@@ -383,13 +383,13 @@ void rotateLine(std::vector<LineSegment> &lines, int lineIdx, float angle, GLuin
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, segment.vertexOffset * 3 * sizeof(float),
-                    updatedVertices.size() * sizeof(float), updatedVertices.data());
+        updatedVertices.size() * sizeof(float), updatedVertices.data());
 }
 
 // 缩放线段
-void scaleLine(std::vector<LineSegment> &lines, int lineIdx, float scale, GLuint VBO)
+void scaleLine(std::vector<LineSegment>& lines, int lineIdx, float scale, GLuint VBO)
 {
-    auto &segment = lines[lineIdx];
+    auto& segment = lines[lineIdx];
     std::vector<float> updatedVertices;
 
     for (size_t i = 0; i < segment.controlPoints.size(); ++i)
@@ -402,13 +402,13 @@ void scaleLine(std::vector<LineSegment> &lines, int lineIdx, float scale, GLuint
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, segment.vertexOffset * 3 * sizeof(float),
-                    updatedVertices.size() * sizeof(float), updatedVertices.data());
+        updatedVertices.size() * sizeof(float), updatedVertices.data());
 }
 
 // 删除线段
 void deleteLine(std::vector<LineSegment>& lines, int lineIdx, GLuint VBO, GLuint EBO)
 {
-    auto &deletedSegment = lines[lineIdx];
+    auto& deletedSegment = lines[lineIdx];
     size_t vertexCount = deletedSegment.isCurve ? 4 : 2;
     size_t indexCount = vertexCount + 1;
 
@@ -450,11 +450,11 @@ void deleteLine(std::vector<LineSegment>& lines, int lineIdx, GLuint VBO, GLuint
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, vertexOffset * 3 * sizeof(float),
-                    updatedVertices.size() * sizeof(float), updatedVertices.data());
+        updatedVertices.size() * sizeof(float), updatedVertices.data());
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indexOffset * sizeof(unsigned int),
-                    updatedIndices.size() * sizeof(unsigned int), updatedIndices.data());
+        updatedIndices.size() * sizeof(unsigned int), updatedIndices.data());
 }
 
 // 全局变量
@@ -465,14 +465,14 @@ glm::vec2 lastMousePos;          // 上一次鼠标位置
 float aspectRatio = 1.0f;        // 窗口宽高比
 
 // 滚轮回调：调整缩放
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     zoomFactor += float(yoffset) * 0.1f;
     zoomFactor = std::max(zoomFactor, 0.1f);
 }
 
 // 鼠标按键回调：检测中键
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_MIDDLE)
     {
@@ -491,7 +491,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 }
 
 // 鼠标移动回调：拖动画面
-void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (middleMousePressed)
     {
@@ -509,7 +509,7 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 }
 
 // 窗口大小变化回调：更新视口和宽高比
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);                                      // 更新视口
     aspectRatio = static_cast<float>(width) / static_cast<float>(height); // 更新宽高比
@@ -532,7 +532,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     // 创建窗口
-    GLFWwindow *window = glfwCreateWindow(1400, 1400, "CAD Lines with Tessellation", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1400, 1400, "CAD Lines with Tessellation", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -588,9 +588,9 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
 
     // 配置顶点属性
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     // 启用图元重启

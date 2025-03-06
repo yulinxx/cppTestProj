@@ -19,20 +19,20 @@ class QBreakpad;
 class QBreakpadPrivate : public QObject
 {
 public:
-    QBreakpadPrivate(QBreakpad *p);
+    QBreakpadPrivate(QBreakpad* p);
     ~QBreakpadPrivate();
 
 private:
-    void InitCrashHandler(const QString& dumpPath, const QString &strApp = QString());
+    void InitCrashHandler(const QString& dumpPath, const QString& strApp = QString());
     bool WriteMinidump();
-    void SetReporter(const QString &strRep);
-    void SetApplication(const QString &strApp);
-    void AppendInfoFile(const QString &strFile);
+    void SetReporter(const QString& strRep);
+    void SetApplication(const QString& strApp);
+    void AppendInfoFile(const QString& strFile);
 
 private:
     friend class QBreakpad;
     //Q_DECLARE_PUBLIC(QBreakpad)
-    QBreakpad * const q_ptr;
+    QBreakpad* const q_ptr;
 
 public:
     static google_breakpad::ExceptionHandler* pHandler;
@@ -44,4 +44,3 @@ public:
 };
 
 #endif // QBREAKPADPRIVATE_H
-

@@ -11,29 +11,31 @@
 
 #include <QMainWindow>
 
-
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui
+{
+    class MainWindow;
+}
 QT_END_NAMESPACE
 
-namespace ImgSpace {
+namespace ImgSpace
+{
     class imgProcess;
 }
 
 class QLabel;
-
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
-    
+
 protected:
     void initSlider();
     void initData();
@@ -58,7 +60,7 @@ private:
     Mat m_matRes;
     Mat m_matResPrev;
 
-    Ui::MainWindow *ui = nullptr;
+    Ui::MainWindow* ui = nullptr;
 
     int m_nType = -1;
     int m_nTypePrev = -1;
@@ -66,4 +68,3 @@ private:
     QVector<QLabel*> m_vecLabelName;
 };
 #endif // MAINWINDOW_H
-

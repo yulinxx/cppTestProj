@@ -13,7 +13,6 @@
 
 int main()
 {
-
     //  //训练函数的签名
     // std::tuple>, std::vector> kmeans_lloyd(const std::vector>&data,   //训练数据集， 必填
     //                                        uint32_t k,                // K值（也就是目标类别的数量）， 必填
@@ -80,10 +79,10 @@ int main()
     auto vCenter = std::get<0>(cluster_data);
 
     size_t i = 0;
-    for (auto &pt : vCenter)
+    for (auto& pt : vCenter)
     {
         std::cout << "\nCenter " << i++ << " ";
-        for (const auto &element : pt)
+        for (const auto& element : pt)
             std::cout << element << " ";
     }
 
@@ -91,7 +90,7 @@ int main()
     auto vGroup = std::get<1>(cluster_data);
 
     i = 0;
-    for (auto &g : vGroup)
+    for (auto& g : vGroup)
     {
         std::cout << "Pt " << i++ << " is Group" << g << std::endl;
     }

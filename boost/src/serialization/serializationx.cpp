@@ -2,7 +2,7 @@
 
 int main()
 {
-    std::cout<<" place holder"<<std::endl;
+    std::cout << " place holder" << std::endl;
 
     return 0;
 }

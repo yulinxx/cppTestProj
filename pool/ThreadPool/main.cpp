@@ -31,7 +31,7 @@ int main()
     }
 
     // 等待线程结束
-    for (auto &&fut : vecFuture)
+    for (auto&& fut : vecFuture)
     {
         if (fut.valid())
             fut.get();

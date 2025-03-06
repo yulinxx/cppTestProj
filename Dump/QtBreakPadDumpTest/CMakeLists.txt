@@ -75,7 +75,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${APP_NAME})
 endif()
 
-MESSAGE(" --------- breakpad ----- \n")
+MESSAGE(" --------- QtBreakPadDumpTest ----- \n")
 
 target_include_directories(${APP_NAME} PRIVATE ./)
 find_package(unofficial-breakpad CONFIG REQUIRED)

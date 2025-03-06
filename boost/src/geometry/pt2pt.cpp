@@ -16,7 +16,9 @@ namespace bg = boost::geometry;
 // 注册到boost的native geometry type中。啥？来个例子你就明白了。
 struct MyPoint // 自定义的点
 {
-    MyPoint(double x, double y, int id) : m_x(x), m_y(y), m_id(id) {}
+    MyPoint(double x, double y, int id) : m_x(x), m_y(y), m_id(id)
+    {
+    }
     double m_x;
     double m_y;
     int m_id; // 标识id
@@ -25,8 +27,7 @@ struct MyPoint // 自定义的点
 // 将MyPoint注册到bg的native类型中
 BOOST_GEOMETRY_REGISTER_POINT_2D(MyPoint, double, bg::cs::cartesian, m_x, m_y)
 
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // cs / coordinate system  坐标系
     // geographic  美[ˌdʒiəˈgræfɪk] 地理
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 
         using geo_segment = bg::model::segment<geo_point>; // 线段
 
-        geo_segment seg = {{0, 1}, {4, 1}};
+        geo_segment seg = { {0, 1}, {4, 1} };
         geo_point gp_in(2, 0);  // 垂足在线段上
         geo_point gp_out(5, 0); // 垂足不在线段上
 
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
             double, 2, bg::cs::cartesian>;           // 笛卡尔坐标系
         using geo_ring = bg::model::ring<geo_point>; // 线段
 
-        geo_ring ring = {{0, 0}, {0, 2}, {2, 2}, {2, 0}, {0, 0}}; // 矩形
+        geo_ring ring = { {0, 0}, {0, 2}, {2, 2}, {2, 0}, {0, 0} }; // 矩形
         geo_point gp_in(1, 1);                                    // 在图形内
         geo_point gp_out(3, 0);                                   // 不在图形内
         auto is_in = bg::within(gp_in, ring);                     // 是否在图形内部
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
         using geo_line = bg::model::linestring<geo_point>; // 线
         using geo_box = bg::model::box<geo_point>;         // box
 
-        geo_line line = {{1, 1}, {2, 0}, {3, 2}};
+        geo_line line = { {1, 1}, {2, 0}, {3, 2} };
         geo_box box;
         // envelope  信封 包络 包络线
         bg::envelope(line, box);

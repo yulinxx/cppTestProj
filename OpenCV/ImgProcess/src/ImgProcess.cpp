@@ -7,7 +7,7 @@ imgProcess::imgProcess()
 {
 }
 
-imgProcess::imgProcess(std::string &strPath)
+imgProcess::imgProcess(std::string& strPath)
 {
     this->readImg(strPath);
 }
@@ -16,7 +16,7 @@ imgProcess::~imgProcess()
 {
 }
 
-cv::Mat imgProcess::readImg(std::string &strPath, int nType /*=1*/)
+cv::Mat imgProcess::readImg(std::string& strPath, int nType /*=1*/)
 {
     Mat matImg = imread(strPath);
     int nChannel = matImg.channels();
@@ -33,7 +33,7 @@ cv::Mat imgProcess::readImg(std::string &strPath, int nType /*=1*/)
     return m_matOri;
 }
 
-void imgProcess::saveImg(const Mat &mat, std::string strPath)
+void imgProcess::saveImg(const Mat& mat, std::string strPath)
 {
     if (mat.data)
     {
@@ -47,7 +47,7 @@ Mat imgProcess::getOriginImg()
     return m_matOri;
 }
 
-Mat imgProcess::resizeImg(const Mat &mat, double dRatio)
+Mat imgProcess::resizeImg(const Mat& mat, double dRatio)
 {
     if (fabs(dRatio) < 0.001)
         dRatio = 0.001;
@@ -59,7 +59,7 @@ Mat imgProcess::resizeImg(const Mat &mat, double dRatio)
     return matRes;
 }
 
-Mat imgProcess::setImgMix(const Mat &matA, Mat &matB, double dAlaphaA /*= 0.5*/, double dAlaphaB /*= 0.5*/, int nType /*=-1*/)
+Mat imgProcess::setImgMix(const Mat& matA, Mat& matB, double dAlaphaA /*= 0.5*/, double dAlaphaB /*= 0.5*/, int nType /*=-1*/)
 {
     if (!matA.data || !matB.data)
         return Mat();
@@ -86,7 +86,7 @@ Mat imgProcess::setImgMix(const Mat &matA, Mat &matB, double dAlaphaA /*= 0.5*/,
         return m_matOri;
 }
 
-Mat imgProcess::getGray(const Mat &mat)
+Mat imgProcess::getGray(const Mat& mat)
 {
     if (1 == mat.channels())
         return mat;
@@ -122,7 +122,7 @@ Mat imgProcess::getGray(const Mat &mat)
     // return grayImg;
 }
 
-Mat imgProcess::setThreshold(const Mat &mat, int nValueA, int nValueB /*= 255*/, int nType /*= 0*/)
+Mat imgProcess::setThreshold(const Mat& mat, int nValueA, int nValueB /*= 255*/, int nType /*= 0*/)
 {
     // threshold(m_oriImg, m_matRes, dValueA, dValueB, nType);
     //  cv::THRESH_BINARY
@@ -141,7 +141,7 @@ Mat imgProcess::setThreshold(const Mat &mat, int nValueA, int nValueB /*= 255*/,
     return matRes;
 }
 
-Mat imgProcess::getRedChannel(const Mat &mat)
+Mat imgProcess::getRedChannel(const Mat& mat)
 {
     vector<Mat> mv;
 
@@ -154,7 +154,7 @@ Mat imgProcess::getRedChannel(const Mat &mat)
     return matRes;
 }
 
-Mat imgProcess::getGreeChannel(const Mat &mat)
+Mat imgProcess::getGreeChannel(const Mat& mat)
 {
     vector<Mat> mv;
 
@@ -167,7 +167,7 @@ Mat imgProcess::getGreeChannel(const Mat &mat)
     return matRes;
 }
 
-Mat imgProcess::getBlueChannel(const Mat &mat)
+Mat imgProcess::getBlueChannel(const Mat& mat)
 {
     vector<Mat> mv;
 
@@ -180,7 +180,7 @@ Mat imgProcess::getBlueChannel(const Mat &mat)
     return matRes;
 }
 
-Mat imgProcess::getRGChannel(const Mat &mat)
+Mat imgProcess::getRGChannel(const Mat& mat)
 {
     vector<Mat> mv;
 
@@ -192,7 +192,7 @@ Mat imgProcess::getRGChannel(const Mat &mat)
     return matRes;
 }
 
-Mat imgProcess::getRBChannel(const Mat &mat)
+Mat imgProcess::getRBChannel(const Mat& mat)
 {
     vector<Mat> mv;
 
@@ -205,7 +205,7 @@ Mat imgProcess::getRBChannel(const Mat &mat)
 }
 
 // 绿蓝
-Mat imgProcess::getGBChannel(const Mat &mat)
+Mat imgProcess::getGBChannel(const Mat& mat)
 {
     vector<Mat> mv;
 
@@ -216,7 +216,7 @@ Mat imgProcess::getGBChannel(const Mat &mat)
     return matRes;
 }
 
-Mat imgProcess::setRotateImg(const Mat &mat, double dAngle /*=0.0*/, bool bChangeSize /*= false*/)
+Mat imgProcess::setRotateImg(const Mat& mat, double dAngle /*=0.0*/, bool bChangeSize /*= false*/)
 {
     if (bChangeSize)
     {
@@ -235,12 +235,12 @@ Mat imgProcess::setRotateImg(const Mat &mat, double dAngle /*=0.0*/, bool bChang
         float matRotate[3][3]{
             {std::cos(theta), -std::sin(theta), 0},
             {std::sin(theta), std::cos(theta), 0},
-            {0, 0, 1}};
+            {0, 0, 1} };
 
         float pt[3][2]{
             {0, (float)nRowsSrc},
             {(float)nColsSrc, (float)nRowsSrc},
-            {(float)nColsSrc, 0}};
+            {(float)nColsSrc, 0} };
 
         for (int i = 0; i < 3; i++)
         {
@@ -305,7 +305,7 @@ Mat imgProcess::setRotateImg(const Mat &mat, double dAngle /*=0.0*/, bool bChang
     }
 }
 
-Mat imgProcess::setScaleImg(const Mat &mat, double dScale /*= 1.0*/)
+Mat imgProcess::setScaleImg(const Mat& mat, double dScale /*= 1.0*/)
 {
     if (fabs(dScale) < 0.000001)
         dScale = 0.000001;
@@ -321,7 +321,7 @@ Mat imgProcess::setScaleImg(const Mat &mat, double dScale /*= 1.0*/)
     return matRes;
 }
 
-Mat imgProcess::setScaleImg(const Mat &mat, double dScaleX, double dScaleY)
+Mat imgProcess::setScaleImg(const Mat& mat, double dScaleX, double dScaleY)
 {
     if (fabs(dScaleX) < 0.000001)
         dScaleX = 0.000001;
@@ -338,7 +338,7 @@ Mat imgProcess::setScaleImg(const Mat &mat, double dScaleX, double dScaleY)
 
     return matRes;
 }
-Mat imgProcess::rotate90(const Mat &mat, int nIndex /*= 0*/)
+Mat imgProcess::rotate90(const Mat& mat, int nIndex /*= 0*/)
 {
     Mat matRes;
 
@@ -351,7 +351,7 @@ Mat imgProcess::rotate90(const Mat &mat, int nIndex /*= 0*/)
     return matRes;
 }
 
-Mat imgProcess::setErodeImg(const Mat &mat, int w /*= 5*/, int h /*= 5*/, int nType /*= 0*/) // 腐蚀
+Mat imgProcess::setErodeImg(const Mat& mat, int w /*= 5*/, int h /*= 5*/, int nType /*= 0*/) // 腐蚀
 {
     if (w < 1 || h < 1)
         return mat;
@@ -373,7 +373,7 @@ Mat imgProcess::setErodeImg(const Mat &mat, int w /*= 5*/, int h /*= 5*/, int nT
     return matRes;
 }
 
-Mat imgProcess::setBlurImg(const Mat &mat, int w /*= 7*/, int h /*= 7*/) // 模糊
+Mat imgProcess::setBlurImg(const Mat& mat, int w /*= 7*/, int h /*= 7*/) // 模糊
 {
     if (w < 1 || h < 1)
         return mat;
@@ -383,7 +383,7 @@ Mat imgProcess::setBlurImg(const Mat &mat, int w /*= 7*/, int h /*= 7*/) // 模�
     return matRes;
 }
 
-Mat imgProcess::setCannyImg(const Mat &mat, int a, int b, int c, int w /*= 13*/, int h /*= 13*/) // 提边
+Mat imgProcess::setCannyImg(const Mat& mat, int a, int b, int c, int w /*= 13*/, int h /*= 13*/) // 提边
 {
     // if(w < 1 || h < 1 || a < 1 || b<1 || c<1)
     //     return m_matRes;
@@ -396,7 +396,7 @@ Mat imgProcess::setCannyImg(const Mat &mat, int a, int b, int c, int w /*= 13*/,
 
 #if 0
     Mat matBlur;
-    const char *window_name = "Sobel Demo - Simple Edge Detector";
+    const char* window_name = "Sobel Demo - Simple Edge Detector";
     int scale = 1;
     int delta = 0;
     int ddepth = CV_16S;
@@ -475,9 +475,8 @@ Mat imgProcess::setCannyImg(const Mat &mat, int a, int b, int c, int w /*= 13*/,
     return matRes;
 }
 
-Mat imgProcess::setContrastAndBright(const Mat &mat, double dH, double dS, double dV)
+Mat imgProcess::setContrastAndBright(const Mat& mat, double dH, double dS, double dV)
 {
-
     // // 查到一般HSV的范围是
     // // H: [0,360]
     // // S: [0,100]
@@ -513,7 +512,7 @@ Mat imgProcess::setContrastAndBright(const Mat &mat, double dH, double dS, doubl
     std::vector<Mat> vecPlanes;
     split(matHSV, vecPlanes);
 
-    const Mat &matTemp = vecPlanes[0];
+    const Mat& matTemp = vecPlanes[0];
     int nW = matTemp.cols;
     int nH = matTemp.rows;
 
@@ -634,7 +633,7 @@ Mat imgProcess::setContrastAndBright(const Mat &mat, double dH, double dS, doubl
     // return matRes;
 }
 
-Mat imgProcess::setSharpening(const Mat &mat, double sigmaX /*= 100.0*/, double sigmaY /*= 0.0*/, int nBorderType /*=BORDER_DEFAULT*/)
+Mat imgProcess::setSharpening(const Mat& mat, double sigmaX /*= 100.0*/, double sigmaY /*= 0.0*/, int nBorderType /*=BORDER_DEFAULT*/)
 {
     if (sigmaX < 1)
         return mat;
@@ -650,7 +649,7 @@ Mat imgProcess::setSharpening(const Mat &mat, double sigmaX /*= 100.0*/, double 
     return matRes;
 }
 
-Mat imgProcess::setImgContours(const Mat &mat, int nBrushSize)
+Mat imgProcess::setImgContours(const Mat& mat, int nBrushSize)
 {
     /// 转成灰度并模糊化降噪
     Mat matGray = getGray(mat);
@@ -679,7 +678,7 @@ Mat imgProcess::setImgContours(const Mat &mat, int nBrushSize)
     return matDraw;
 }
 
-Mat imgProcess::setImgBlur(const Mat &mat, int nBrushSize, int nType)
+Mat imgProcess::setImgBlur(const Mat& mat, int nBrushSize, int nType)
 {
     if (nBrushSize < 1)
         nBrushSize = 3;
@@ -746,7 +745,7 @@ Mat imgProcess::setImgBlur(const Mat &mat, int nBrushSize, int nType)
 }
 
 // https://blog.csdn.net/weixin_44394801/article/details/118077769
-Mat imgProcess::setMosaic(const Mat &mat, int nBrushSize, int nType)
+Mat imgProcess::setMosaic(const Mat& mat, int nBrushSize, int nType)
 {
     if (nBrushSize < 3)
         nBrushSize = 3;
@@ -790,16 +789,16 @@ Mat imgProcess::setMosaic(const Mat &mat, int nBrushSize, int nType)
 }
 
 // 浮雕
-Mat imgProcess::setRelief(const Mat &mat, int nBrushSize, int nType)
+Mat imgProcess::setRelief(const Mat& mat, int nBrushSize, int nType)
 {
     Mat matImgA(mat.size(), CV_8UC3);
 
     for (int y = 1; y < mat.rows - 1; y++)
     {
-        const uchar *p0 = mat.ptr<uchar>(y);
-        const uchar *p1 = mat.ptr<uchar>(y + 1);
+        const uchar* p0 = mat.ptr<uchar>(y);
+        const uchar* p1 = mat.ptr<uchar>(y + 1);
 
-        uchar *q0 = matImgA.ptr<uchar>(y);
+        uchar* q0 = matImgA.ptr<uchar>(y);
 
         for (int x = 1; x < mat.cols - 1; x++)
         {
@@ -866,7 +865,7 @@ Mat imgProcess::setRelief(const Mat &mat, int nBrushSize, int nType)
 }
 
 // 素描
-Mat imgProcess::setImgSketch(const Mat &mat, int nBrushSize, int nType)
+Mat imgProcess::setImgSketch(const Mat& mat, int nBrushSize, int nType)
 {
     int nW = mat.cols;
     int heigh = mat.rows;
@@ -888,9 +887,9 @@ Mat imgProcess::setImgSketch(const Mat &mat, int nBrushSize, int nType)
     Mat matRes(matGrayB.size(), CV_8UC1);
     for (int y = 0; y < heigh; y++)
     {
-        uchar *pA = matGrayA.ptr<uchar>(y);
-        uchar *pB = matGrayB.ptr<uchar>(y);
-        uchar *p = matRes.ptr<uchar>(y);
+        uchar* pA = matGrayA.ptr<uchar>(y);
+        uchar* pB = matGrayB.ptr<uchar>(y);
+        uchar* p = matRes.ptr<uchar>(y);
         for (int x = 0; x < nW; x++)
         {
             int nA = pA[x];
@@ -902,7 +901,7 @@ Mat imgProcess::setImgSketch(const Mat &mat, int nBrushSize, int nType)
     return matRes;
 }
 
-Mat imgProcess::setColorStyle(const Mat &mat, int nA)
+Mat imgProcess::setColorStyle(const Mat& mat, int nA)
 {
     if (nA < 0)
         nA = 0;
@@ -928,7 +927,7 @@ Mat imgProcess::setColorStyle(const Mat &mat, int nA)
     return matRes;
 }
 
-Mat imgProcess::setImgOilPaint(const Mat &mat, int nBrushSize, int nCoarseness)
+Mat imgProcess::setImgOilPaint(const Mat& mat, int nBrushSize, int nCoarseness)
 {
     // 1.把（0~255）灰度值均分成n个区间
     // 2.遍历图像的每个像素点 将模板范围内的所有像素值进一步离散化，根据像素的灰度落入不同的区间，
@@ -967,11 +966,11 @@ Mat imgProcess::setImgOilPaint(const Mat &mat, int nBrushSize, int nCoarseness)
     int nH = mat.rows;
 
     int nLenArray = nCoarseness + 1;
-    int *pCountIntensity = new int[nLenArray];
+    int* pCountIntensity = new int[nLenArray];
 
-    uint *pRedAverage = new uint[nLenArray];
-    uint *pGreenAverage = new uint[nLenArray];
-    uint *pBlueAverage = new uint[nLenArray];
+    uint* pRedAverage = new uint[nLenArray];
+    uint* pGreenAverage = new uint[nLenArray];
+    uint* pBlueAverage = new uint[nLenArray];
 
     /// 图像灰度化
     Mat matGray = getGray(mat);
@@ -1043,11 +1042,11 @@ Mat imgProcess::setImgOilPaint(const Mat &mat, int nBrushSize, int nCoarseness)
             }
 
             matRes.at<Vec3b>(nY, nX)[2] = static_cast<uchar>(pRedAverage[chosenIntensity] /
-                                                             static_cast<float>(maxInstance));
+                static_cast<float>(maxInstance));
             matRes.at<Vec3b>(nY, nX)[1] = static_cast<uchar>(pGreenAverage[chosenIntensity] /
-                                                             static_cast<float>(maxInstance));
+                static_cast<float>(maxInstance));
             matRes.at<Vec3b>(nY, nX)[0] = static_cast<uchar>(pBlueAverage[chosenIntensity] /
-                                                             static_cast<float>(maxInstance));
+                static_cast<float>(maxInstance));
         }
     }
 
@@ -1059,7 +1058,7 @@ Mat imgProcess::setImgOilPaint(const Mat &mat, int nBrushSize, int nCoarseness)
 }
 
 // 挂网
-Mat imgProcess::setDotPaint(const Mat &mat, int nBrushSize, int nCoarseness)
+Mat imgProcess::setDotPaint(const Mat& mat, int nBrushSize, int nCoarseness)
 {
     assert(!mat.empty());
 
@@ -1208,7 +1207,7 @@ Mat imgProcess::setDotPaint(const Mat &mat, int nBrushSize, int nCoarseness)
 }
 
 // 散点图
-Mat imgProcess::setDither(const Mat &mat, int nBrushSize, int nCoarseness)
+Mat imgProcess::setDither(const Mat& mat, int nBrushSize, int nCoarseness)
 {
     Mat matDith = getGray(mat);
 
@@ -1219,8 +1218,7 @@ Mat imgProcess::setDither(const Mat &mat, int nBrushSize, int nCoarseness)
     int err;
     int8_t a, b, c, d;
 
-    auto saturated_add = [](uint8_t val1, int8_t val2) -> uint8_t
-    {
+    auto saturated_add = [](uint8_t val1, int8_t val2) -> uint8_t {
         int16_t val1_int = val1;
         int16_t val2_int = val2;
         int16_t tmp = val1_int + val2_int;
@@ -1231,7 +1229,7 @@ Mat imgProcess::setDither(const Mat &mat, int nBrushSize, int nCoarseness)
             return 0;
         else
             return tmp;
-    };
+        };
 
     for (int i = 0; i < nH; i++)
     {
@@ -1270,50 +1268,50 @@ Mat imgProcess::setDither(const Mat &mat, int nBrushSize, int nCoarseness)
     return matDith;
 }
 
-Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType, int nAdjust, int nE)
+Mat imgProcess::setDither(const Mat& mat, double dScale, int nBright, int nType, int nAdjust, int nE)
 {
     // Screw Ordered Dithering
-    int Mask0[] = {64, 53, 42, 26, 27, 43, 54, 61,
+    int Mask0[] = { 64, 53, 42, 26, 27, 43, 54, 61,
                    60, 41, 25, 14, 15, 28, 44, 55,
                    52, 40, 13, 5, 6, 16, 29, 45,
                    39, 24, 12, 1, 2, 7, 17, 30,
                    38, 23, 11, 4, 3, 8, 18, 31,
                    51, 37, 22, 10, 9, 19, 32, 41,
                    59, 50, 36, 21, 20, 33, 47, 56,
-                   63, 58, 49, 35, 34, 48, 57, 62};
+                   63, 58, 49, 35, 34, 48, 57, 62 };
 
     // CoarseFatting Ordered Dithering
-    int Mask1[] = {4, 14, 52, 58, 56, 45, 20, 6,
+    int Mask1[] = { 4, 14, 52, 58, 56, 45, 20, 6,
                    16, 26, 38, 50, 48, 36, 28, 18,
                    43, 35, 31, 9, 11, 25, 33, 41,
                    61, 46, 23, 1, 3, 13, 55, 60,
                    57, 47, 21, 7, 5, 15, 53, 59,
                    49, 37, 29, 19, 17, 27, 39, 51,
                    10, 24, 32, 40, 42, 34, 30, 8,
-                   2, 12, 54, 60, 51, 44, 22, 0};
+                   2, 12, 54, 60, 51, 44, 22, 0 };
 
     // 有序抖动算法 Bayer Ordered Dithering
-    int Mask2[] = {0, 32, 8, 40, 2, 34, 10, 42,
+    int Mask2[] = { 0, 32, 8, 40, 2, 34, 10, 42,
                    48, 16, 56, 42, 50, 18, 58, 26,
                    12, 44, 4, 36, 14, 46, 6, 38,
                    60, 28, 52, 20, 62, 30, 54, 22,
                    3, 35, 11, 43, 1, 33, 9, 41,
                    51, 19, 59, 27, 49, 17, 57, 25,
                    15, 47, 7, 39, 13, 45, 5, 37,
-                   63, 31, 55, 23, 61, 29, 53, 21};
+                   63, 31, 55, 23, 61, 29, 53, 21 };
 
     // Halftone Ordered Dithering
-    int Mask3[] = {28, 10, 18, 26, 36, 44, 52, 34,
+    int Mask3[] = { 28, 10, 18, 26, 36, 44, 52, 34,
                    22, 2, 4, 12, 48, 58, 60, 42,
                    14, 6, 0, 20, 40, 56, 62, 50,
                    24, 16, 8, 30, 32, 54, 46, 38,
                    37, 45, 53, 35, 29, 11, 19, 27,
                    49, 59, 61, 43, 23, 3, 5, 13,
                    41, 57, 63, 51, 15, 7, 1, 21,
-                   33, 55, 47, 39, 25, 17, 9, 31};
+                   33, 55, 47, 39, 25, 17, 9, 31 };
 
     // 12 * 12  大颗粒
-    int Mask4[] = {144, 140, 132, 122, 107, 63, 54, 93, 106, 123, 133, 142,
+    int Mask4[] = { 144, 140, 132, 122, 107, 63, 54, 93, 106, 123, 133, 142,
                    143, 137, 128, 104, 94, 41, 31, 65, 98, 116, 120, 139,
                    135, 131, 114, 97, 61, 35, 24, 55, 80, 103, 113, 125,
                    126, 117, 88, 83, 56, 29, 15, 51, 68, 90, 99, 111,
@@ -1324,10 +1322,10 @@ Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType,
                    101, 95, 70, 67, 38, 13, 20, 36, 50, 75, 82, 108,
                    121, 110, 86, 78, 45, 17, 27, 39, 69, 79, 102, 119,
                    134, 129, 112, 89, 49, 23, 43, 60, 71, 87, 115, 127,
-                   141, 138, 124, 118, 66, 40, 62, 72, 84, 105, 130, 136};
+                   141, 138, 124, 118, 66, 40, 62, 72, 84, 105, 130, 136 };
 
     // 16 * 16
-    int Mask5[] = {0, 191, 48, 239, 12, 203, 60, 251, 3, 194, 51, 242, 15, 206, 63, 254,
+    int Mask5[] = { 0, 191, 48, 239, 12, 203, 60, 251, 3, 194, 51, 242, 15, 206, 63, 254,
                    127, 64, 175, 112, 139, 76, 187, 124, 130, 67, 178, 115, 142, 79, 190, 127,
                    32, 223, 16, 207, 44, 235, 28, 219, 35, 226, 19, 210, 47, 238, 31, 222,
                    159, 96, 143, 80, 171, 108, 155, 92, 162, 99, 146, 83, 174, 111, 158, 95,
@@ -1342,7 +1340,7 @@ Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType,
                    10, 201, 58, 249, 6, 197, 54, 245, 9, 200, 57, 248, 5, 196, 53, 244,
                    137, 74, 185, 122, 133, 70, 181, 118, 136, 73, 184, 121, 132, 69, 180, 117,
                    42, 233, 26, 217, 38, 229, 22, 213, 41, 232, 25, 216, 37, 228, 21, 212,
-                   169, 106, 153, 90, 165, 102, 149, 86, 168, 105, 152, 89, 164, 101, 148, 85};
+                   169, 106, 153, 90, 165, 102, 149, 86, 168, 105, 152, 89, 164, 101, 148, 85 };
 
     // 9 * 9
     int Mask6[] = {
@@ -1354,7 +1352,7 @@ Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType,
         79, 47, 23, 7, 6, 5, 17, 37, 65,
         78, 46, 22, 21, 20, 19, 18, 38, 66,
         77, 45, 44, 43, 42, 41, 40, 39, 67,
-        76, 75, 74, 73, 72, 71, 70, 69, 68};
+        76, 75, 74, 73, 72, 71, 70, 69, 68 };
 
     Mat matOri = mat.clone();
     Mat matTemp = setRotateImg(matOri, nE, true);
@@ -1432,7 +1430,7 @@ Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType,
 
     // matGray = setRotateImg(matMix, nE, true);
 
-    std::vector<int *> vecArr;
+    std::vector<int*> vecArr;
     vecArr.emplace_back(Mask0);
     vecArr.emplace_back(Mask1);
     vecArr.emplace_back(Mask2);
@@ -1474,7 +1472,7 @@ Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType,
     Mat matGrayResize;
     resize(matGray, matGrayResize, dsize);
 
-    uchar *p = nullptr;
+    uchar* p = nullptr;
 
     int nW = matGrayResize.cols;
     int nH = matGrayResize.rows;
@@ -1495,7 +1493,7 @@ Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType,
             // if(nPix > Mask[(k * L + l) % 64])
             if (dPix > vecArr[nType % 7][(k * L + l)])
 
-            // if (nPix > Mask0[(k * L + l)])
+                // if (nPix > Mask0[(k * L + l)])
             {
                 matGrayResize.at<uint8_t>(Point(x, y)) = 255;
                 // p[x] = 255; //对灰度图像素操作赋值
@@ -1517,7 +1515,7 @@ Mat imgProcess::setDither(const Mat &mat, double dScale, int nBright, int nType,
 }
 
 // 镜像
-Mat imgProcess::setImgMirror(const Mat &mat, int type /*= 0*/)
+Mat imgProcess::setImgMirror(const Mat& mat, int type /*= 0*/)
 {
     int row = mat.rows;
     int col = mat.cols;
@@ -1536,7 +1534,7 @@ Mat imgProcess::setImgMirror(const Mat &mat, int type /*= 0*/)
     return matRes;
 }
 
-Mat imgProcess::setColorReversal(const Mat &mat, int type /*= 0*/)
+Mat imgProcess::setColorReversal(const Mat& mat, int type /*= 0*/)
 {
     Mat outImg;
     // Mat dstimage = imread("F:/img/circle.png");
@@ -1553,7 +1551,7 @@ Mat imgProcess::setColorReversal(const Mat &mat, int type /*= 0*/)
     return outImg;
 }
 
-Mat imgProcess::setColorTemperature(const Mat &mat, int nPercent)
+Mat imgProcess::setColorTemperature(const Mat& mat, int nPercent)
 {
     Mat matRes = mat.clone();
     int row = matRes.rows;
@@ -1562,8 +1560,8 @@ Mat imgProcess::setColorTemperature(const Mat &mat, int nPercent)
 
     for (int i = 0; i < row; ++i)
     {
-        uchar *a = matRes.ptr<uchar>(i);
-        uchar *r = matRes.ptr<uchar>(i);
+        uchar* a = matRes.ptr<uchar>(i);
+        uchar* r = matRes.ptr<uchar>(i);
 
         for (int j = 0; j < col; ++j)
         {
@@ -1607,7 +1605,7 @@ Mat imgProcess::setColorTemperature(const Mat &mat, int nPercent)
 }
 
 // 美颜
-Mat imgProcess::setBeautify(const Mat &mat, int nA, int nB)
+Mat imgProcess::setBeautify(const Mat& mat, int nA, int nB)
 {
     int bilateralFilterVal = 30; // 双边模糊系数
 
@@ -1630,7 +1628,7 @@ Mat imgProcess::setBeautify(const Mat &mat, int nA, int nB)
     Mat matResult;
     GaussianBlur(srcMat, srcMat, Size(9, 9), 0, 0);        // 高斯模糊，消除椒盐噪声
     bilateralFilter(srcMat, matResult, bilateralFilterVal, // 整体磨皮
-                    bilateralFilterVal * 2, bilateralFilterVal / 2);
+        bilateralFilterVal * 2, bilateralFilterVal / 2);
 
     Mat matFinal;
 
@@ -1641,12 +1639,12 @@ Mat imgProcess::setBeautify(const Mat &mat, int nA, int nB)
 }
 
 // 自动白平衡
-Mat imgProcess::setAutoWhithBalance(const Mat &mat, double dA, double dB, double dC)
+Mat imgProcess::setAutoWhithBalance(const Mat& mat, double dA, double dB, double dC)
 {
     int nRow = mat.rows;
     int nCol = mat.cols;
     Mat dst(nRow, nCol, CV_8UC3);
-    int HistRGB[767] = {0};
+    int HistRGB[767] = { 0 };
     int nMaxVal = 0;
 
     for (int i = 0; i < nRow; i++)
@@ -1726,7 +1724,7 @@ Mat imgProcess::setAutoWhithBalance(const Mat &mat, double dA, double dB, double
     return dst;
 }
 
-Mat imgProcess::setColorReplace(const Mat &mat, int nR, int nG, int nB)
+Mat imgProcess::setColorReplace(const Mat& mat, int nR, int nG, int nB)
 {
     int iterations = 5;
     Point anchor;
@@ -1754,7 +1752,7 @@ Mat imgProcess::setColorReplace(const Mat &mat, int nR, int nG, int nB)
     return dilatedImage;
 }
 
-Mat imgProcess::drawLaserLine(const Mat &mat, double dA, double dB, double dC)
+Mat imgProcess::drawLaserLine(const Mat& mat, double dA, double dB, double dC)
 {
     if (dA < 1)
         dA = 1;
@@ -1782,7 +1780,7 @@ Mat imgProcess::drawLaserLine(const Mat &mat, double dA, double dB, double dC)
     return matDraw;
 }
 
-Mat imgProcess::setImgEdgeStrong(const Mat &mat, int nA, int nB, double dC)
+Mat imgProcess::setImgEdgeStrong(const Mat& mat, int nA, int nB, double dC)
 {
     Mat matTempx = mat.clone();
 
@@ -1801,7 +1799,7 @@ Mat imgProcess::setImgEdgeStrong(const Mat &mat, int nA, int nB, double dC)
     return matRes;
 }
 
-Mat imgProcess::setImgMask(const Mat &mat, double dA)
+Mat imgProcess::setImgMask(const Mat& mat, double dA)
 {
     Mat matMask(mat.size(), CV_8UC1, Scalar::all(0));
 
@@ -1855,7 +1853,7 @@ Mat imgProcess::setImgMask(const Mat &mat, double dA)
             int nValue = matMask.at<uchar>(Point(x, y));
             if (nValue < 1)
             {
-                cv::Vec3b &pixel = matDst.at<Vec3b>(Point(x, y));
+                cv::Vec3b& pixel = matDst.at<Vec3b>(Point(x, y));
                 pixel[0] = 255;
                 pixel[1] = 255;
                 pixel[2] = 255;
@@ -1867,7 +1865,7 @@ Mat imgProcess::setImgMask(const Mat &mat, double dA)
 }
 
 // PNG 叠加到 JPG上
-Mat imgProcess::setImgPngMerge(const Mat &mat, std::string strPngPath, int nXPos /*= 0*/, int nYPos /*= 0*/)
+Mat imgProcess::setImgPngMerge(const Mat& mat, std::string strPngPath, int nXPos /*= 0*/, int nYPos /*= 0*/)
 {
     Mat matRes = mat.clone();
     Mat matPng = imread(strPngPath, IMREAD_UNCHANGED);
@@ -1904,7 +1902,7 @@ Mat imgProcess::setImgPngMerge(const Mat &mat, std::string strPngPath, int nXPos
     return matRes;
 }
 
-Mat imgProcess::setImgCut(const Mat &mat)
+Mat imgProcess::setImgCut(const Mat& mat)
 {
     // std::string strPath = "F:/img/trans.png";
     // Mat matPng = imread(strPath, IMREAD_UNCHANGED);
@@ -1938,7 +1936,7 @@ Mat imgProcess::setImgCut(const Mat &mat)
     {
         for (int ny = y; ny < nH; ny++)
         {
-            cv::Vec4b &pixel = matPng.at<cv::Vec4b>(Point(nx, ny));
+            cv::Vec4b& pixel = matPng.at<cv::Vec4b>(Point(nx, ny));
             pixel[3] = 0;
         }
     }
@@ -1948,7 +1946,7 @@ Mat imgProcess::setImgCut(const Mat &mat)
     return matPng;
 }
 
-Mat imgProcess::imgTransparent(const Mat &mat, double dA, double dB, double dC)
+Mat imgProcess::imgTransparent(const Mat& mat, double dA, double dB, double dC)
 {
     Mat matMask(mat.size(), CV_8UC1, Scalar::all(0));
 
@@ -1999,7 +1997,7 @@ Mat imgProcess::imgTransparent(const Mat &mat, double dA, double dB, double dC)
             int nPt = matMask.at<uchar>(Point(x, y));
             if (nPt < 1)
             {
-                cv::Vec4b &pixel = matPng.at<cv::Vec4b>(Point(x, y));
+                cv::Vec4b& pixel = matPng.at<cv::Vec4b>(Point(x, y));
                 pixel[3] = 0;
             }
         }
@@ -2012,7 +2010,7 @@ Mat imgProcess::imgTransparent(const Mat &mat, double dA, double dB, double dC)
     return matRes;
 }
 
-Mat imgProcess::setImgText(const Mat &mat, std::string &strText, std::string &strFont, int nFontSize, bool bReverse /*= false*/)
+Mat imgProcess::setImgText(const Mat& mat, std::string& strText, std::string& strFont, int nFontSize, bool bReverse /*= false*/)
 {
     return Mat();
 #if 0
@@ -2032,16 +2030,16 @@ Mat imgProcess::setImgText(const Mat &mat, std::string &strText, std::string &st
     //ft2->loadFontData(strFont, 0);
 
     Size textSize = ft2->getTextSize(strText,
-                                     nFontSize,
-                                     thickness,
-                                     &baseline);
+        nFontSize,
+        thickness,
+        &baseline);
     if (thickness > 0)
     {
         baseline += thickness;
     }
 
     Point ptText((matMask.cols - textSize.width) / 2,
-                 (matMask.rows + textSize.height) / 2);
+        (matMask.rows + textSize.height) / 2);
 
     // rectangle(matMask, ptText + Point(0, baseline),
     //           ptText + Point(textSize.width, -textSize.height),
@@ -2052,7 +2050,7 @@ Mat imgProcess::setImgText(const Mat &mat, std::string &strText, std::string &st
     //      Scalar(0, 0, 255), 1, 8);
 
     ft2->putText(matMask, strText, ptText, nFontSize,
-                 Scalar::all(255), thickness, linestyle, true);
+        Scalar::all(255), thickness, linestyle, true);
 
     // imshow("mast",matMask);
 
@@ -2074,7 +2072,7 @@ Mat imgProcess::setImgText(const Mat &mat, std::string &strText, std::string &st
             int nValue = matMask.at<uchar>(Point(x, y));
             if (nValue < 1)
             {
-                cv::Vec3b &pixel = matDst.at<Vec3b>(Point(x, y));
+                cv::Vec3b& pixel = matDst.at<Vec3b>(Point(x, y));
                 pixel[0] = 255;
                 pixel[1] = 255;
                 pixel[2] = 255;
@@ -2086,12 +2084,12 @@ Mat imgProcess::setImgText(const Mat &mat, std::string &strText, std::string &st
 #endif
 }
 
-Mat imgProcess::setImgGamma(const Mat &mat, const double dGamma)
+Mat imgProcess::setImgGamma(const Mat& mat, const double dGamma)
 {
     double dInvGamma = 1 / dGamma;
 
     Mat table(1, 256, CV_8U);
-    uchar *p = table.ptr();
+    uchar* p = table.ptr();
     for (int i = 0; i < 256; ++i)
     {
         p[i] = (uchar)(pow(i / 255.0, dInvGamma) * 255);
@@ -2102,7 +2100,7 @@ Mat imgProcess::setImgGamma(const Mat &mat, const double dGamma)
     return matRes;
 }
 
-Mat imgProcess::setImgEdgePaperEffect(const Mat &mat, double dLineInterval, double dDPI, int nContrast, int nBrightness, double dGamma, int nEnhanceRadius, int nEnhanceAmount, double dAngle /*=0.0*/)
+Mat imgProcess::setImgEdgePaperEffect(const Mat& mat, double dLineInterval, double dDPI, int nContrast, int nBrightness, double dGamma, int nEnhanceRadius, int nEnhanceAmount, double dAngle /*=0.0*/)
 {
     int nType = dLineInterval;
     int nTemp = nContrast;
@@ -2127,7 +2125,7 @@ Mat imgProcess::setImgEdgePaperEffect(const Mat &mat, double dLineInterval, doub
         dInvGamma = 0.001;
 
     Mat table(1, 256, CV_8U);
-    uchar *p = table.ptr();
+    uchar* p = table.ptr();
     for (int i = 0; i < 256; ++i)
     {
         p[i] = (uchar)(pow(i / 255.0, dInvGamma) * 255);
@@ -2142,47 +2140,47 @@ Mat imgProcess::setImgEdgePaperEffect(const Mat &mat, double dLineInterval, doub
     Mat matOri = matRes.clone();
 
     // Screw Ordered Dithering
-    int Mask0[] = {64, 53, 42, 26, 27, 43, 54, 61,
+    int Mask0[] = { 64, 53, 42, 26, 27, 43, 54, 61,
                    60, 41, 25, 14, 15, 28, 44, 55,
                    52, 40, 13, 5, 6, 16, 29, 45,
                    39, 24, 12, 1, 2, 7, 17, 30,
                    38, 23, 11, 4, 3, 8, 18, 31,
                    51, 37, 22, 10, 9, 19, 32, 41,
                    59, 50, 36, 21, 20, 33, 47, 56,
-                   63, 58, 49, 35, 34, 48, 57, 62};
+                   63, 58, 49, 35, 34, 48, 57, 62 };
 
     // CoarseFatting Ordered Dithering
-    int Mask1[] = {4, 14, 52, 58, 56, 45, 20, 6,
+    int Mask1[] = { 4, 14, 52, 58, 56, 45, 20, 6,
                    16, 26, 38, 50, 48, 36, 28, 18,
                    43, 35, 31, 9, 11, 25, 33, 41,
                    61, 46, 23, 1, 3, 13, 55, 60,
                    57, 47, 21, 7, 5, 15, 53, 59,
                    49, 37, 29, 19, 17, 27, 39, 51,
                    10, 24, 32, 40, 42, 34, 30, 8,
-                   2, 12, 54, 60, 51, 44, 22, 0};
+                   2, 12, 54, 60, 51, 44, 22, 0 };
 
     // 有序抖动算法 Bayer Ordered Dithering
-    int Mask2[] = {0, 32, 8, 40, 2, 34, 10, 42,
+    int Mask2[] = { 0, 32, 8, 40, 2, 34, 10, 42,
                    48, 16, 56, 42, 50, 18, 58, 26,
                    12, 44, 4, 36, 14, 46, 6, 38,
                    60, 28, 52, 20, 62, 30, 54, 22,
                    3, 35, 11, 43, 1, 33, 9, 41,
                    51, 19, 59, 27, 49, 17, 57, 25,
                    15, 47, 7, 39, 13, 45, 5, 37,
-                   63, 31, 55, 23, 61, 29, 53, 21};
+                   63, 31, 55, 23, 61, 29, 53, 21 };
 
     // Halftone Ordered Dithering
-    int Mask3[] = {28, 10, 18, 26, 36, 44, 52, 34,
+    int Mask3[] = { 28, 10, 18, 26, 36, 44, 52, 34,
                    22, 2, 4, 12, 48, 58, 60, 42,
                    14, 6, 0, 20, 40, 56, 62, 50,
                    24, 16, 8, 30, 32, 54, 46, 38,
                    37, 45, 53, 35, 29, 11, 19, 27,
                    49, 59, 61, 43, 23, 3, 5, 13,
                    41, 57, 63, 51, 15, 7, 1, 21,
-                   33, 55, 47, 39, 25, 17, 9, 31};
+                   33, 55, 47, 39, 25, 17, 9, 31 };
 
     // 12 * 12  大颗粒
-    int Mask4[] = {144, 140, 132, 122, 107, 63, 54, 93, 106, 123, 133, 142,
+    int Mask4[] = { 144, 140, 132, 122, 107, 63, 54, 93, 106, 123, 133, 142,
                    143, 137, 128, 104, 94, 41, 31, 65, 98, 116, 120, 139,
                    135, 131, 114, 97, 61, 35, 24, 55, 80, 103, 113, 125,
                    126, 117, 88, 83, 56, 29, 15, 51, 68, 90, 99, 111,
@@ -2193,10 +2191,10 @@ Mat imgProcess::setImgEdgePaperEffect(const Mat &mat, double dLineInterval, doub
                    101, 95, 70, 67, 38, 13, 20, 36, 50, 75, 82, 108,
                    121, 110, 86, 78, 45, 17, 27, 39, 69, 79, 102, 119,
                    134, 129, 112, 89, 49, 23, 43, 60, 71, 87, 115, 127,
-                   141, 138, 124, 118, 66, 40, 62, 72, 84, 105, 130, 136};
+                   141, 138, 124, 118, 66, 40, 62, 72, 84, 105, 130, 136 };
 
     // 16 * 16
-    int Mask5[] = {0, 191, 48, 239, 12, 203, 60, 251, 3, 194, 51, 242, 15, 206, 63, 254,
+    int Mask5[] = { 0, 191, 48, 239, 12, 203, 60, 251, 3, 194, 51, 242, 15, 206, 63, 254,
                    127, 64, 175, 112, 139, 76, 187, 124, 130, 67, 178, 115, 142, 79, 190, 127,
                    32, 223, 16, 207, 44, 235, 28, 219, 35, 226, 19, 210, 47, 238, 31, 222,
                    159, 96, 143, 80, 171, 108, 155, 92, 162, 99, 146, 83, 174, 111, 158, 95,
@@ -2211,7 +2209,7 @@ Mat imgProcess::setImgEdgePaperEffect(const Mat &mat, double dLineInterval, doub
                    10, 201, 58, 249, 6, 197, 54, 245, 9, 200, 57, 248, 5, 196, 53, 244,
                    137, 74, 185, 122, 133, 70, 181, 118, 136, 73, 184, 121, 132, 69, 180, 117,
                    42, 233, 26, 217, 38, 229, 22, 213, 41, 232, 25, 216, 37, 228, 21, 212,
-                   169, 106, 153, 90, 165, 102, 149, 86, 168, 105, 152, 89, 164, 101, 148, 85};
+                   169, 106, 153, 90, 165, 102, 149, 86, 168, 105, 152, 89, 164, 101, 148, 85 };
 
     // 9 * 9
     int Mask6[] = {
@@ -2223,7 +2221,7 @@ Mat imgProcess::setImgEdgePaperEffect(const Mat &mat, double dLineInterval, doub
         79, 47, 23, 7, 6, 5, 17, 37, 65,
         78, 46, 22, 21, 20, 19, 18, 38, 66,
         77, 45, 44, 43, 42, 41, 40, 39, 67,
-        76, 75, 74, 73, 72, 71, 70, 69, 68};
+        76, 75, 74, 73, 72, 71, 70, 69, 68 };
 
     Mat matTemp = setRotateImg(matOri, dAngle, true);
 
@@ -2299,7 +2297,7 @@ Mat imgProcess::setImgEdgePaperEffect(const Mat &mat, double dLineInterval, doub
     // imshow("matMix", matMix);
     // matGray = setRotateImg(matMix, nE, true);
 
-    std::vector<int *> vecArr;
+    std::vector<int*> vecArr;
     vecArr.emplace_back(Mask0);
     vecArr.emplace_back(Mask1);
     vecArr.emplace_back(Mask2);

@@ -1,16 +1,16 @@
-#include <glad/glad.h> 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp> 
-#include <glm/gtc/type_ptr.hpp>         
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h" 
+#include "stb_truetype.h"
 
 ////////////////////////////////////////////////////////
 
@@ -62,7 +62,7 @@ void loadFontTexture(const std::string& fontPath)
 
 const char* vertexShaderSource = R"(
 #version 330 core
-layout (location = 0) in vec4 vertex; 
+layout (location = 0) in vec4 vertex;
 out vec2 TexCoords;
 uniform mat4 projection;
 
@@ -162,7 +162,7 @@ void renderText(const std::string& text, float x, float y, float scale, GLuint t
 
 int main()
 {
-    if (!glfwInit()) 
+    if (!glfwInit())
         return -1;
 
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL Font Rendering", NULL, NULL);

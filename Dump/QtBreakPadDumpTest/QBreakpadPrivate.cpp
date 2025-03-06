@@ -17,14 +17,13 @@ QStringList QBreakpadPrivate::stlstFiles;
 #include "WindowsDllInterceptor.h"
 
 static WindowsDllInterceptor g_Kernel32Intercept;
-typedef LPTOP_LEVEL_EXCEPTION_FILTER (WINAPI *SetUnhandledExceptionFilterRedirection)(LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter);
+typedef LPTOP_LEVEL_EXCEPTION_FILTER(WINAPI* SetUnhandledExceptionFilterRedirection)(LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter);
 
 static SetUnhandledExceptionFilterRedirection SetUnhandledExceptionFilterFunc = 0;
 static bool g_BlockUnhandledExceptionFilter = true;
 static LPTOP_LEVEL_EXCEPTION_FILTER previousUnhandledExceptionFilter = nullptr;
 
-
-static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI SetUnhandledExceptionFilterPatched (LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
+static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI SetUnhandledExceptionFilterPatched(LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
 {
     if (!g_BlockUnhandledExceptionFilter)
     {
@@ -44,20 +43,19 @@ static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI SetUnhandledExceptionFilterPatched (L
 }
 #endif
 
-
 #if defined(Q_OS_WIN)
-bool DumpCallback(const wchar_t *_dump_dir,
-                  const wchar_t *_minidump_id,
-                  void *context,
-                  EXCEPTION_POINTERS *exinfo,
-                  MDRawAssertionInfo *assertion,
-                  bool succeeded)
+bool DumpCallback(const wchar_t* _dump_dir,
+    const wchar_t* _minidump_id,
+    void* context,
+    EXCEPTION_POINTERS* exinfo,
+    MDRawAssertionInfo* assertion,
+    bool succeeded)
 #elif defined(Q_OS_LINUX)
-bool DumpCallback(const google_breakpad::MinidumpDescriptor &md,void *context, bool succeeded)
+bool DumpCallback(const google_breakpad::MinidumpDescriptor& md, void* context, bool succeeded)
 #elif defined(Q_OS_MACX)
-bool DumpCallback(const char *_dump_dir,
-                  const char *_minidump_id,
-                  void *context, bool succeeded)
+bool DumpCallback(const char* _dump_dir,
+    const char* _minidump_id,
+    void* context, bool succeeded)
 #endif
 {
     Q_UNUSED(context);
@@ -80,7 +78,7 @@ bool DumpCallback(const char *_dump_dir,
 #endif
         QStringList stlstArgs;
         stlstArgs << QBreakpadPrivate::strApplication <<
-                     strDumpName;
+            strDumpName;
         QProcess::startDetached(QBreakpadPrivate::strReporter, stlstArgs);
     }
 
@@ -91,13 +89,12 @@ bool DumpCallback(const char *_dump_dir,
     return QBreakpadPrivate::bReportCrashesToSystem ? succeeded : true;
 }
 
-
 #if defined(Q_OS_WIN)
 void InvalidParameterHandlerFunc(const wchar_t* expression,
-                                 const wchar_t* function,
-                                 const wchar_t* file,
-                                 unsigned int line,
-                                 uintptr_t pReserved)
+    const wchar_t* function,
+    const wchar_t* file,
+    unsigned int line,
+    uintptr_t pReserved)
 {
     Q_UNUSED(expression);
     Q_UNUSED(function);
@@ -117,7 +114,6 @@ void InvalidParameterHandlerFunc(const wchar_t* expression,
     TerminateProcess(GetCurrentProcess(), 1);
 }
 
-
 void PurecallHandlerFunc()
 {
     qDebug() << "PurecallHandlerFunc";
@@ -132,7 +128,7 @@ void PurecallHandlerFunc()
 }
 #endif
 
-QBreakpadPrivate::QBreakpadPrivate(QBreakpad *p) : q_ptr(p)
+QBreakpadPrivate::QBreakpadPrivate(QBreakpad* p) : q_ptr(p)
 {
     pHandler = 0;
 }
@@ -142,7 +138,7 @@ QBreakpadPrivate::~QBreakpadPrivate()
     delete pHandler;
 }
 
-void QBreakpadPrivate::InitCrashHandler(const QString &dumpPath, const QString &strApp)
+void QBreakpadPrivate::InitCrashHandler(const QString& dumpPath, const QString& strApp)
 {
     if (pHandler != 0)
         return;
@@ -158,12 +154,12 @@ void QBreakpadPrivate::InitCrashHandler(const QString &dumpPath, const QString &
 #if defined(Q_OS_WIN)
     std::wstring wstrPath = strDumpPath.toStdWString();
     pHandler = new google_breakpad::ExceptionHandler(
-                wstrPath,
-                0,
-                DumpCallback,
-                0,
-                google_breakpad::ExceptionHandler::HANDLER_ALL
-                );
+        wstrPath,
+        0,
+        DumpCallback,
+        0,
+        google_breakpad::ExceptionHandler::HANDLER_ALL
+    );
     pHandler->set_handle_debug_exceptions(true);
 
     _invalid_parameter_handler oldHandler;
@@ -178,9 +174,9 @@ void QBreakpadPrivate::InitCrashHandler(const QString &dumpPath, const QString &
     g_BlockUnhandledExceptionFilter = true;
     g_Kernel32Intercept.Init("kernel32.dll");
     bool ok = g_Kernel32Intercept.AddHook(
-                "SetUnhandledExceptionFilter",
-                reinterpret_cast<intptr_t>(SetUnhandledExceptionFilterPatched),
-                (void**) &SetUnhandledExceptionFilterFunc);
+        "SetUnhandledExceptionFilter",
+        reinterpret_cast<intptr_t>(SetUnhandledExceptionFilterPatched),
+        (void**)&SetUnhandledExceptionFilterFunc);
     if (!ok)
         qWarning() << "SetUnhandledExceptionFilter hook failed; crash reporter is vulnerable.";
     ///================================================================
@@ -189,30 +185,28 @@ void QBreakpadPrivate::InitCrashHandler(const QString &dumpPath, const QString &
     std::string pathAsStr = dumpPath.toStdString();
     google_breakpad::MinidumpDescriptor md(pathAsStr);
     pHandler = new google_breakpad::ExceptionHandler(
-                md,
-                /*FilterCallback*/ 0,
-                DumpCallback,
-                /*context*/ 0,
-                true,
-                -1
-                );
+        md,
+        /*FilterCallback*/ 0,
+        DumpCallback,
+        /*context*/ 0,
+        true,
+        -1
+    );
 
 #elif defined(Q_OS_MACX)
     std::string pathAsStr = dumpPath.toStdString();
     pHandler = new google_breakpad::ExceptionHandler(
-                pathAsStr,
-                /*FilterCallback*/ 0,
-                DumpCallback,
-                /*context*/ 0,
-                true,
-                0);
+        pathAsStr,
+        /*FilterCallback*/ 0,
+        DumpCallback,
+        /*context*/ 0,
+        true,
+        0);
 #endif
 }
 
-
 bool QBreakpadPrivate::WriteMinidump()
 {
-
 #if defined(Q_OS_WIN)
     std::wstring strPath = strDumpPath.toStdWString();
 #elif defined(Q_OS_MACX)
@@ -226,19 +220,19 @@ bool QBreakpadPrivate::WriteMinidump()
     return res;
 }
 
-void QBreakpadPrivate::SetReporter(const QString &strRep)
+void QBreakpadPrivate::SetReporter(const QString& strRep)
 {
     QFileInfo info(strRep);
     strReporter = info.absoluteFilePath();
 }
 
-void QBreakpadPrivate::SetApplication(const QString &strApp)
+void QBreakpadPrivate::SetApplication(const QString& strApp)
 {
     QFileInfo info(strApp);
     strApplication = info.absoluteFilePath();
 }
 
-void QBreakpadPrivate::AppendInfoFile(const QString &strFile)
+void QBreakpadPrivate::AppendInfoFile(const QString& strFile)
 {
     QFileInfo info(strFile);
     QString strTemp = info.absoluteFilePath();

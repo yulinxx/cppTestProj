@@ -1,4 +1,3 @@
-
 // 使用几何着色器，绘制出一条简单的  --->--- 线
 
 #include <glad/glad.h>
@@ -73,7 +72,8 @@ void main() {
 }
 )";
 
-GLuint loadShader() {
+GLuint loadShader()
+{
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
@@ -99,10 +99,10 @@ GLuint loadShader() {
     return shaderProgram;
 }
 
-int main() 
+int main()
 {
     // 初始化 GLFW
-    if (!glfwInit()) 
+    if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
@@ -114,7 +114,7 @@ int main()
 
     // 创建窗口
     GLFWwindow* window = glfwCreateWindow(800, 600, "Simple Line with Arrow", nullptr, nullptr);
-    if (!window) 
+    if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -123,7 +123,8 @@ int main()
     glfwMakeContextCurrent(window);
 
     // 初始化 GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -160,14 +161,16 @@ int main()
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     // 渲染循环
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_LINES, 0, 2);  // 绘制一条线段
 
         GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR) {
+        while ((err = glGetError()) != GL_NO_ERROR)
+        {
             std::cerr << "OpenGL Error: " << err << std::endl;
         }
 

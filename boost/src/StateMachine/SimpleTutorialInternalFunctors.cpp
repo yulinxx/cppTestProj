@@ -28,53 +28,70 @@ using namespace msm::front::euml;
 namespace
 {
     // events
-    struct play {};
-    struct end_pause {};
-    struct stop {};
-    struct pause {};
-    struct open_close {};
+    struct play
+    {
+    };
+    struct end_pause
+    {
+    };
+    struct stop
+    {
+    };
+    struct pause
+    {
+    };
+    struct open_close
+    {
+    };
 
     // A "complicated" event type that carries some data.
     enum DiskTypeEnum
     {
-        DISK_CD=0,
-        DISK_DVD=1
+        DISK_CD = 0,
+        DISK_DVD = 1
     };
     struct cd_detected
     {
         cd_detected(std::string name, DiskTypeEnum diskType)
             : name(name),
             disc_type(diskType)
-        {}
+        {
+        }
 
         std::string name;
         DiskTypeEnum disc_type;
     };
 
-    // front-end: define the FSM structure 
+    // front-end: define the FSM structure
     struct player_ : public msm::front::state_machine_def<player_>
     {
         // The list of FSM states
-        struct Empty : public msm::front::state<> 
+        struct Empty : public msm::front::state<>
         {
             // every (optional) entry/exit methods get the event passed.
-            template <class Event,class FSM>
-            void on_entry(Event const&,FSM& ) {std::cout << "entering: Empty" << std::endl;}
-            template <class Event,class FSM>
-            void on_exit(Event const&,FSM& ) {std::cout << "leaving: Empty" << std::endl;}
-            struct internal_guard_fct 
+            template <class Event, class FSM>
+            void on_entry(Event const&, FSM&)
             {
-                template <class EVT,class FSM,class SourceState,class TargetState>
-                bool operator()(EVT const& evt ,FSM&,SourceState& ,TargetState& )
+                std::cout << "entering: Empty" << std::endl;
+            }
+            template <class Event, class FSM>
+            void on_exit(Event const&, FSM&)
+            {
+                std::cout << "leaving: Empty" << std::endl;
+            }
+            struct internal_guard_fct
+            {
+                template <class EVT, class FSM, class SourceState, class TargetState>
+                bool operator()(EVT const& evt, FSM&, SourceState&, TargetState&)
                 {
                     std::cout << "Empty::internal_transition_table guard\n";
                     return false;
                 }
             };
-            struct internal_action_fct 
+            struct internal_action_fct
             {
-                template <class EVT,class FSM,class SourceState,class TargetState>
-                void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+                template <class EVT, class FSM, class SourceState, class TargetState>
+                void operator()(EVT const&, FSM&, SourceState&, TargetState&)
                 {
                     std::cout << "Empty::internal_transition_table action" << std::endl;
                 }
@@ -82,32 +99,52 @@ namespace
             // Transition table for Empty
             struct internal_transition_table : mpl::vector<
                 //    Start     Event         Next      Action               Guard
-           Internal <           cd_detected           , internal_action_fct ,internal_guard_fct    >
+                Internal <           cd_detected, internal_action_fct, internal_guard_fct    >
                 //  +---------+-------------+---------+---------------------+----------------------+
-            > {};        
+            >
+            {
+            };
         };
-        struct Open : public msm::front::state<> 
-        { 
-            template <class Event,class FSM>
-            void on_entry(Event const& ,FSM&) {std::cout << "entering: Open" << std::endl;}
-            template <class Event,class FSM>
-            void on_exit(Event const&,FSM& ) {std::cout << "leaving: Open" << std::endl;}
+        struct Open : public msm::front::state<>
+        {
+            template <class Event, class FSM>
+            void on_entry(Event const&, FSM&)
+            {
+                std::cout << "entering: Open" << std::endl;
+            }
+            template <class Event, class FSM>
+            void on_exit(Event const&, FSM&)
+            {
+                std::cout << "leaving: Open" << std::endl;
+            }
         };
 
-        struct Stopped : public msm::front::state<> 
-        { 
-            template <class Event,class FSM>
-            void on_entry(Event const& ,FSM&) {std::cout << "entering: Stopped" << std::endl;}
-            template <class Event,class FSM>
-            void on_exit(Event const&,FSM& ) {std::cout << "leaving: Stopped" << std::endl;}
+        struct Stopped : public msm::front::state<>
+        {
+            template <class Event, class FSM>
+            void on_entry(Event const&, FSM&)
+            {
+                std::cout << "entering: Stopped" << std::endl;
+            }
+            template <class Event, class FSM>
+            void on_exit(Event const&, FSM&)
+            {
+                std::cout << "leaving: Stopped" << std::endl;
+            }
         };
 
         struct Playing : public msm::front::state<>
         {
-            template <class Event,class FSM>
-            void on_entry(Event const&,FSM& ) {std::cout << "entering: Playing" << std::endl;}
-            template <class Event,class FSM>
-            void on_exit(Event const&,FSM& ) {std::cout << "leaving: Playing" << std::endl;}
+            template <class Event, class FSM>
+            void on_entry(Event const&, FSM&)
+            {
+                std::cout << "entering: Playing" << std::endl;
+            }
+            template <class Event, class FSM>
+            void on_exit(Event const&, FSM&)
+            {
+                std::cout << "leaving: Playing" << std::endl;
+            }
         };
 
         // state not defining any entry or exit
@@ -119,102 +156,102 @@ namespace
         typedef Empty initial_state;
 
         // transition actions
-        // as the functors are generic on events, fsm and source/target state, 
+        // as the functors are generic on events, fsm and source/target state,
         // you can reuse them in another machine if you wish
-        struct TestFct 
+        struct TestFct
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const&, FSM&,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "transition with event:" << typeid(EVT).name() << endl;
             }
         };
-        struct start_playback 
+        struct start_playback
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::start_playback" << endl;
             }
         };
-        struct open_drawer 
+        struct open_drawer
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::open_drawer" << endl;
             }
         };
-        struct close_drawer 
+        struct close_drawer
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::close_drawer" << endl;
             }
         };
-        struct store_cd_info 
+        struct store_cd_info
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const&,FSM& fsm ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM& fsm, SourceState&, TargetState&)
             {
                 cout << "player::store_cd_info" << endl;
                 fsm.process_event(play());
             }
         };
-        struct stop_playback 
+        struct stop_playback
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::stop_playback" << endl;
             }
         };
-        struct pause_playback 
+        struct pause_playback
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::pause_playback" << endl;
             }
         };
-        struct resume_playback 
+        struct resume_playback
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::resume_playback" << endl;
             }
         };
-        struct stop_and_open 
+        struct stop_and_open
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::stop_and_open" << endl;
             }
         };
-        struct stopped_again 
+        struct stopped_again
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            void operator()(EVT const& ,FSM& ,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            void operator()(EVT const&, FSM&, SourceState&, TargetState&)
             {
                 cout << "player::stopped_again" << endl;
             }
         };
         // guard conditions
-        struct DummyGuard 
+        struct DummyGuard
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            bool operator()(EVT const& evt,FSM& fsm,SourceState& src,TargetState& tgt)
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt)
             {
                 return true;
             }
         };
-        struct good_disk_format 
+        struct good_disk_format
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            bool operator()(EVT const& evt ,FSM&,SourceState& ,TargetState& )
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            bool operator()(EVT const& evt, FSM&, SourceState&, TargetState&)
             {
                 // to test a guard condition, let's say we understand only CDs, not DVD
                 if (evt.disc_type != DISK_CD)
@@ -225,19 +262,19 @@ namespace
                 return true;
             }
         };
-        struct always_true 
+        struct always_true
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            bool operator()(EVT const& evt ,FSM&,SourceState& ,TargetState& )
-            {             
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            bool operator()(EVT const& evt, FSM&, SourceState&, TargetState&)
+            {
                 return true;
             }
         };
-        struct internal_guard 
+        struct internal_guard
         {
-            template <class EVT,class FSM,class SourceState,class TargetState>
-            bool operator()(EVT const& evt ,FSM&,SourceState& ,TargetState& )
-            {            
+            template <class EVT, class FSM, class SourceState, class TargetState>
+            bool operator()(EVT const& evt, FSM&, SourceState&, TargetState&)
+            {
                 std::cout << "Empty::internal guard\n";
                 return false;
             }
@@ -246,33 +283,35 @@ namespace
         struct transition_table : mpl::vector<
             //    Start     Event         Next      Action                     Guard
             //  +---------+-------------+---------+---------------------------+----------------------+
-            Row < Stopped , play        , Playing , ActionSequence_
-                                                     <mpl::vector<
-                                                     TestFct,start_playback> >            
-                                                                              , DummyGuard           >,
-            Row < Stopped , open_close  , Open    , open_drawer               , none                 >,
-            Row < Stopped , stop        , Stopped , none                      , none                 >,
+            Row < Stopped, play, Playing, ActionSequence_
+            <mpl::vector<
+            TestFct, start_playback> >
+            , DummyGuard           >,
+            Row < Stopped, open_close, Open, open_drawer, none                 >,
+            Row < Stopped, stop, Stopped, none, none                 >,
             //  +---------+-------------+---------+---------------------------+----------------------+
-            Row < Open    , open_close  , Empty   , close_drawer              , none                 >,
+            Row < Open, open_close, Empty, close_drawer, none                 >,
             //  +---------+-------------+---------+---------------------------+----------------------+
-            Row < Empty   , open_close  , Open    , open_drawer               , none                 >,
-            Row < Empty   , cd_detected , Stopped , store_cd_info             , And_<good_disk_format,
-                                                                                     always_true>    >,
+            Row < Empty, open_close, Open, open_drawer, none                 >,
+            Row < Empty, cd_detected, Stopped, store_cd_info, And_<good_disk_format,
+            always_true>    >,
             // internal transition inside the stt: none as Target
-            Row < Empty   , cd_detected , none    , none                      , internal_guard       >,
+            Row < Empty, cd_detected, none, none, internal_guard       >,
             //  +---------+-------------+---------+---------------------------+----------------------+
-            Row < Playing , stop        , Stopped , stop_playback             , none                 >,
-            Row < Playing , pause       , Paused  , pause_playback            , none                 >,
-            Row < Playing , open_close  , Open    , stop_and_open             , none                 >,
+            Row < Playing, stop, Stopped, stop_playback, none                 >,
+            Row < Playing, pause, Paused, pause_playback, none                 >,
+            Row < Playing, open_close, Open, stop_and_open, none                 >,
             //  +---------+-------------+---------+---------------------------+----------------------+
-            Row < Paused  , end_pause   , Playing , resume_playback           , none                 >,
-            Row < Paused  , stop        , Stopped , stop_playback             , none                 >,
-            Row < Paused  , open_close  , Open    , stop_and_open             , none                 >
+            Row < Paused, end_pause, Playing, resume_playback, none                 >,
+            Row < Paused, stop, Stopped, stop_playback, none                 >,
+            Row < Paused, open_close, Open, stop_and_open, none                 >
             //  +---------+-------------+---------+---------------------------+----------------------+
-        > {};
+        >
+        {
+        };
         // Replaces the default no-transition response.
-        template <class FSM,class Event>
-        void no_transition(Event const& e, FSM&,int state)
+        template <class FSM, class Event>
+        void no_transition(Event const& e, FSM&, int state)
         {
             std::cout << "no transition from state " << state
                 << " on event " << typeid(e).name() << std::endl;
@@ -291,22 +330,22 @@ namespace
     }
 
     void test()
-    {        
+    {
         player p;
         // needed to start the highest-level SM. This will call on_entry and mark the start of the SM
-        p.start(); 
+        p.start();
         // go to Open, call on_exit on Empty, then action, then on_entry on Open
         p.process_event(open_close()); pstate(p);
         p.process_event(open_close()); pstate(p);
         // will be rejected, wrong disk type
         p.process_event(
-            cd_detected("louie, louie",DISK_DVD)); pstate(p);
+            cd_detected("louie, louie", DISK_DVD)); pstate(p);
         p.process_event(
-            cd_detected("louie, louie",DISK_CD)); pstate(p);
+            cd_detected("louie, louie", DISK_CD)); pstate(p);
         // no need to call play() as the previous transition does it in its action method
         //p.process_event(play());
 
-        // at this point, Play is active      
+        // at this point, Play is active
         p.process_event(pause()); pstate(p);
         // go back to Playing
         p.process_event(end_pause());  pstate(p);

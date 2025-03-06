@@ -8,8 +8,6 @@ set(CPP_DIR
 )
 
 #################### EXE ##################################
-set(SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-
 foreach(SUB_DIR ${CPP_DIR})
     file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/${SUB_DIR}/*.cpp")
     foreach(CPP ${SRC})
@@ -29,6 +27,8 @@ foreach(SUB_DIR ${CPP_DIR})
         find_package(glad CONFIG REQUIRED)
         target_link_libraries(${APP_NAME} PRIVATE glad::glad)
 
+        find_package(Stb REQUIRED)
+        target_include_directories(${APP_NAME} PRIVATE ${Stb_INCLUDE_DIR})
     endforeach(CPP)
 
 endforeach(SUB_DIR)

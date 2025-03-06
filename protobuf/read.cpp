@@ -13,7 +13,7 @@ using namespace basePkg;
 #include "baseinfoObj.h"
 #include "messageObj.h"
 
-void traceMsg(const Info &msg)
+void traceMsg(const Info& msg)
 {
     cout << "\n----Info\n";
     cout << msg.ver() << endl;
@@ -23,7 +23,7 @@ void traceMsg(const Info &msg)
     cout << msg.mask() << endl;
 }
 
-void traceMsg(const MessageTest &msg)
+void traceMsg(const MessageTest& msg)
 {
     cout << "\n----Message\n";
     cout << msg.datetime() << endl;
@@ -38,7 +38,7 @@ void testAllItem()
 
     allPkg::allInfo al;
 
-    if(!al.ParseFromIstream(&input))
+    if (!al.ParseFromIstream(&input))
         return;
 
     input.close();
@@ -48,7 +48,7 @@ void testAllItem()
 
     int nBaseInfoSize = al.info_obj_size();
     std::vector<baseinfoObj> vecBaseInfo;
-    for(int i = 0; i < nBaseInfoSize; i++)
+    for (int i = 0; i < nBaseInfoSize; i++)
     {
         baseinfoObj baseObj;
         auto obj = al.info_obj(i);
@@ -68,14 +68,12 @@ void testAllItem()
         const MsgPkg::MessageTest  obj = al.msg_obj(i);
         msgObj.m_nDataTime = obj.datetime();
         msgObj.m_strHostName = obj.hostname();
-        msgObj.m_strIP= obj.ip();
+        msgObj.m_strIP = obj.ip();
         msgObj.m_strInfo = obj.info();
         vecMsgInfo.emplace_back(msgObj);
     }
-    std::cout<<std::endl;
-    
+    std::cout << std::endl;
 }
-
 
 int main(void)
 {
@@ -83,13 +81,13 @@ int main(void)
 
     testAllItem();
 
-    if(0)
+    if (0)
     {
         int nSize = 3;
 
         Info info;
 
-        int nSizeArr[] = {106, 109, 124};
+        int nSizeArr[] = { 106, 109, 124 };
         for (int i = 0; i < nSize; i++)
         {
             int n = info.ByteSizeLong();

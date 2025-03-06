@@ -20,12 +20,12 @@ int main(void)
     // fstream output("message.db", ios::out|ios::trunc);
 
     std::vector<baseinfoObj> vecBaseInfo;
-    
+
     {
         baseinfoObj infoObj;
         infoObj.m_strVer = "1.0";
         infoObj.m_strAuthor = "a";
-        infoObj.m_strCreateTime= "2022.01.01";
+        infoObj.m_strCreateTime = "2022.01.01";
         infoObj.m_strEncrypt = "encryptStr";
         infoObj.m_strMask = "maskStr";
         vecBaseInfo.emplace_back(infoObj);
@@ -35,7 +35,7 @@ int main(void)
         baseinfoObj infoObj;
         infoObj.m_strVer = "1.1";
         infoObj.m_strAuthor = "b";
-        infoObj.m_strCreateTime= "2022.01.02";
+        infoObj.m_strCreateTime = "2022.01.02";
         infoObj.m_strEncrypt = "encryptStr2";
         infoObj.m_strMask = "maskStr2";
         vecBaseInfo.emplace_back(infoObj);
@@ -45,17 +45,16 @@ int main(void)
         baseinfoObj infoObj;
         infoObj.m_strVer = "1.2";
         infoObj.m_strAuthor = "c";
-        infoObj.m_strCreateTime= "2022.01.03";
+        infoObj.m_strCreateTime = "2022.01.03";
         infoObj.m_strEncrypt = "encryptStr3";
         infoObj.m_strMask = "maskStr3";
         vecBaseInfo.emplace_back(infoObj);
     }
 
-
     allPkg::allInfo al;
     al.set_num_flag(999);
     al.set_str_flag("ssssstring Flag test");
-    for(const auto& item : vecBaseInfo)
+    for (const auto& item : vecBaseInfo)
     {
         basePkg::Info* info = al.add_info_obj();
         info->set_ver(item.m_strVer);
@@ -65,15 +64,13 @@ int main(void)
         info->set_mask(item.m_strMask);
     }
 
-
-
     std::vector<messageObj> vecMsgInfo;
-    
+
     {
         messageObj msgObj;
         msgObj.m_nDataTime = 1;
         msgObj.m_strHostName = "abcA";
-        msgObj.m_strIP= "192.168.1.1";
+        msgObj.m_strIP = "192.168.1.1";
         msgObj.m_strInfo = "baseInfo.prot";
         vecMsgInfo.emplace_back(msgObj);
     }
@@ -82,7 +79,7 @@ int main(void)
         messageObj msgObj;
         msgObj.m_nDataTime = 2;
         msgObj.m_strHostName = "abcB";
-        msgObj.m_strIP= "192.168.1.2";
+        msgObj.m_strIP = "192.168.1.2";
         msgObj.m_strInfo = "encryptStr2";
         vecMsgInfo.emplace_back(msgObj);
     }
@@ -91,7 +88,7 @@ int main(void)
         messageObj msgObj;
         msgObj.m_nDataTime = 3;
         msgObj.m_strHostName = "abcxxxxcC";
-        msgObj.m_strIP= "192.168.1.3";
+        msgObj.m_strIP = "192.168.1.3";
         msgObj.m_strInfo = "repeated MsgPkg.MessageTes";
         vecMsgInfo.emplace_back(msgObj);
     }
@@ -100,13 +97,13 @@ int main(void)
         messageObj msgObj;
         msgObj.m_nDataTime = 4;
         msgObj.m_strHostName = "abcD";
-        msgObj.m_strIP= "192.168.1.4";
+        msgObj.m_strIP = "192.168.1.4";
         msgObj.m_strInfo = "message MessageTest{";
         vecMsgInfo.emplace_back(msgObj);
     }
 
     MsgPkg::MessageTest msg;
-    for(const auto& item : vecMsgInfo)
+    for (const auto& item : vecMsgInfo)
     {
         MsgPkg::MessageTest* msg = al.add_msg_obj();
         msg->set_datetime(item.m_nDataTime);
@@ -114,7 +111,7 @@ int main(void)
         msg->set_ip(item.m_strIP);
         msg->set_info(item.m_strInfo);
     }
-    
+
     // fstream output2("message.db", ios::out|ios::trunc|ios::ate|ios::binary);
     // fstream output2("message.db", ios::out | ios::app | ios::binary);
     if (!al.SerializeToOstream(&output))
@@ -122,8 +119,6 @@ int main(void)
         cerr << "save data error." << endl;
         return -1;
     }
-
-
 
     if (0)
     {
@@ -148,7 +143,7 @@ int main(void)
 
         int nB = info.ByteSizeLong(); // 106
         std::cout << info.DebugString() << std::endl;
-        std::cout<<"Size:"<<nB<<std::endl<<std::endl;
+        std::cout << "Size:" << nB << std::endl << std::endl;
     }
 
     if (0)
@@ -171,7 +166,7 @@ int main(void)
 
         int nD = info2.ByteSizeLong(); // 109
         std::cout << info2.DebugString() << std::endl;
-        std::cout<<"Size:"<<nD<<std::endl<<std::endl;
+        std::cout << "Size:" << nD << std::endl << std::endl;
     }
 
     if (0)
@@ -194,7 +189,7 @@ int main(void)
 
         int nF = info3.ByteSizeLong(); // 124
         std::cout << info3.DebugString() << std::endl;
-        std::cout<<"Size:"<<nF<<std::endl<<std::endl;
+        std::cout << "Size:" << nF << std::endl << std::endl;
     }
 
     // output.close();
@@ -218,7 +213,7 @@ int main(void)
 
         int nG = msg.ByteSizeLong(); // 102
         std::cout << msg.DebugString() << std::endl;
-        std::cout<<"Size:"<<nG<<std::endl;
+        std::cout << "Size:" << nG << std::endl;
         // output2.close();
     }
 

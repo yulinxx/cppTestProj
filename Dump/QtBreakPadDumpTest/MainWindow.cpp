@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "./ui_MainWindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
@@ -21,4 +21,3 @@ void MainWindow::onBtnCrash()
     int b = 0;
     int n = a / b;
 }
-

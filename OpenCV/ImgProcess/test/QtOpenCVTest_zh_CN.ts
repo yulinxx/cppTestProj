@@ -4,12 +4,12 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="270"/>
+        <location filename="mainwindow.cpp" line="269"/>
         <source>Open Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="270"/>
+        <location filename="mainwindow.cpp" line="269"/>
         <source>Image File(*.bmp *.jpg *.jpeg *.png *.webp *.jfif)</source>
         <translation type="unfinished"></translation>
     </message>

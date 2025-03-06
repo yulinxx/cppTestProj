@@ -61,14 +61,16 @@ void main() {
 }
 )";
 
-GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
+GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
+{
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
 
     GLint success;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cerr << "Vertex Shader Compilation Failed:\n" << infoLog << std::endl;
@@ -79,7 +81,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cerr << "Fragment Shader Compilation Failed:\n" << infoLog << std::endl;
@@ -91,7 +94,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     glLinkProgram(shaderProgram);
 
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
         std::cerr << "Shader Program Linking Failed:\n" << infoLog << std::endl;
@@ -103,7 +107,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     return shaderProgram;
 }
 
-glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X) {
+glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X)
+{
     return glm::vec2(
         minX + (rand() / static_cast<float>(RAND_MAX)) * (maxX - minX),
         minY + (rand() / static_cast<float>(RAND_MAX)) * (maxY - minY)
@@ -117,11 +122,13 @@ void generateRandomMixedLines(
     int numSegments,
     int bezierSegments,
     float minX, float maxX, float minY, float maxY
-) {
+)
+{
     vertices.clear();
     lineIndices.clear();
 
-    for (int line = 0; line < numLines; ++line) {
+    for (int line = 0; line < numLines; ++line)
+    {
         std::vector<unsigned int> currentLineIndices;
         glm::vec2 startPoint = randomPoint(minX, maxX, minY, maxY);
         glm::vec2 currentPoint = startPoint;
@@ -134,10 +141,12 @@ void generateRandomMixedLines(
         vertices.push_back(dAccLen);
         currentLineIndices.push_back(vertexIndex);
 
-        for (int i = 0; i < numSegments; ++i) {
+        for (int i = 0; i < numSegments; ++i)
+        {
             bool bLine = rand() % 2 == 0;
 
-            if (bLine) {
+            if (bLine)
+            {
                 glm::vec2 point = randomPoint(minX, maxX, minY, maxY);
                 vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
                 vertices.push_back(point.x);
@@ -151,19 +160,22 @@ void generateRandomMixedLines(
 
                 prevPoint = point;
                 currentPoint = point;
-            } else {
+            }
+            else
+            {
                 glm::vec2 controlPoint1 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 controlPoint2 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 nextPoint = randomPoint(minX, maxX, minY, maxY);
 
-                for (int j = 1; j <= bezierSegments; ++j) {
+                for (int j = 1; j <= bezierSegments; ++j)
+                {
                     float t = float(j) / float(bezierSegments);
                     float u = 1.0f - t;
 
                     glm::vec2 point = u * u * u * currentPoint +
-                                      3.0f * u * u * t * controlPoint1 +
-                                      3.0f * u * t * t * controlPoint2 +
-                                      t * t * t * nextPoint;
+                        3.0f * u * u * t * controlPoint1 +
+                        3.0f * u * t * t * controlPoint2 +
+                        t * t * t * nextPoint;
 
                     vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
                     vertices.push_back(point.x);
@@ -186,13 +198,16 @@ void generateRandomMixedLines(
 
 float zoomFactor = 1.0f;
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
     zoomFactor += float(yoffset) * 0.1f;
     zoomFactor = std::max(zoomFactor, 0.1f);
 }
 
-int main() {
-    if (!glfwInit()) {
+int main()
+{
+    if (!glfwInit())
+    {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -204,14 +219,16 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     GLFWwindow* window = glfwCreateWindow(1400, 1400, "OpenGL Dash Lines", nullptr, nullptr);
-    if (!window) {
+    if (!window)
+    {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+    {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -248,7 +265,8 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, shapeVertices.size() * sizeof(float), shapeVertices.data(), GL_STATIC_DRAW);
 
     std::vector<unsigned int> flatIndices;
-    for (const auto& line : shapeIndices) {
+    for (const auto& line : shapeIndices)
+    {
         flatIndices.insert(flatIndices.end(), line.begin(), line.end());
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -261,7 +279,8 @@ int main() {
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glm::mat4 cameraTrans = glm::ortho(-X * zoomFactor, X * zoomFactor, -X * zoomFactor, X * zoomFactor);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "cameraTrans"), 1, GL_FALSE, &cameraTrans[0][0]);
 
@@ -282,7 +301,8 @@ int main() {
         std::vector<const GLvoid*> indicesOffsets;
         std::vector<GLsizei> counts;
         size_t offset = 0;
-        for (const auto& line : shapeIndices) {
+        for (const auto& line : shapeIndices)
+        {
             counts.push_back(static_cast<GLsizei>(line.size()));
             indicesOffsets.push_back(reinterpret_cast<const GLvoid*>(offset * sizeof(unsigned int)));
             offset += line.size();
@@ -291,7 +311,8 @@ int main() {
         glMultiDrawElements(GL_LINE_STRIP, counts.data(), GL_UNSIGNED_INT, indicesOffsets.data(), static_cast<GLsizei>(counts.size()));
 
         GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR) {
+        while ((err = glGetError()) != GL_NO_ERROR)
+        {
             std::cerr << "OpenGL Error: " << err << std::endl;
         }
 
@@ -320,8 +341,6 @@ int main() {
 
     return 0;
 }
-
-
 
 // 主要优化点说明
 // 生成多条连续的折线：

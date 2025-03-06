@@ -8,12 +8,12 @@ xxThreadPool::xxThreadPool()
     init();
 }
 
-xxThreadPool::xxThreadPool(const xxThreadPool &)
+xxThreadPool::xxThreadPool(const xxThreadPool&)
 {
     init();
 }
 
-xxThreadPool& xxThreadPool::operator = (const xxThreadPool &)
+xxThreadPool& xxThreadPool::operator = (const xxThreadPool&)
 {
     return *this;
 }
@@ -22,7 +22,7 @@ xxThreadPool::~xxThreadPool()
 {
 }
 
-void xxThreadPool::init() 
+void xxThreadPool::init()
 {
 }
 

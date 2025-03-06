@@ -1,42 +1,31 @@
 MESSAGE(" --------- MathTestProj----- \n")
 
-add_subdirectory(Eigen)
-add_subdirectory(CGAL)
-add_subdirectory(OpenCASCADE)
+# 查找当前文件夹下的子目录
+SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
-# # 从 CMakeLists.txt 中查找所有一级子目录并将它们添加到 add_subdirectory 中
+# 设置要排除的子目录
+SET(ExclusionList
+    .git
+    .vscode
+    build
+)
 
-# MESSAGE(" --------- --------------------------------------- ----- \n")
+# 遍历子目录,将排除的子目剔除后,添加至cmake中
+FOREACH(SUBDIR ${SUBDIRS})
+MESSAGE("\n----------------------------" ${SUBDIR} )
 
-# 获取当前目录下的所有文件和子目录列表
-# file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+    SET(ADD_DIR TRUE)
+    foreach(exc ${ExclusionList})
+        if("${SUBDIR}" STREQUAL "${exc}" )
+            MESSAGE(" ${SUBDIR}   Equal  ${exc} Skip...")
+            SET(ADD_DIR FALSE)
+            BREAK()
+        endif()
+    endforeach()
 
-# # 遍历列表
-# foreach(child ${children})
-#   # 检查是否为目录
-#   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${child})
-#     # 将子目录添加到 add_subdirectory 中
-#     add_subdirectory(${child})
-#     message(${child})
-#   endif()
-# endforeach()
+    IF( ADD_DIR )
+        MESSAGE("add subdir: " ${SUBDIR})
+        ADD_SUBDIRECTORY(${SUBDIR})
+    ENDIF()
 
-# file(GLOB_RECURSIVE children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
-# file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
-# foreach(child ${children})
-#   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${child})
-#     message(${child})
-#     add_subdirectory(${child}}
-#     endif()
-# endforeach()
-
-
-# MESSAGE(" --------- --------------------------------------- ----- \n")
-# MESSAGE(" --------- --------------------------------------- ----- \n")
-# MESSAGE(" --------- --------------------------------------- ----- \n")
-# foreach(SUBDIR ${SUBDIRECTORIES})
-
-#   # 将子目录添加到 add_subdirectory 中
-#   add_subdirectory(${SUBDIR})
-
-# endforeach()
+ENDFOREACH()

@@ -1,3 +1,20 @@
+/**
+ * OpenGL 动态虚线效果演示程序
+ *
+ * 功能：
+ * 1. 使用GLSL着色器实现虚线效果
+ * 2. 生成随机混合线段（直线和贝塞尔曲线）
+ * 3. 支持鼠标滚轮缩放
+ * 4. 实现动态虚线动画效果
+ *
+ * 主要技术点：
+ * - 使用顶点着色器计算虚线参数
+ * - 片段着色器根据参数决定是否绘制片段
+ * - 使用GLFW创建窗口和处理输入
+ * - 使用GLM进行矩阵变换
+ * - 支持动态缩放和动画效果
+ */
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -8,6 +25,13 @@
 
 constexpr float X = 4.0f;
 
+/**
+ * 顶点着色器代码
+ * 功能：
+ * - 接收顶点位置和线段长度作为输入
+ * - 应用相机变换矩阵
+ * - 计算虚线参数并传递给片段着色器
+ */
 const char* vertexShaderSource = R"(
 #version 330 core
 layout(location = 0) in vec2 in_pos;
@@ -25,6 +49,13 @@ void main() {
 }
 )";
 
+/**
+ * 片段着色器代码
+ * 功能：
+ * - 接收顶点着色器传递的虚线参数
+ * - 根据参数值决定是否绘制当前片段
+ * - 实现虚线效果
+ */
 const char* fragmentShaderSource = R"(
 #version 330 core
 in float dashParam;
@@ -151,6 +182,21 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     zoomFactor = std::max(zoomFactor, 0.1f);
 }
 
+/**
+ * 程序主函数
+ * 
+ * 功能：
+ * 1. 初始化GLFW窗口和OpenGL上下文
+ * 2. 设置回调函数
+ * 3. 编译和链接着色器程序
+ * 4. 生成随机线段数据
+ * 5. 设置顶点缓冲区和属性指针
+ * 6. 进入主渲染循环
+ * 7. 清理资源
+ * 
+ * 主要流程：
+ * - 初始化 -> 设置 -> 渲染循环 -> 清理
+ */
 int main()
 {
     if (!glfwInit())
@@ -190,7 +236,6 @@ int main()
 
     glUniform4f(glGetUniformLocation(shaderProgram, "color"), 0.0f, 0.0f, 1.0f, 1.0f);
     glUniform1f(glGetUniformLocation(shaderProgram, "dashScale"), 8.0f);
-
 
     std::vector<float> shapeVertices;
 

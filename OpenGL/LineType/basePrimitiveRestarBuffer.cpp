@@ -62,14 +62,16 @@ void main() {
 }
 )";
 
-GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
+GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
+{
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
 
     GLint success;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cerr << "Vertex Shader Compilation Failed:\n" << infoLog << std::endl;
@@ -80,7 +82,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cerr << "Fragment Shader Compilation Failed:\n" << infoLog << std::endl;
@@ -92,7 +95,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     glLinkProgram(shaderProgram);
 
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
         std::cerr << "Shader Program Linking Failed:\n" << infoLog << std::endl;
@@ -104,7 +108,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     return shaderProgram;
 }
 
-glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X) {
+glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X)
+{
     return glm::vec2(
         minX + (rand() / static_cast<float>(RAND_MAX)) * (maxX - minX),
         minY + (rand() / static_cast<float>(RAND_MAX)) * (maxY - minY)
@@ -118,11 +123,13 @@ void generateRandomMixedLines(
     int numSegments,
     int bezierSegments,
     float minX, float maxX, float minY, float maxY
-) {
+)
+{
     vertices.clear();
     flatIndices.clear();
 
-    for (int line = 0; line < numLines; ++line) {
+    for (int line = 0; line < numLines; ++line)
+    {
         glm::vec2 startPoint = randomPoint(minX, maxX, minY, maxY);
         glm::vec2 currentPoint = startPoint;
         glm::vec2 prevPoint = startPoint;
@@ -134,10 +141,12 @@ void generateRandomMixedLines(
         vertices.push_back(dAccLen);
         flatIndices.push_back(vertexIndex);
 
-        for (int i = 0; i < numSegments; ++i) {
+        for (int i = 0; i < numSegments; ++i)
+        {
             bool bLine = rand() % 2 == 0;
 
-            if (bLine) {
+            if (bLine)
+            {
                 glm::vec2 point = randomPoint(minX, maxX, minY, maxY);
                 vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
                 vertices.push_back(point.x);
@@ -151,19 +160,22 @@ void generateRandomMixedLines(
 
                 prevPoint = point;
                 currentPoint = point;
-            } else {
+            }
+            else
+            {
                 glm::vec2 controlPoint1 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 controlPoint2 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 nextPoint = randomPoint(minX, maxX, minY, maxY);
 
-                for (int j = 1; j <= bezierSegments; ++j) {
+                for (int j = 1; j <= bezierSegments; ++j)
+                {
                     float t = float(j) / float(bezierSegments);
                     float u = 1.0f - t;
 
                     glm::vec2 point = u * u * u * currentPoint +
-                                      3.0f * u * u * t * controlPoint1 +
-                                      3.0f * u * t * t * controlPoint2 +
-                                      t * t * t * nextPoint;
+                        3.0f * u * u * t * controlPoint1 +
+                        3.0f * u * t * t * controlPoint2 +
+                        t * t * t * nextPoint;
 
                     vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
                     vertices.push_back(point.x);
@@ -180,7 +192,8 @@ void generateRandomMixedLines(
                 currentPoint = nextPoint;
             }
         }
-        if (line < numLines - 1) {
+        if (line < numLines - 1)
+        {
             flatIndices.push_back(0xFFFFFFFF); // 图元重启标记
         }
     }
@@ -188,13 +201,16 @@ void generateRandomMixedLines(
 
 float zoomFactor = 1.0f;
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
     zoomFactor += float(yoffset) * 0.1f;
     zoomFactor = std::max(zoomFactor, 0.1f);
 }
 
-int main() {
-    if (!glfwInit()) {
+int main()
+{
+    if (!glfwInit())
+    {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -206,14 +222,16 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     GLFWwindow* window = glfwCreateWindow(1400, 1400, "CAD Lines", nullptr, nullptr);
-    if (!window) {
+    if (!window)
+    {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+    {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -262,7 +280,8 @@ int main() {
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glm::mat4 cameraTrans = glm::ortho(-X * zoomFactor, X * zoomFactor, -X * zoomFactor, X * zoomFactor);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "cameraTrans"), 1, GL_FALSE, &cameraTrans[0][0]);
 
@@ -280,13 +299,15 @@ int main() {
         glDrawElements(GL_LINE_STRIP, flatIndices.size(), GL_UNSIGNED_INT, 0);
 
         GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR) {
+        while ((err = glGetError()) != GL_NO_ERROR)
+        {
             std::cerr << "OpenGL Error: " << err << std::endl;
         }
 
         static int i = 0;
         i++;
-        if (i % 4000 == 0 && false) {
+        if (i % 4000 == 0 && false)
+        {
             int width, height;
             glfwGetWindowSize(window, &width, &height);
             std::vector<unsigned char> pixels(width * height * 4);
@@ -311,11 +332,7 @@ int main() {
     return 0;
 }
 
-
-
-
 // 使用动态缓冲 有哪些好处
-
 
 // 在 OpenGL 中使用动态缓冲区（通常通过 GL_DYNAMIC_DRAW 或 GL_STREAM_DRAW 指定）相比静态缓冲区（GL_STATIC_DRAW）有特定的优势，尤其在需要频繁更新数据的场景下，比如你的 CAD 软件中涉及数万条线的实时编辑和渲染。以下是使用动态缓冲区的主要好处，以及在你的具体场景中的意义：
 
@@ -351,8 +368,6 @@ int main() {
 // 内存分配	    一次性，可能优化为 GPU 内存	        保留灵活性，避免重复分配
 // 性能开销	    初始化快，更新慢	                初始化稍慢，更新快
 // 典型用途	    固定几何体（如模型）	            动态几何体（如 CAD 线条）
-
-
 
 // 进一步优化的建议
 // 分块管理：

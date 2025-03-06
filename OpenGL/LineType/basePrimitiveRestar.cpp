@@ -1,30 +1,3 @@
-// 在 OpenGL 中，使用**图元重启（Primitive Restart）**是一种优化绘制多条折线（或多条线段、条带等）的技术。它允许你在单个索引缓冲区中通过插入一个特殊的索引值（通常是最大值，如 0xFFFFFFFF）来分隔不同的图元（如多条 GL_LINE_STRIP），从而避免多次调用绘制函数（如 glMultiDrawElements）或手动管理多个偏移和计数数组。
-
-// 结合你的代码和需求（绘制多条连续的虚线折线，使用 GL_LINE_STRIP），我将对比图元重启与当前 glMultiDrawElements 的方式，并提供基于图元重启的实现代码，最后分析哪种方式更适合你的场景。
-
-// 图元重启 vs 当前方式 (glMultiDrawElements)
-// 当前方式：glMultiDrawElements
-// 实现：使用 glMultiDrawElements 绘制多条独立的 GL_LINE_STRIP，通过 indicesOffsets 和 counts 指定每条折线的起始偏移和顶点数。
-// 优点：
-// 直观且易于理解，代码逻辑清晰。
-// 不需要额外的硬件支持（图元重启需要 OpenGL 3.1+ 和驱动支持）。
-// 索引数据无需特殊处理，直接按折线分段存储。
-// 缺点：
-// 需要额外的 CPU 端数组（indicesOffsets 和 counts），增加了内存开销和维护成本。
-// 每次绘制需要传递多个参数，可能降低性能（尤其是折线数量很大时）。
-// 不能充分利用 GPU 的批量处理能力。
-// 图元重启方式
-// 实现：在索引缓冲区中插入一个特殊值（如 0xFFFFFFFF）来分隔每条折线，然后使用单次 glDrawElements 调用绘制所有折线。
-// 优点：
-// 只需一次绘制调用（glDrawElements），减少 CPU 到 GPU 的通信开销。
-// 索引缓冲区更紧凑，管理更简单，无需额外的偏移和计数数组。
-// 在 GPU 端更高效，尤其适合大量折线的场景。
-// 缺点：
-// 需要启用图元重启功能（glEnable(GL_PRIMITIVE_RESTART)），并确保硬件支持。
-// 索引数据中需要插入特殊值，稍微增加了一点生成复杂性。
-// 如果调试不当，可能导致难以察觉的绘制错误（比如忘记启用图元重启）。
-
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -37,11 +10,13 @@
 constexpr float X = 4.0f;
 
 const char* vertexShaderSource = R"(
+#version 330 core
+layout(location = 0) in vec2 in_pos;
 layout(location = 1) in float in_len;
 
 uniform mat4 cameraTrans;
 uniform float dashScale;
-uniform float timeOffset = 0.0;
+uniform float timeOffset;  // 移除默认值
 
 out float dashParam;
 
@@ -56,16 +31,15 @@ const char* fragmentShaderSource = R"(
 #version 330 core
 in float dashParam;
 uniform vec4 color;
-uniform int dashType = 0;
+uniform int dashType;  // 移除默认值
 out vec4 fragColor;
 
 void main() {
     bool draw = false;
     float pattern;
-    float cycle;
 
     switch(dashType) {
-        case 0: // 默认等长虚线
+        case 0:
             pattern = mod(dashParam, 1.0);
             draw = (pattern < 0.5);
             break;
@@ -79,14 +53,16 @@ void main() {
 }
 )";
 
-GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
+GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
+{
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
 
     GLint success;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cerr << "Vertex Shader Compilation Failed:\n" << infoLog << std::endl;
@@ -97,7 +73,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cerr << "Fragment Shader Compilation Failed:\n" << infoLog << std::endl;
@@ -109,7 +86,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     glLinkProgram(shaderProgram);
 
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
         std::cerr << "Shader Program Linking Failed:\n" << infoLog << std::endl;
@@ -121,7 +99,8 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     return shaderProgram;
 }
 
-glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X) {
+glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X)
+{
     return glm::vec2(
         minX + (rand() / static_cast<float>(RAND_MAX)) * (maxX - minX),
         minY + (rand() / static_cast<float>(RAND_MAX)) * (maxY - minY)
@@ -130,16 +109,17 @@ glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float ma
 
 void generateRandomMixedLines(
     std::vector<float>& vertices,
-    std::vector<unsigned int>& flatIndices, // 直接生成展平的索引数组
-    int numLines,
+    std::vector<unsigned int>& flatIndices, int numLines,
     int numSegments,
     int bezierSegments,
     float minX, float maxX, float minY, float maxY
-) {
+)
+{
     vertices.clear();
     flatIndices.clear();
 
-    for (int line = 0; line < numLines; ++line) {
+    for (int line = 0; line < numLines; ++line)
+    {
         glm::vec2 startPoint = randomPoint(minX, maxX, minY, maxY);
         glm::vec2 currentPoint = startPoint;
         glm::vec2 prevPoint = startPoint;
@@ -151,10 +131,12 @@ void generateRandomMixedLines(
         vertices.push_back(dAccLen);
         flatIndices.push_back(vertexIndex);
 
-        for (int i = 0; i < numSegments; ++i) {
+        for (int i = 0; i < numSegments; ++i)
+        {
             bool bLine = rand() % 2 == 0;
 
-            if (bLine) {
+            if (bLine)
+            {
                 glm::vec2 point = randomPoint(minX, maxX, minY, maxY);
                 vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
                 vertices.push_back(point.x);
@@ -168,19 +150,22 @@ void generateRandomMixedLines(
 
                 prevPoint = point;
                 currentPoint = point;
-            } else {
+            }
+            else
+            {
                 glm::vec2 controlPoint1 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 controlPoint2 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 nextPoint = randomPoint(minX, maxX, minY, maxY);
 
-                for (int j = 1; j <= bezierSegments; ++j) {
+                for (int j = 1; j <= bezierSegments; ++j)
+                {
                     float t = float(j) / float(bezierSegments);
                     float u = 1.0f - t;
 
                     glm::vec2 point = u * u * u * currentPoint +
-                                      3.0f * u * u * t * controlPoint1 +
-                                      3.0f * u * t * t * controlPoint2 +
-                                      t * t * t * nextPoint;
+                        3.0f * u * u * t * controlPoint1 +
+                        3.0f * u * t * t * controlPoint2 +
+                        t * t * t * nextPoint;
 
                     vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
                     vertices.push_back(point.x);
@@ -197,22 +182,25 @@ void generateRandomMixedLines(
                 currentPoint = nextPoint;
             }
         }
-        // 在每条折线结束后插入图元重启标记
-        if (line < numLines - 1) {
-            flatIndices.push_back(0xFFFFFFFF); // 图元重启标记
+        if (line < numLines - 1)
+        {
+            flatIndices.push_back(0xFFFFFFFF);
         }
     }
 }
 
 float zoomFactor = 1.0f;
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
     zoomFactor += float(yoffset) * 0.1f;
     zoomFactor = std::max(zoomFactor, 0.1f);
 }
 
-int main() {
-    if (!glfwInit()) {
+int main()
+{
+    if (!glfwInit())
+    {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -224,14 +212,16 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     GLFWwindow* window = glfwCreateWindow(1400, 1400, "OpenGL Dash Lines", nullptr, nullptr);
-    if (!window) {
+    if (!window)
+    {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+    {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -275,13 +265,12 @@ int main() {
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // 启用图元重启
     glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex(0xFFFFFFFF); // 设置重启标记为 0xFFFFFFFF
-
+    glPrimitiveRestartIndex(0xFFFFFFFF);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glm::mat4 cameraTrans = glm::ortho(-X * zoomFactor, X * zoomFactor, -X * zoomFactor, X * zoomFactor);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "cameraTrans"), 1, GL_FALSE, &cameraTrans[0][0]);
 
@@ -300,7 +289,8 @@ int main() {
         glDrawElements(GL_LINE_STRIP, flatIndices.size(), GL_UNSIGNED_INT, 0);
 
         GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR) {
+        while ((err = glGetError()) != GL_NO_ERROR)
+        {
             std::cerr << "OpenGL Error: " << err << std::endl;
         }
 
@@ -308,8 +298,7 @@ int main() {
         glfwPollEvents();
     }
 
-    glDisable(GL_PRIMITIVE_RESTART); // 清理时禁用图元重启
-    glDeleteProgram(shaderProgram);
+    glDisable(GL_PRIMITIVE_RESTART);     glDeleteProgram(shaderProgram);
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -319,7 +308,31 @@ int main() {
     return 0;
 }
 
+// 在 OpenGL 中，使用**图元重启（Primitive Restart）**是一种优化绘制多条折线（或多条线段、条带等）的技术。它允许你在单个索引缓冲区中通过插入一个特殊的索引值（通常是最大值，如 0xFFFFFFFF）来分隔不同的图元（如多条 GL_LINE_STRIP），从而避免多次调用绘制函数（如 glMultiDrawElements）或手动管理多个偏移和计数数组。
 
+// 结合你的代码和需求（绘制多条连续的虚线折线，使用 GL_LINE_STRIP），我将对比图元重启与当前 glMultiDrawElements 的方式，并提供基于图元重启的实现代码，最后分析哪种方式更适合你的场景。
+
+// 图元重启 vs 当前方式 (glMultiDrawElements)
+// 当前方式：glMultiDrawElements
+// 实现：使用 glMultiDrawElements 绘制多条独立的 GL_LINE_STRIP，通过 indicesOffsets 和 counts 指定每条折线的起始偏移和顶点数。
+// 优点：
+// 直观且易于理解，代码逻辑清晰。
+// 不需要额外的硬件支持（图元重启需要 OpenGL 3.1+ 和驱动支持）。
+// 索引数据无需特殊处理，直接按折线分段存储。
+// 缺点：
+// 需要额外的 CPU 端数组（indicesOffsets 和 counts），增加了内存开销和维护成本。
+// 每次绘制需要传递多个参数，可能降低性能（尤其是折线数量很大时）。
+// 不能充分利用 GPU 的批量处理能力。
+// 图元重启方式
+// 实现：在索引缓冲区中插入一个特殊值（如 0xFFFFFFFF）来分隔每条折线，然后使用单次 glDrawElements 调用绘制所有折线。
+// 优点：
+// 只需一次绘制调用（glDrawElements），减少 CPU 到 GPU 的通信开销。
+// 索引缓冲区更紧凑，管理更简单，无需额外的偏移和计数数组。
+// 在 GPU 端更高效，尤其适合大量折线的场景。
+// 缺点：
+// 需要启用图元重启功能（glEnable(GL_PRIMITIVE_RESTART)），并确保硬件支持。
+// 索引数据中需要插入特殊值，稍微增加了一点生成复杂性。
+// 如果调试不当，可能导致难以察觉的绘制错误（比如忘记启用图元重启）。
 
 // 修改点说明
 // 索引生成：
@@ -353,8 +366,6 @@ int main() {
 // 如何选择
 // 如果你优先考虑简单性和调试，继续使用 glMultiDrawElements（前一个版本）。
 // 如果你追求性能和扩展性，采用上面的图元重启版本。
-
-
 
 // 图元重启 vs glMultiDrawElements 详细对比
 // 图元重启（Primitive Restart）

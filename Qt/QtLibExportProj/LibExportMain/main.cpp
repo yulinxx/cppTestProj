@@ -3,11 +3,9 @@
 #include "Implementation.h"
 #include "MainWindow.h"
 
-
 #include <QApplication>
 #include <QWidget>
 #include <QApplication>
-
 
 int main(int argc, char* argv[])
 {

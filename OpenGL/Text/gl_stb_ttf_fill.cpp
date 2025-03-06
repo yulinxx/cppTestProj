@@ -1,17 +1,16 @@
-#include <glad/glad.h> 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp> 
-#include <glm/gtc/type_ptr.hpp>         
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h" 
-
+#include "stb_truetype.h"
 
 ////////////////////////////////////////////////////////
 #include <glad/glad.h>
@@ -19,7 +18,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 
 #include <iostream>
 #include <vector>
@@ -47,7 +45,6 @@
 //将每个轮廓转换为三角形网格（三角剖分），然后用 GL_TRIANGLES 填充。可以使用简单的三角形生成方法（如耳分法）或引入专门的几何库（如 poly2tri）。
 //改进填充逻辑：
 //仅填充外部轮廓，跳过或反向填充内部孔洞。
-
 
 // 窗口大小
 const int WIDTH = 800;

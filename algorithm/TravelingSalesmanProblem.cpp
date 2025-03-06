@@ -1,4 +1,4 @@
-// 模拟退火(SA, Simulated Annealing)算法解决旅行商TSP问题_模拟退火算法tsp_lamusique的博客-CSDN博客  
+// 模拟退火(SA, Simulated Annealing)算法解决旅行商TSP问题_模拟退火算法tsp_lamusique的博客-CSDN博客
 // https://blog.csdn.net/lamusique/article/details/123721794
 
 // 使用模拟退火(SA)算法求解旅行商(TSP)问题
@@ -10,7 +10,6 @@
 // 不停的交换,并得到最短的路径即可
 // 以下为cpp代码
 // 注释部分为python代码, 用于展示点以及点与点之间的连线
-
 
 // 什么是旅行商问题(TSP)?
 // TSP问题（Traveling Salesman Problem，旅行商问题），由威廉哈密顿爵士和英国数学家克克曼T.P.Kirkman于19世纪初提出。问题描述如下：
@@ -136,7 +135,6 @@ void createNew()
     cityList[pos1] = cityList[pos2];
     cityList[pos2] = temp; // 交换两个点
 
-
     double x;
     if (pos1 == 0 || pos2 == 0)
         x = pos1 + pos2;
@@ -201,15 +199,10 @@ int main(void)
     return 0;
 }
 
-
-
-
-
 ////////////////////////
 // python代码
 
 /*
-
 
 import matplotlib.pyplot as plt
 
@@ -257,6 +250,5 @@ plt.ylabel('Y Coordinate')
 
 # 显示图表
 plt.show()
-
 
 */
