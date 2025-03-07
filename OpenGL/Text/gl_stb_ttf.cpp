@@ -180,7 +180,7 @@ int main()
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
     // TTF
-    loadFontTexture("STHUPO.TTF");
+    loadFontTexture("C:/Windows/Fonts/arial.ttf");
 
     glm::mat4 projection = glm::ortho(0.0f, (float)WIDTH, 0.0f, (float)HEIGHT);
     glUseProgram(shaderProgram);

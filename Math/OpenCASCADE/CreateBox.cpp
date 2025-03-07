@@ -14,22 +14,22 @@
 
 /**
  * @brief 主函数，程序的入口点。
- * 
+ *
  * 此程序的主要用途是利用 Open CASCADE 库创建一个三维的盒子形状，
  * 并将这个盒子的几何模型保存为 STEP 格式的文件。
  * STEP 文件是一种常见的用于交换三维几何数据的标准文件格式。
- * 
+ *
  * @return int 程序的退出状态码，0 表示正常退出。
  */
-int main() 
+int main()
 {
     // 创建一个三维盒子
     // 定义盒子在 x 轴方向的长度
-    Standard_Real xLength = 100.0; 
+    Standard_Real xLength = 100.0;
     // 定义盒子在 y 轴方向的长度
-    Standard_Real yLength = 50.0;  
+    Standard_Real yLength = 50.0;
     // 定义盒子在 z 轴方向的长度
-    Standard_Real zLength = 30.0;  
+    Standard_Real zLength = 30.0;
 
     // 使用 BRepPrimAPI_MakeBox 类创建一个盒子形状
     // 该类是 Open CASCADE 库中用于创建基本体（如盒子）的工具类

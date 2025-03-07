@@ -35,18 +35,18 @@ static const int WIDTH = 800;
 static const int HEIGHT = 600;
 
 // 定义着色器程序 ID
-GLuint shaderProgram, 
+GLuint shaderProgram,
 // 定义顶点数组对象 ID
-VAO, 
+VAO,
 // 定义顶点缓冲对象 ID
 VBO;
 
 /**
  * @brief 读取字体文件并将其内容存储在向量中。
- * 
+ *
  * 该函数以二进制模式打开指定的字体文件，并将文件内容读取到一个无符号字符向量中。
  * 如果文件打开失败，将输出错误信息并终止程序。
- * 
+ *
  * @param filename 字体文件的路径和文件名。
  * @return std::vector<unsigned char> 包含字体文件内容的向量。
  */
@@ -102,10 +102,10 @@ void main()
 
 /**
  * @brief 编译指定类型的着色器。
- * 
+ *
  * 该函数创建一个指定类型的着色器对象，并将源代码加载到该对象中进行编译。
  * 目前省略了错误检查。
- * 
+ *
  * @param type 着色器类型，如 GL_VERTEX_SHADER 或 GL_FRAGMENT_SHADER。
  * @param src 着色器源代码。
  * @return GLuint 编译后的着色器对象 ID。
@@ -125,7 +125,7 @@ GLuint compileShader(GLenum type, const char* src)
 
 /**
  * @brief 初始化 OpenGL 着色器程序。
- * 
+ *
  * 该函数编译顶点着色器和片段着色器，并将它们链接到一个着色器程序中。
  * 编译和链接完成后，删除临时的着色器对象。
  */
@@ -151,10 +151,10 @@ void initOpenGL()
 
 /**
  * @brief 计算多边形的面积。
- * 
+ *
  * 该函数根据多边形的顶点坐标计算其面积。面积的正负表示多边形的顶点顺序：
  * 顺时针顺序为负，逆时针顺序为正。
- * 
+ *
  * @param poly 包含多边形顶点坐标的向量，格式为 [x0, y0, x1, y1, ...]。
  * @return float 多边形的面积。
  */
@@ -178,10 +178,10 @@ float computeArea(const std::vector<float>& poly)
 
 /**
  * @brief 翻转多边形的顶点顺序。
- * 
+ *
  * 该函数将多边形的顶点顺序从顺时针翻转到逆时针，或从逆时针翻转到顺时针。
  * 顶点坐标存储在向量中，格式为 [x0, y0, x1, y1, ...]。
- * 
+ *
  * @param poly 包含多边形顶点坐标的向量。
  */
 void reversePolygon(std::vector<float>& poly)
@@ -204,9 +204,9 @@ void reversePolygon(std::vector<float>& poly)
 
 /**
  * @brief 细分二次贝塞尔曲线。
- * 
+ *
  * 该函数将二次贝塞尔曲线细分为多个线段，并返回细分后的顶点坐标。
- * 
+ *
  * @param x0 起始点的 x 坐标。
  * @param y0 起始点的 y 坐标。
  * @param x1 控制点的 x 坐标。
@@ -242,10 +242,10 @@ std::vector<float> tessellateQuadBezier(float x0, float y0, float x1, float y1, 
 
 /**
  * @brief 获取字符的轮廓。
- * 
+ *
  * 该函数使用 STB 字体库获取指定字符的轮廓，并将轮廓存储在一个二维向量中。
  * 同时，计算字符的水平偏移量。
- * 
+ *
  * @param font 字体信息结构体指针。
  * @param codepoint 字符的 Unicode 码点。
  * @param scale 字体缩放比例。
@@ -269,7 +269,7 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
         // 根据顶点类型进行不同的处理
         switch (v[i].type)
         {
-        // 处理移动到新点的操作
+            // 处理移动到新点的操作
         case STBTT_vmove:
             // 如果当前轮廓不为空
             if (!current.empty())
@@ -284,14 +284,14 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
             // 将新点的 y 坐标添加到当前轮廓中
             current.push_back(v[i].y * scale);
             break;
-        // 处理直线段的操作
+            // 处理直线段的操作
         case STBTT_vline:
             // 将直线段终点的 x 坐标添加到当前轮廓中
             current.push_back(v[i].x * scale);
             // 将直线段终点的 y 坐标添加到当前轮廓中
             current.push_back(v[i].y * scale);
             break;
-        // 处理二次贝塞尔曲线的操作
+            // 处理二次贝塞尔曲线的操作
         case STBTT_vcurve:
         {
             // 获取当前轮廓的最后一个点的 x 坐标
@@ -316,7 +316,7 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
         }
     }
     // 如果当前轮廓不为空
-    if (!current.empty()) 
+    if (!current.empty())
         // 将当前轮廓添加到轮廓向量中
         outlines.push_back(current);
     // 释放 STB 顶点结构体的内存
@@ -334,9 +334,9 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
 
 /**
  * @brief 对单个轮廓进行三角剖分。
- * 
+ *
  * 该函数使用 earcut 库对单个轮廓进行三角剖分，并将三角剖分后的顶点坐标存储在输出向量中。
- * 
+ *
  * @param outline 包含单个轮廓顶点坐标的向量，格式为 [x0, y0, x1, y1, ...]。
  * @param outVertices 存储三角剖分后顶点坐标的输出向量。
  */
@@ -376,10 +376,10 @@ void triangulateSingleOutline(const std::vector<float>& outline, std::vector<flo
 
 /**
  * @brief 绘制单个字符。
- * 
+ *
  * 该函数获取指定字符的轮廓，对轮廓进行三角剖分，并将三角剖分后的顶点数据上传到 OpenGL 缓冲区进行绘制。
  * 同时，更新光标位置。
- * 
+ *
  * @param font 字体信息结构体指针。
  * @param codepoint 字符的 Unicode 码点。
  * @param cursorX 光标当前的 x 坐标。
@@ -440,9 +440,9 @@ void renderGlyph(stbtt_fontinfo* font, int codepoint, float& cursorX, float base
 
 /**
  * @brief 渲染填充文本。
- * 
+ *
  * 该函数遍历字符串中的每个字符，调用 renderGlyph 函数绘制每个字符，并更新光标位置。
- * 
+ *
  * @param font 字体信息结构体指针。
  * @param text 要渲染的字符串。
  * @param x 文本的起始 x 坐标。
@@ -463,10 +463,10 @@ void renderFilledText(stbtt_fontinfo* font, const std::string& text, float x, fl
 
 /**
  * @brief 主函数，程序的入口点。
- * 
+ *
  * 该函数初始化 GLFW 和 GLAD，创建窗口，初始化 OpenGL 着色器程序，加载字体，设置投影矩阵，
  * 并在主循环中渲染填充文本。最后，清理资源并退出程序。
- * 
+ *
  * @return int 程序的退出状态码，0 表示正常退出。
  */
 int main()
@@ -508,7 +508,7 @@ int main()
 
     // 加载字体
     // 读取字体文件
-    auto fontBuf = readFontFile("STHUPO.TTF");
+    auto fontBuf = readFontFile("C:/Windows/Fonts/arial.ttf");
     // 定义字体信息结构体
     stbtt_fontinfo font;
     // 初始化字体信息

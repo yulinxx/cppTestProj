@@ -184,7 +184,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 /**
  * 程序主函数
- * 
+ *
  * 功能：
  * 1. 初始化GLFW窗口和OpenGL上下文
  * 2. 设置回调函数
@@ -193,7 +193,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
  * 5. 设置顶点缓冲区和属性指针
  * 6. 进入主渲染循环
  * 7. 清理资源
- * 
+ *
  * 主要流程：
  * - 初始化 -> 设置 -> 渲染循环 -> 清理
  */

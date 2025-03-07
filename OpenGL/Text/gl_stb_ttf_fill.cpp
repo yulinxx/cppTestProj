@@ -269,7 +269,7 @@ int main()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
     // 加载字体
-    auto fontBuffer = readFontFile("STHUPO.TTF");
+    auto fontBuffer = readFontFile("C:/Windows/Fonts/arial.ttf");
     stbtt_fontinfo font;
     if (!stbtt_InitFont(&font, fontBuffer.data(), stbtt_GetFontOffsetForIndex(fontBuffer.data(), 0)))
     {

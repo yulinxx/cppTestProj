@@ -5,67 +5,88 @@
 #include <time.h>    // 用于 srand()
 #include <vector>    // 添加 vector 头文件
 
-// 顶点着色器
-const char* vertexShaderSource = "#version 400\n"
-"layout (location = 0) in vec2 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
-"}\0";
+// 顶点着色器（使用 Raw String Literal）
+const char* vertexShaderSource = R"(
+#version 400
+layout (location = 0) in vec2 aPos;
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
+}
+)";
 
-// 几何着色器
-const char* geometryShaderSource = "#version 400\n"
-"layout (lines_adjacency) in;\n"  // 使用 lines_adjacency 输入布局
-"layout (triangle_strip, max_vertices = 4) out;\n"
-"uniform float thickness = 0.03;\n"  // 线条粗细
-"void main()\n"
-"{\n"
-"   vec2 p0 = gl_in[0].gl_Position.xy;\n"  // 前一个点
-"   vec2 p1 = gl_in[1].gl_Position.xy;\n"  // 起点
-"   vec2 p2 = gl_in[2].gl_Position.xy;\n"  // 终点
-"   vec2 p3 = gl_in[3].gl_Position.xy;\n"  // 后一个点
-"   \n"
-"   // 计算前段和后段的方向\n"
-"   vec2 dir1 = normalize(p2 - p1);\n"
-"   vec2 dir2 = normalize(p3 - p2);\n"
-"   \n"
-"   // 计算法线\n"
-"   vec2 normal1 = vec2(-dir1.y, dir1.x);\n"
-"   vec2 normal2 = vec2(-dir2.y, dir2.x);\n"
-"   \n"
-"   // 计算连接处的法线（角度平分线）\n"
-"   vec2 normal = normalize(normal1 + normal2);\n"
-"   \n"
-"   // 计算偏移\n"
-"   vec2 offset1 = normal * thickness;\n"
-"   vec2 offset2 = normal * thickness;\n"
-"   \n"
-"   // 生成粗线的顶点\n"
-"   gl_Position = vec4(p1 - offset1, 0.0, 1.0);\n"
-"   EmitVertex();\n"
-"   gl_Position = vec4(p1 + offset1, 0.0, 1.0);\n"
-"   EmitVertex();\n"
-"   gl_Position = vec4(p2 - offset2, 0.0, 1.0);\n"
-"   EmitVertex();\n"
-"   gl_Position = vec4(p2 + offset2, 0.0, 1.0);\n"
-"   EmitVertex();\n"
-"   EndPrimitive();\n"
-"}\0";
+// 几何着色器（优化法线和偏移计算，使用 Raw String Literal）
+const char* geometryShaderSource = R"(
+#version 400
+layout (lines_adjacency) in;           // 输入：带邻接信息的线段
+layout (triangle_strip, max_vertices = 32) out; // 输出：三角形条带，增加顶点数支持圆角
+uniform float thickness;               // 线条厚度
+uniform int segments = 8;              // 圆角细分段数
 
-// 片段着色器
-const char* fragmentShaderSource = "#version 400\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"  // 红色线条
-"}\0";
+void main()
+{
+    // 获取四个输入点
+    vec2 p0 = gl_in[0].gl_Position.xy; // 前一个点（邻接）
+    vec2 p1 = gl_in[1].gl_Position.xy; // 线段起点
+    vec2 p2 = gl_in[2].gl_Position.xy; // 线段终点
+    vec2 p3 = gl_in[3].gl_Position.xy; // 后一个点（邻接）
+
+    // 计算线段方向
+    vec2 dir1 = normalize(p2 - p1);    // 第一段方向
+    vec2 dir2 = normalize(p3 - p2);    // 第二段方向
+
+    // 计算法线
+    vec2 normal1 = vec2(-dir1.y, dir1.x);
+    vec2 normal2 = vec2(-dir2.y, dir2.x);
+
+    // 生成直线部分的顶点
+    vec2 offset1 = thickness * normal1;
+    vec2 offset2 = thickness * normal2;
+
+    gl_Position = vec4(p1 - offset1, 0.0, 1.0); EmitVertex();
+    gl_Position = vec4(p1 + offset1, 0.0, 1.0); EmitVertex();
+    gl_Position = vec4(p2 - offset2, 0.0, 1.0); EmitVertex();
+    gl_Position = vec4(p2 + offset2, 0.0, 1.0); EmitVertex();
+
+    // 生成圆角顶点（仅在转折处）
+    if (dot(dir1, dir2) < 0.999) {  // 判断是否为转折处
+        vec2 center = p2;  // 转折点为中心
+        float angle1 = atan(normal1.y, normal1.x);
+        float angle2 = atan(normal2.y, normal2.x);
+        float delta_angle = angle2 - angle1;
+        if (delta_angle > 3.14159) delta_angle -= 2 * 3.14159;
+        if (delta_angle < -3.14159) delta_angle += 2 * 3.14159;
+
+        for (int i = 0; i <= segments; ++i) {
+            float t = float(i) / float(segments);
+            float angle = angle1 + t * delta_angle;
+            vec2 offset = thickness * vec2(cos(angle), sin(angle));
+            gl_Position = vec4(center + offset, 0.0, 1.0);
+            EmitVertex();
+        }
+    }
+
+    EndPrimitive();
+}
+)";
+
+// 片段着色器（使用 Raw String Literal）
+const char* fragmentShaderSource = R"(
+#version 400
+out vec4 FragColor;
+uniform vec4 lineColor;  // 在全局作用域声明 uniform
+
+void main()
+{
+    FragColor = lineColor;
+}
+)";
 
 // 生成随机顶点的函数，返回 vector
 std::vector<float> generateRandomVertices(int numPoints)
 {
     std::vector<float> vertices(numPoints * 2);  // 每个点需要2个float (x, y)
 
-    // 随机数种子，只需初始化一次
     static int seeded = 0;
     if (!seeded)
     {
@@ -73,7 +94,6 @@ std::vector<float> generateRandomVertices(int numPoints)
         seeded = 1;
     }
 
-    // 生成随机坐标，范围在 [-1, 1]
     for (int i = 0; i < numPoints * 2; i += 2)
     {
         vertices[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;     // x坐标
@@ -169,13 +189,36 @@ int main()
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
 
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
+    }
+
     unsigned int geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
     glShaderSource(geometryShader, 1, &geometryShaderSource, NULL);
     glCompileShader(geometryShader);
 
+    glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
+        printf("ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n%s\n", infoLog);
+    }
+
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s\n", infoLog);
+    }
 
     // 链接着色器程序
     unsigned int shaderProgram = glCreateProgram();
@@ -184,13 +227,20 @@ int main()
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
 
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
+    }
+
     // 删除不再需要的着色器对象
     glDeleteShader(vertexShader);
     glDeleteShader(geometryShader);
     glDeleteShader(fragmentShader);
 
-    // 生成随机顶点
-    int numPoints = 50;
+    // 生成随机顶点（增加点数以改善平滑性）
+    int numPoints = 10;  // 增加点数
     std::vector<float> vertices = generateRandomVertices(numPoints);
 
     // 准备 lines_adjacency 顶点数据
@@ -207,6 +257,11 @@ int main()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    // 获取 uniform 位置
+    glUseProgram(shaderProgram);
+    GLint thicknessLoc = glGetUniformLocation(shaderProgram, "thickness");
+    GLint lineColorLoc = glGetUniformLocation(shaderProgram, "lineColor");
+
     // 渲染循环
     while (!glfwWindowShouldClose(window))
     {
@@ -214,8 +269,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
+        // 设置 uniform 值
+        glUniform1f(thicknessLoc, 0.05f);           // 设置线条粗细
+        glUniform4f(lineColorLoc, 1.0f, 0.0f, 0.0f, 1.0f);  // 设置红色
+
         glBindVertexArray(VAO);
-        // 使用 GL_LINES_ADJACENCY 绘制
         glDrawArrays(GL_LINES_ADJACENCY, 0, 4 * (numPoints - 1));
 
         glfwSwapBuffers(window);

@@ -1,5 +1,8 @@
 // Eigen 是一个强大的 C++ 线性代数库，提供了许多用于矩阵和向量操作的功能。下面列举了一些 Eigen 库中常用的矩阵操作：
 
+// 矩阵创建、加法、乘法、转置、求逆和行列式计算，
+// 线性方程组求解、特征值和特征向量计算、矩阵大小和维度获取、行和列访问以及子矩阵访问等常用函数的示例
+
 // 1. 创建矩阵和向量：
 //    - `MatrixXd`：动态大小的矩阵。
 //    - `Matrix3d`、`Matrix4d`：固定大小的 3x3 和 4x4 矩阵。
@@ -51,39 +54,75 @@ int main()
 
     // 访问矩阵元素
     std::cout << std::endl
-              << "m1: \n"
-              << m1 << std::endl;
+        << "m1: \n"
+        << m1 << std::endl;
     std::cout << std::endl
-              << "m2: \n"
-              << m2 << std::endl;
+        << "m2: \n"
+        << m2 << std::endl;
 
     // 矩阵加法
     Eigen::Matrix3d sum = m1 + m2;
     std::cout << std::endl
-              << "m1 + m2: \n"
-              << sum << std::endl;
+        << "m1 + m2: \n"
+        << sum << std::endl;
 
     // 矩阵乘法
     Eigen::Matrix3d product = m1 * m2;
     std::cout << std::endl
-              << "m1 * m2: \n"
-              << product << std::endl;
+        << "m1 * m2: \n"
+        << product << std::endl;
 
     // 矩阵转置
     Eigen::Matrix3d transposed = m1.transpose();
     std::cout << std::endl
-              << "m1 transposed: \n"
-              << transposed << std::endl;
+        << "m1 transposed: \n"
+        << transposed << std::endl;
 
     // 矩阵求逆
     Eigen::Matrix3d inverse = m1.inverse();
     std::cout << "m1 inverse: \n"
-              << inverse << std::endl;
+        << inverse << std::endl;
 
     // 矩阵行列式
     double determinant = m1.determinant();
     std::cout << std::endl
-              << "m1 determinant: " << determinant << std::endl;
+        << "m1 determinant: " << determinant << std::endl;
+
+    // 矩阵求解线性方程组 Ax = b
+    Eigen::Vector3d b(1.0, 2.0, 3.0);
+    Eigen::Vector3d x = m1.solve(b);
+    std::cout << std::endl
+        << "Solution of m1 * x = b: \n"
+        << x << std::endl;
+
+    // 矩阵特征值
+    Eigen::EigenSolver<Eigen::Matrix3d> es(m1);
+    std::cout << std::endl
+        << "Eigenvalues of m1: \n"
+        << es.eigenvalues() << std::endl;
+
+    // 矩阵特征向量
+    std::cout << std::endl
+        << "Eigenvectors of m1: \n"
+        << es.eigenvectors() << std::endl;
+
+    // 矩阵大小和维度
+    std::cout << std::endl
+        << "m1 rows: " << m1.rows() << ", cols: " << m1.cols() << std::endl;
+
+    // 访问矩阵的行和列
+    std::cout << std::endl
+        << "m1 first row: \n"
+        << m1.row(0) << std::endl;
+    std::cout << std::endl
+        << "m1 first column: \n"
+        << m1.col(0) << std::endl;
+
+    // 访问矩阵的子矩阵
+    Eigen::Matrix2d submatrix = m1.block(0, 0, 2, 2);
+    std::cout << std::endl
+        << "2x2 submatrix of m1: \n"
+        << submatrix << std::endl;
 
     return 0;
 }

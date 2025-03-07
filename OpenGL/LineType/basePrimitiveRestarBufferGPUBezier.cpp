@@ -1,4 +1,3 @@
-// 在你的 CAD 软件中，当前将曲线离散成短线段（例如通过贝塞尔曲线细分）后传给 GPU 的做法确实会显著增加数据量，尤其是在处理数万条线时。
 // 这种方法将计算负担放在了 CPU 端，而 GPU 的强大并行计算能力未被充分利用。
 // 直接将直线和曲线的控制点传给 GPU，让 GPU 负责绘制曲线是一个非常可行的优化方向。这种方法可以减少数据传输量，提高渲染效率，同时保留高质量的曲线绘制。
 
@@ -88,16 +87,21 @@
 #include <chrono>
 #include <string>
 
-constexpr float X = 4.0f; // 初始世界坐标范围（-X 到 X）
+// 初始世界坐标范围（-X 到 X）
+constexpr float X = 4.0f; 
 
 // Vertex Shader: 传递控制点位置和累计长度
 const char* vertexShaderSource = R"(
 #version 400 core
-layout(location = 0) in vec2 in_pos;   // 输入控制点坐标
-layout(location = 1) in float in_len;  // 输入累计长度
+// 输入控制点坐标
+layout(location = 0) in vec2 in_pos;   
+// 输入累计长度
+layout(location = 1) in float in_len;  
 
-out vec2 v_pos;    // 传递给 Tessellation 的位置
-out float v_len;   // 传递给 Tessellation 的长度
+// 传递给 Tessellation 的位置
+out vec2 v_pos;    
+// 传递给 Tessellation 的长度
+out float v_len;   
 
 void main() {
     v_pos = in_pos;
@@ -108,17 +112,24 @@ void main() {
 // Tessellation Control Shader: 设置细分级别
 const char* tessControlShaderSource = R"(
 #version 400 core
+// 输出顶点数为 4
 layout(vertices = 4) out;
 
-uniform float tessLevel = 10.0;  // 细分级别，动态调整
+// 细分级别，动态调整
+uniform float tessLevel = 10.0;  
 
+// 从 Vertex Shader 传入的位置
 in vec2 v_pos[];
+// 从 Vertex Shader 传入的长度
 in float v_len[];
 
+// 传递给 Tessellation Evaluation Shader 的位置
 out vec2 tc_pos[];
+// 传递给 Tessellation Evaluation Shader 的长度
 out float tc_len[];
 
 void main() {
+    // 将输入的位置和长度传递给输出
     tc_pos[gl_InvocationID] = v_pos[gl_InvocationID];
     tc_len[gl_InvocationID] = v_len[gl_InvocationID];
 
@@ -137,18 +148,26 @@ void main() {
 // Tessellation Evaluation Shader: 计算曲线上的点和长度
 const char* tessEvaluationShaderSource = R"(
 #version 400 core
+// 采用等间距的等值线细分模式
 layout(isolines, equal_spacing) in;
 
-uniform mat4 cameraTrans;       // 相机变换矩阵
-uniform float dashScale = 8.0;  // 虚线缩放因子
-uniform float timeOffset = 0.0; // 时间偏移，用于虚线动画
+// 相机变换矩阵
+uniform mat4 cameraTrans;       
+// 虚线缩放因子
+uniform float dashScale = 8.0;  
+// 时间偏移，用于虚线动画
+uniform float timeOffset = 0.0; 
 
+// 从 Tessellation Control Shader 传入的位置
 in vec2 tc_pos[];
+// 从 Tessellation Control Shader 传入的长度
 in float tc_len[];
 
-out float dashParam;  // 传递给 Fragment Shader 的虚线参数
+// 传递给 Fragment Shader 的虚线参数
+out float dashParam;  
 
 void main() {
+    // 获取细分坐标
     float u = gl_TessCoord.x;
 
     vec4 pos;
@@ -169,20 +188,27 @@ void main() {
               3.0 * oneMinusU * u2 * vec4(tc_pos[2], 0.0, 1.0) +
               u3 * vec4(tc_pos[3], 0.0, 1.0);
 
-        len = mix(tc_len[0], tc_len[3], u);  // 近似长度
+        // 近似长度
+        len = mix(tc_len[0], tc_len[3], u);  
     }
 
-    dashParam = len * dashScale + timeOffset;  // 计算虚线参数
-    gl_Position = cameraTrans * pos;           // 应用相机变换
+    // 计算虚线参数
+    dashParam = len * dashScale + timeOffset;  
+    // 应用相机变换
+    gl_Position = cameraTrans * pos;           
 }
 )";
 
 // Fragment Shader: 实现虚线样式
 const char* fragmentShaderSource = R"(
 #version 400 core
+// 从 Tessellation Evaluation Shader 传入的虚线参数
 in float dashParam;
+// 线条颜色
 uniform vec4 color;
-uniform int dashType = 10;
+// 虚线类型
+uniform int dashType = 0;
+// 输出片段颜色
 out vec4 fragColor;
 
 void main() {
@@ -212,113 +238,182 @@ void main() {
     }
 
     if (!draw)
-        discard;  // 不绘制虚线空白部分
+        // 不绘制虚线空白部分
+        discard;  
 
     fragColor = color;
 }
 )";
 
-// 编译并链接着色器程序
+/**
+ * @brief 编译并链接着色器程序
+ * @return 着色器程序的 ID
+ */
 GLuint loadShader()
 {
+    // 创建顶点着色器
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    // 设置顶点着色器源代码
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    // 编译顶点着色器
     glCompileShader(vertexShader);
 
+    // 创建镶嵌控制着色器
     GLuint tessControlShader = glCreateShader(GL_TESS_CONTROL_SHADER);
+    // 设置镶嵌控制着色器源代码
     glShaderSource(tessControlShader, 1, &tessControlShaderSource, nullptr);
+    // 编译镶嵌控制着色器
     glCompileShader(tessControlShader);
 
+    // 创建镶嵌评估着色器
     GLuint tessEvaluationShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
+    // 设置镶嵌评估着色器源代码
     glShaderSource(tessEvaluationShader, 1, &tessEvaluationShaderSource, nullptr);
+    // 编译镶嵌评估着色器
     glCompileShader(tessEvaluationShader);
 
+    // 创建片段着色器
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    // 设置片段着色器源代码
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    // 编译片段着色器
     glCompileShader(fragmentShader);
 
+    // 创建着色器程序
     GLuint shaderProgram = glCreateProgram();
+    // 将顶点着色器附加到着色器程序
     glAttachShader(shaderProgram, vertexShader);
+    // 将镶嵌控制着色器附加到着色器程序
     glAttachShader(shaderProgram, tessControlShader);
+    // 将镶嵌评估着色器附加到着色器程序
     glAttachShader(shaderProgram, tessEvaluationShader);
+    // 将片段着色器附加到着色器程序
     glAttachShader(shaderProgram, fragmentShader);
+    // 链接着色器程序
     glLinkProgram(shaderProgram);
 
+    // 删除顶点着色器
     glDeleteShader(vertexShader);
+    // 删除镶嵌控制着色器
     glDeleteShader(tessControlShader);
+    // 删除镶嵌评估着色器
     glDeleteShader(tessEvaluationShader);
+    // 删除片段着色器
     glDeleteShader(fragmentShader);
 
     return shaderProgram;
 }
 
-// 生成随机点
+/**
+ * @brief 生成随机点
+ * @param minX 最小 X 坐标
+ * @param maxX 最大 X 坐标
+ * @param minY 最小 Y 坐标
+ * @param maxY 最大 Y 坐标
+ * @return 随机生成的点
+ */
 glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X)
 {
     return glm::vec2(
+        // 生成随机 X 坐标
         minX + (rand() / static_cast<float>(RAND_MAX)) * (maxX - minX),
+        // 生成随机 Y 坐标
         minY + (rand() / static_cast<float>(RAND_MAX)) * (maxY - minY));
 }
 
 // 线段结构体
 struct LineSegment
 {
-    std::vector<glm::vec2> controlPoints; // 控制点（直线2个，曲线4个）
-    std::vector<float> lengths;           // 累计长度
-    bool isCurve;                         // 是否为曲线
-    size_t vertexOffset;                  // VBO 中的顶点偏移
-    size_t indexOffset;                   // EBO 中的索引偏移
+    // 控制点（直线2个，曲线4个）
+    std::vector<glm::vec2> controlPoints; 
+    // 累计长度
+    std::vector<float> lengths;           
+    // 是否为曲线
+    bool isCurve;                         
+    // VBO 中的顶点偏移
+    size_t vertexOffset;                  
+    // EBO 中的索引偏移
+    size_t indexOffset;                   
 };
 
-// 生成随机线条（直线和曲线混合）
+/**
+ * @brief 生成随机线条（直线和曲线混合）
+ * @param lines 存储生成的线条
+ * @param numLines 线条数量
+ * @param numSegments 每条线条的段数
+ */
 void generateRandomMixedLines(std::vector<LineSegment>& lines, int numLines, int numSegments)
 {
+    // 调整向量大小以容纳所有线条段
     lines.resize(numLines * numSegments);
     int lineIdx = 0;
 
     for (int line = 0; line < numLines; ++line)
     {
+        // 生成随机起始点
         glm::vec2 currentPoint = randomPoint();
         float dAccLen = 0.0f;
         for (int i = 0; i < numSegments; ++i)
         {
+            // 获取当前线段
             LineSegment& segment = lines[lineIdx++];
+            // 随机决定是否为曲线
             segment.isCurve = rand() % 2 == 0;
 
             if (segment.isCurve)
             {
+                // 添加起始控制点
                 segment.controlPoints.push_back(currentPoint);
                 segment.lengths.push_back(dAccLen);
+                // 添加随机控制点
                 segment.controlPoints.push_back(randomPoint());
                 segment.lengths.push_back(dAccLen);
+                // 添加随机控制点
                 segment.controlPoints.push_back(randomPoint());
                 segment.lengths.push_back(dAccLen);
+                // 生成随机结束点
                 glm::vec2 nextPoint = randomPoint();
+                // 计算线段长度
                 float segmentLength = glm::distance(currentPoint, nextPoint);
                 dAccLen += segmentLength;
+                // 添加结束控制点
                 segment.controlPoints.push_back(nextPoint);
                 segment.lengths.push_back(dAccLen);
+                // 更新当前点
                 currentPoint = nextPoint;
             }
             else
             {
+                // 添加起始控制点
                 segment.controlPoints.push_back(currentPoint);
                 segment.lengths.push_back(dAccLen);
+                // 生成随机结束点
                 glm::vec2 nextPoint = randomPoint();
+                // 计算线段长度
                 float segmentLength = glm::distance(currentPoint, nextPoint);
                 dAccLen += segmentLength;
+                // 添加结束控制点
                 segment.controlPoints.push_back(nextPoint);
                 segment.lengths.push_back(dAccLen);
+                // 更新当前点
                 currentPoint = nextPoint;
             }
         }
     }
 }
 
-// 更新顶点和索引缓冲区
+/**
+ * @brief 更新顶点和索引缓冲区
+ * @param VBO 顶点缓冲区对象 ID
+ * @param EBO 索引缓冲区对象 ID
+ * @param lines 存储的线条
+ * @param vertices 顶点数据
+ * @param indices 索引数据
+ */
 void updateBuffers(GLuint VBO, GLuint EBO, std::vector<LineSegment>& lines,
     std::vector<float>& vertices, std::vector<unsigned int>& indices)
 {
+    // 清空顶点和索引数据
     vertices.clear();
     indices.clear();
     size_t vertexOffset = 0;
@@ -326,18 +421,23 @@ void updateBuffers(GLuint VBO, GLuint EBO, std::vector<LineSegment>& lines,
 
     for (auto& segment : lines)
     {
+        // 记录顶点和索引偏移
         segment.vertexOffset = vertexOffset;
         segment.indexOffset = indexOffset;
 
         for (size_t i = 0; i < segment.controlPoints.size(); ++i)
         {
+            // 添加控制点的 X 坐标
             vertices.push_back(segment.controlPoints[i].x);
+            // 添加控制点的 Y 坐标
             vertices.push_back(segment.controlPoints[i].y);
+            // 添加累计长度
             vertices.push_back(segment.lengths[i]);
         }
 
         if (segment.isCurve)
         {
+            // 添加曲线的索引
             indices.push_back(static_cast<unsigned int>(vertexOffset));
             indices.push_back(static_cast<unsigned int>(vertexOffset + 1));
             indices.push_back(static_cast<unsigned int>(vertexOffset + 2));
@@ -347,71 +447,115 @@ void updateBuffers(GLuint VBO, GLuint EBO, std::vector<LineSegment>& lines,
         }
         else
         {
+            // 添加直线的索引
             indices.push_back(static_cast<unsigned int>(vertexOffset));
             indices.push_back(static_cast<unsigned int>(vertexOffset + 1));
             vertexOffset += 2;
             indexOffset += 2;
         }
 
-        indices.push_back(0xFFFFFFFF); // 图元重启标记
+        // 添加图元重启标记
+        indices.push_back(0xFFFFFFFF); 
         indexOffset++;
     }
 
+    // 移除最后一个图元重启标记
     indices.pop_back();
 
+    // 绑定顶点缓冲区
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 更新顶点缓冲区数据
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
 
+    // 绑定索引缓冲区
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // 更新索引缓冲区数据
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
 }
 
-// 旋转线段
+/**
+ * @brief 旋转线段
+ * @param lines 存储的线条
+ * @param lineIdx 要旋转的线段索引
+ * @param angle 旋转角度
+ * @param VBO 顶点缓冲区对象 ID
+ */
 void rotateLine(std::vector<LineSegment>& lines, int lineIdx, float angle, GLuint VBO)
 {
+    // 获取要旋转的线段
     auto& segment = lines[lineIdx];
+    // 创建旋转矩阵
     glm::mat2 rotation = glm::mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
     std::vector<float> updatedVertices;
 
     for (size_t i = 0; i < segment.controlPoints.size(); ++i)
     {
+        // 应用旋转矩阵
         segment.controlPoints[i] = rotation * segment.controlPoints[i];
+        // 添加更新后的 X 坐标
         updatedVertices.push_back(segment.controlPoints[i].x);
+        // 添加更新后的 Y 坐标
         updatedVertices.push_back(segment.controlPoints[i].y);
+        // 添加累计长度
         updatedVertices.push_back(segment.lengths[i]);
     }
 
+    // 绑定顶点缓冲区
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 更新顶点缓冲区数据
     glBufferSubData(GL_ARRAY_BUFFER, segment.vertexOffset * 3 * sizeof(float),
         updatedVertices.size() * sizeof(float), updatedVertices.data());
 }
 
-// 缩放线段
+/**
+ * @brief 缩放线段
+ * @param lines 存储的线条
+ * @param lineIdx 要缩放的线段索引
+ * @param scale 缩放因子
+ * @param VBO 顶点缓冲区对象 ID
+ */
 void scaleLine(std::vector<LineSegment>& lines, int lineIdx, float scale, GLuint VBO)
 {
+    // 获取要缩放的线段
     auto& segment = lines[lineIdx];
     std::vector<float> updatedVertices;
 
     for (size_t i = 0; i < segment.controlPoints.size(); ++i)
     {
+        // 应用缩放因子
         segment.controlPoints[i] *= scale;
+        // 添加更新后的 X 坐标
         updatedVertices.push_back(segment.controlPoints[i].x);
+        // 添加更新后的 Y 坐标
         updatedVertices.push_back(segment.controlPoints[i].y);
+        // 添加累计长度
         updatedVertices.push_back(segment.lengths[i]);
     }
 
+    // 绑定顶点缓冲区
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 更新顶点缓冲区数据
     glBufferSubData(GL_ARRAY_BUFFER, segment.vertexOffset * 3 * sizeof(float),
         updatedVertices.size() * sizeof(float), updatedVertices.data());
 }
 
-// 删除线段
+/**
+ * @brief 删除线段
+ * @param lines 存储的线条
+ * @param lineIdx 要删除的线段索引
+ * @param VBO 顶点缓冲区对象 ID
+ * @param EBO 索引缓冲区对象 ID
+ */
 void deleteLine(std::vector<LineSegment>& lines, int lineIdx, GLuint VBO, GLuint EBO)
 {
+    // 获取要删除的线段
     auto& deletedSegment = lines[lineIdx];
+    // 计算顶点数量
     size_t vertexCount = deletedSegment.isCurve ? 4 : 2;
+    // 计算索引数量
     size_t indexCount = vertexCount + 1;
 
+    // 从向量中删除线段
     lines.erase(lines.begin() + lineIdx);
 
     std::vector<float> updatedVertices;
@@ -421,18 +565,24 @@ void deleteLine(std::vector<LineSegment>& lines, int lineIdx, GLuint VBO, GLuint
 
     for (size_t i = lineIdx; i < lines.size(); ++i)
     {
+        // 更新顶点偏移
         lines[i].vertexOffset -= vertexCount;
+        // 更新索引偏移
         lines[i].indexOffset -= indexCount;
 
         for (size_t j = 0; j < lines[i].controlPoints.size(); ++j)
         {
+            // 添加更新后的 X 坐标
             updatedVertices.push_back(lines[i].controlPoints[j].x);
+            // 添加更新后的 Y 坐标
             updatedVertices.push_back(lines[i].controlPoints[j].y);
+            // 添加累计长度
             updatedVertices.push_back(lines[i].lengths[j]);
         }
 
         if (lines[i].isCurve)
         {
+            // 添加曲线的索引
             updatedIndices.push_back(static_cast<unsigned int>(lines[i].vertexOffset));
             updatedIndices.push_back(static_cast<unsigned int>(lines[i].vertexOffset + 1));
             updatedIndices.push_back(static_cast<unsigned int>(lines[i].vertexOffset + 2));
@@ -440,79 +590,126 @@ void deleteLine(std::vector<LineSegment>& lines, int lineIdx, GLuint VBO, GLuint
         }
         else
         {
+            // 添加直线的索引
             updatedIndices.push_back(static_cast<unsigned int>(lines[i].vertexOffset));
             updatedIndices.push_back(static_cast<unsigned int>(lines[i].vertexOffset + 1));
         }
 
+        // 添加图元重启标记
         updatedIndices.push_back(0xFFFFFFFF);
     }
+    // 移除最后一个图元重启标记
     updatedIndices.pop_back();
 
+    // 绑定顶点缓冲区
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 更新顶点缓冲区数据
     glBufferSubData(GL_ARRAY_BUFFER, vertexOffset * 3 * sizeof(float),
         updatedVertices.size() * sizeof(float), updatedVertices.data());
 
+    // 绑定索引缓冲区
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // 更新索引缓冲区数据
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indexOffset * sizeof(unsigned int),
         updatedIndices.size() * sizeof(unsigned int), updatedIndices.data());
 }
 
-// 全局变量
-float zoomFactor = 1.0f;         // 缩放因子
-glm::vec2 cameraPos(0.0f, 0.0f); // 相机位置
-bool middleMousePressed = false; // 中键按下状态
-glm::vec2 lastMousePos;          // 上一次鼠标位置
-float aspectRatio = 1.0f;        // 窗口宽高比
+// 缩放因子
+float zoomFactor = 1.0f;         
+// 相机位置
+glm::vec2 cameraPos(0.0f, 0.0f); 
+// 中键按下状态
+bool middleMousePressed = false; 
+// 上一次鼠标位置
+glm::vec2 lastMousePos;          
+// 窗口宽高比
+float aspectRatio = 1.0f;        
 
-// 滚轮回调：调整缩放
+/**
+ * @brief 滚轮回调：调整缩放
+ * @param window GLFW 窗口指针
+ * @param xoffset 鼠标滚轮水平偏移
+ * @param yoffset 鼠标滚轮垂直偏移
+ */
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+    // 根据滚轮垂直偏移调整缩放因子
     zoomFactor += float(yoffset) * 0.1f;
+    // 确保缩放因子不小于 0.1
     zoomFactor = std::max(zoomFactor, 0.1f);
 }
 
-// 鼠标按键回调：检测中键
+/**
+ * @brief 鼠标按键回调：检测中键
+ * @param window GLFW 窗口指针
+ * @param button 鼠标按键
+ * @param action 按键动作
+ * @param mods 按键修饰符
+ */
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_MIDDLE)
     {
         if (action == GLFW_PRESS)
         {
+            // 标记中键按下
             middleMousePressed = true;
             double xpos, ypos;
+            // 获取鼠标当前位置
             glfwGetCursorPos(window, &xpos, &ypos);
+            // 记录上一次鼠标位置
             lastMousePos = glm::vec2(xpos, ypos);
         }
         else if (action == GLFW_RELEASE)
         {
+            // 标记中键释放
             middleMousePressed = false;
         }
     }
 }
 
-// 鼠标移动回调：拖动画面
+/**
+ * @brief 鼠标移动回调：拖动画面
+ * @param window GLFW 窗口指针
+ * @param xpos 鼠标当前 X 坐标
+ * @param ypos 鼠标当前 Y 坐标
+ */
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (middleMousePressed)
     {
+        // 获取当前鼠标位置
         glm::vec2 currentMousePos(xpos, ypos);
+        // 计算鼠标位置偏移
         glm::vec2 delta = currentMousePos - lastMousePos;
 
         int width, height;
+        // 获取窗口大小
         glfwGetWindowSize(window, &width, &height);
+        // 计算水平移动距离
         float moveX = -delta.x * (2.0f * X * zoomFactor * aspectRatio) / width;
+        // 计算垂直移动距离
         float moveY = delta.y * (2.0f * X * zoomFactor) / height;
 
+        // 更新相机位置
         cameraPos += glm::vec2(moveX, moveY);
+        // 更新上一次鼠标位置
         lastMousePos = currentMousePos;
     }
 }
 
-// 窗口大小变化回调：更新视口和宽高比
+/**
+ * @brief 窗口大小变化回调：更新视口和宽高比
+ * @param window GLFW 窗口指针
+ * @param width 窗口新宽度
+ * @param height 窗口新高度
+ */
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, width, height);                                      // 更新视口
-    aspectRatio = static_cast<float>(width) / static_cast<float>(height); // 更新宽高比
+    // 更新视口
+    glViewport(0, 0, width, height);                                      
+    // 更新宽高比
+    aspectRatio = static_cast<float>(width) / static_cast<float>(height); 
 }
 
 int main()
@@ -524,6 +721,7 @@ int main()
         return -1;
     }
 
+    // 设置随机数种子
     srand(static_cast<unsigned int>(time(NULL)));
 
     // 设置 OpenGL 4.0 核心配置文件
@@ -539,6 +737,7 @@ int main()
         glfwTerminate();
         return -1;
     }
+    // 设置当前上下文
     glfwMakeContextCurrent(window);
 
     // 初始化 GLAD
@@ -562,6 +761,7 @@ int main()
 
     // 创建着色器程序
     GLuint shaderProgram = loadShader();
+    // 使用着色器程序
     glUseProgram(shaderProgram);
 
     // 生成线条数据
@@ -571,39 +771,58 @@ int main()
     {
         const int NUM_LINES = 10;
         const int NUM_SEGMENTS = 3;
+        // 生成随机混合线条
         generateRandomMixedLines(allLines, NUM_LINES, NUM_SEGMENTS);
+        // 更新缓冲区
         updateBuffers(0, 0, allLines, vertices, indices);
     }
 
     // 设置 VAO、VBO、EBO
     GLuint VAO, VBO, EBO;
+    // 生成顶点数组对象
     glGenVertexArrays(1, &VAO);
+    // 生成顶点缓冲区对象
     glGenBuffers(1, &VBO);
+    // 生成索引缓冲区对象
     glGenBuffers(1, &EBO);
 
+    // 绑定顶点数组对象
     glBindVertexArray(VAO);
+    // 绑定顶点缓冲区
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 更新顶点缓冲区数据
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
+    // 绑定索引缓冲区
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // 更新索引缓冲区数据
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
 
     // 配置顶点属性
+    // 配置位置属性
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // 启用位置属性
     glEnableVertexAttribArray(0);
+    // 配置长度属性
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(2 * sizeof(float)));
+    // 启用长度属性
     glEnableVertexAttribArray(1);
 
     // 启用图元重启
     glEnable(GL_PRIMITIVE_RESTART);
+    // 设置图元重启索引
     glPrimitiveRestartIndex(0xFFFFFFFF);
+    // 设置每个图元的顶点数
     glPatchParameteri(GL_PATCH_VERTICES, 4);
 
     // 设置背景色
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
     // 示例修改线段
+    // 旋转第 5 条线段 45 度
     rotateLine(allLines, 5, glm::radians(45.0f), VBO);
+    // 缩放第 10 条线段 1.5 倍
     scaleLine(allLines, 10, 1.5f, VBO);
+    // 删除第 15 条线段
     deleteLine(allLines, 15, VBO, EBO);
 
     // 渲染循环
@@ -616,25 +835,37 @@ int main()
             -X * zoomFactor + cameraPos.y,               // 下边界
             X * zoomFactor + cameraPos.y                 // 上边界
         );
+        // 设置相机变换矩阵
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "cameraTrans"), 1, GL_FALSE, &cameraTrans[0][0]);
 
         // 动态调整细分级别和虚线缩放
+        // 根据缩放因子调整细分级别
         float tessLevel = 35.0f / zoomFactor;
+        // 设置细分级别
         glUniform1f(glGetUniformLocation(shaderProgram, "tessLevel"), tessLevel);
 
+        // 设置线条颜色
         glUniform4f(glGetUniformLocation(shaderProgram, "color"), 0.0f, 0.0f, 1.0f, 1.0f);
 
+        // 获取当前时间
         auto now = std::chrono::high_resolution_clock::now();
+        // 计算时间差
         auto duration = std::chrono::duration<float>(now.time_since_epoch());
         float time = duration.count();
+        // 设置时间偏移
         glUniform1f(glGetUniformLocation(shaderProgram, "timeOffset"), time * 0.8f);
 
+        // 根据缩放因子调整虚线缩放
         float dashScale = 12.0f / zoomFactor;
+        // 设置虚线缩放
         glUniform1f(glGetUniformLocation(shaderProgram, "dashScale"), dashScale);
 
         // 渲染
+        // 清除颜色缓冲区
         glClear(GL_COLOR_BUFFER_BIT);
+        // 绑定顶点数组对象
         glBindVertexArray(VAO);
+        // 绘制图元
         glDrawElements(GL_PATCHES, indices.size(), GL_UNSIGNED_INT, 0);
 
         // 检查 OpenGL 错误
@@ -644,16 +875,24 @@ int main()
             std::cerr << "OpenGL Error: " << err << std::endl;
         }
 
+        // 交换前后缓冲区
         glfwSwapBuffers(window);
+        // 处理事件
         glfwPollEvents();
     }
 
     // 清理资源
+    // 删除着色器程序
     glDeleteProgram(shaderProgram);
+    // 删除顶点数组对象
     glDeleteVertexArrays(1, &VAO);
+    // 删除顶点缓冲区对象
     glDeleteBuffers(1, &VBO);
+    // 删除索引缓冲区对象
     glDeleteBuffers(1, &EBO);
+    // 销毁窗口
     glfwDestroyWindow(window);
+    // 终止 GLFW
     glfwTerminate();
 
     return 0;

@@ -1,4 +1,6 @@
 // Eigen 库对向量的基本操作与矩阵操作类似，下面列举了一些常用的 Eigen 向量操作：
+// 向量的创建、基本运算、元素访问、子向量访问、按元素运算、标量运算、
+// 向量范数、归一化、大小获取以及向量与 std::vector 的转换等。
 
 // 创建向量：
 
@@ -31,12 +33,12 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-int main() {
+int main()
+{
     // 创建向量
     Eigen::Vector3d v1(1.0, 2.0, 3.0);
     Eigen::Vector3d v2(4.0, 5.0, 6.0);
 
-    // 访问向量元素
     std::cout << "v1: " << v1 << std::endl;
     std::cout << "v2: " << v2 << std::endl;
 
@@ -59,6 +61,49 @@ int main() {
     // 向量长度（范数）
     double norm = v1.norm();
     std::cout << "v1 norm: " << norm << std::endl;
+
+    // 向量归一化
+    Eigen::Vector3d normalizedV1 = v1.normalized();
+    std::cout << "v1 normalized: " << normalizedV1 << std::endl;
+
+    // 访问向量元素
+    std::cout << "v1[0]: " << v1[0] << std::endl;
+    std::cout << "v1(1): " << v1(1) << std::endl;
+
+    // 访问子向量
+    Eigen::VectorXd v3 = Eigen::VectorXd::Random(6);
+    std::cout << "v3: " << v3.transpose() << std::endl;
+    std::cout << "v3 head(3): " << v3.head(3).transpose() << std::endl;
+    std::cout << "v3 tail(2): " << v3.tail(2).transpose() << std::endl;
+    std::cout << "v3 segment(1, 3): " << v3.segment(1, 3).transpose() << std::endl;
+
+    // 向量按元素相乘
+    Eigen::Vector3d elementwiseProduct = v1.array() * v2.array();
+    std::cout << "v1 element-wise product v2: " << elementwiseProduct << std::endl;
+
+    // 向量按元素相除
+    Eigen::Vector3d elementwiseDivision = v1.array() / v2.array();
+    std::cout << "v1 element-wise division v2: " << elementwiseDivision << std::endl;
+
+    // 标量乘法
+    Eigen::Vector3d scalarMultiplication = v1 * 2.0;
+    std::cout << "v1 * 2.0: " << scalarMultiplication << std::endl;
+
+    // 标量除法
+    Eigen::Vector3d scalarDivision = v1 / 2.0;
+    std::cout << "v1 / 2.0: " << scalarDivision << std::endl;
+
+    // 向量大小
+    std::cout << "v1 size: " << v1.size() << std::endl;
+
+    // 向量转换为 std::vector
+    std::vector<double> stdVector(v1.data(), v1.data() + v1.size());
+    std::cout << "v1 as std::vector: ";
+    for (double val : stdVector)
+    {
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;
 
     return 0;
 }

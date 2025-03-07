@@ -1,118 +1,141 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <vector>
-#include <chrono>
-#include <string>
+// OpenGL基础头文件
+#include <glad/glad.h>  // 用于加载OpenGL函数指针
+#include <GLFW/glfw3.h> // 窗口和输入管理
 
-constexpr float X = 4.0f;
+// 标准库
+#include <iostream>    // 控制台输出
+#include <vector>      // 动态数组容器
+#include <chrono>      // 时间相关功能
+#include <string>      // 字符串处理
 
+// 数学库
+#include <glm/glm.hpp> // OpenGL数学库
+#include <glm/gtc/matrix_transform.hpp> // 矩阵变换
+
+// 窗口坐标范围 [-X, X]
+constexpr float X = 4.0f; // 定义窗口的可见范围，用于正交投影
+
+// 顶点着色器源代码
 const char* vertexShaderSource = R"(
 #version 330 core
-layout(location = 0) in vec2 in_pos;
-layout(location = 1) in float in_len;
+layout(location = 0) in vec2 in_pos;  // 顶点位置 (x,y)
+layout(location = 1) in float in_len; // 顶点到起点的累计长度
 
-uniform mat4 cameraTrans;
-uniform float dashScale;
-uniform float timeOffset;  // 移除默认值
+uniform mat4 cameraTrans;  // 相机变换矩阵
+uniform float dashScale;   // 虚线缩放比例
+uniform float timeOffset;  // 时间偏移量（用于动画）
 
-out float dashParam;
+out float dashParam;       // 传递给片段着色器的参数
 
 void main() {
+    // 将顶点位置转换为裁剪空间坐标
     gl_Position = cameraTrans * vec4(in_pos, 0.0, 1.0);
+
+    // 计算虚线参数：累计长度 * 缩放 + 时间偏移
     float dashLength = in_len * dashScale + timeOffset;
     dashParam = dashLength;
 }
 )";
 
+// 片段着色器源代码
 const char* fragmentShaderSource = R"(
 #version 330 core
-in float dashParam;
-uniform vec4 color;
-uniform int dashType;  // 移除默认值
-out vec4 fragColor;
+in float dashParam;    // 从顶点着色器传入的虚线参数
+uniform vec4 color;    // 线条颜色
+uniform int dashType;  // 虚线类型 0:虚线 其他:实线
+out vec4 fragColor;    // 输出颜色
 
 void main() {
-    bool draw = false;
-    float pattern;
+    bool draw = false; // 是否绘制当前片段
+    float pattern;     // 虚线模式值
 
     switch(dashType) {
-        case 0:
-            pattern = mod(dashParam, 1.0);
-            draw = (pattern < 0.5);
+        case 0:  // 虚线模式
+            pattern = mod(dashParam, 1.0);  // 对dashParam取模
+            draw = (pattern < 0.5);         // 绘制前半段
             break;
-        default:
+        default: // 实线模式
             draw = true;
             break;
     }
 
-    if (!draw) discard;
-    fragColor = color;
+    if (!draw) discard;  // 如果不绘制，丢弃当前片段
+    fragColor = color;   // 设置片段颜色
 }
 )";
 
+// 加载并编译着色器程序
 GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
 {
+    // 创建并编译顶点着色器
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
 
+    // 检查顶点着色器编译状态
     GLint success;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
         char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-        std::cerr << "Vertex Shader Compilation Failed:\n" << infoLog << std::endl;
+        std::cerr << "顶点着色器编译失败:\n" << infoLog << std::endl;
     }
 
+    // 创建并编译片段着色器
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
     glCompileShader(fragmentShader);
 
+    // 检查片段着色器编译状态
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-        std::cerr << "Fragment Shader Compilation Failed:\n" << infoLog << std::endl;
+        std::cerr << "片段着色器编译失败:\n" << infoLog << std::endl;
     }
 
+    // 创建着色器程序并链接
     GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
 
+    // 检查链接状态
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success)
     {
         char infoLog[512];
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-        std::cerr << "Shader Program Linking Failed:\n" << infoLog << std::endl;
+        std::cerr << "着色器程序链接失败:\n" << infoLog << std::endl;
     }
 
+    // 删除着色器对象（已链接到程序中，不再需要）
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
     return shaderProgram;
 }
 
+// 生成随机点
 glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X)
 {
     return glm::vec2(
-        minX + (rand() / static_cast<float>(RAND_MAX)) * (maxX - minX),
-        minY + (rand() / static_cast<float>(RAND_MAX)) * (maxY - minY)
+        minX + (rand() / static_cast<float>(RAND_MAX)) * (maxX - minX), // 随机x坐标
+        minY + (rand() / static_cast<float>(RAND_MAX)) * (maxY - minY)  // 随机y坐标
     );
 }
 
+// 生成随机混合线条（直线和贝塞尔曲线）
 void generateRandomMixedLines(
-    std::vector<float>& vertices,
-    std::vector<unsigned int>& flatIndices, int numLines,
-    int numSegments,
-    int bezierSegments,
-    float minX, float maxX, float minY, float maxY
+    std::vector<float>& vertices,        // 输出：顶点数据 (x,y,累计长度)
+    std::vector<unsigned int>& flatIndices, // 输出：索引数据
+    int numLines,                        // 线条数量
+    int numSegments,                     // 每条线的段数
+    int bezierSegments,                  // 贝塞尔曲线的细分段数
+    float minX, float maxX,              // x坐标范围
+    float minY, float maxY               // y坐标范围
 )
 {
     vertices.clear();
@@ -120,28 +143,32 @@ void generateRandomMixedLines(
 
     for (int line = 0; line < numLines; ++line)
     {
+        // 生成起点
         glm::vec2 startPoint = randomPoint(minX, maxX, minY, maxY);
         glm::vec2 currentPoint = startPoint;
         glm::vec2 prevPoint = startPoint;
-        float dAccLen = 0.0;
+        float dAccLen = 0.0; // 累计长度
 
+        // 添加起点数据
         unsigned int vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
         vertices.push_back(startPoint.x);
         vertices.push_back(startPoint.y);
         vertices.push_back(dAccLen);
         flatIndices.push_back(vertexIndex);
 
+        // 生成线段
         for (int i = 0; i < numSegments; ++i)
         {
-            bool bLine = rand() % 2 == 0;
+            bool bLine = rand() % 2 == 0; // 随机选择直线或贝塞尔曲线
 
-            if (bLine)
+            if (bLine) // 直线段
             {
                 glm::vec2 point = randomPoint(minX, maxX, minY, maxY);
                 vertexIndex = static_cast<unsigned int>(vertices.size() / 3);
                 vertices.push_back(point.x);
                 vertices.push_back(point.y);
 
+                // 计算并更新累计长度
                 float segmentLength = glm::distance(prevPoint, point);
                 dAccLen += segmentLength;
                 vertices.push_back(dAccLen);
@@ -151,17 +178,20 @@ void generateRandomMixedLines(
                 prevPoint = point;
                 currentPoint = point;
             }
-            else
+            else // 贝塞尔曲线段
             {
+                // 生成控制点
                 glm::vec2 controlPoint1 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 controlPoint2 = randomPoint(minX, maxX, minY, maxY);
                 glm::vec2 nextPoint = randomPoint(minX, maxX, minY, maxY);
 
+                // 细分贝塞尔曲线
                 for (int j = 1; j <= bezierSegments; ++j)
                 {
                     float t = float(j) / float(bezierSegments);
                     float u = 1.0f - t;
 
+                    // 计算贝塞尔曲线上的点
                     glm::vec2 point = u * u * u * currentPoint +
                         3.0f * u * u * t * controlPoint1 +
                         3.0f * u * t * t * controlPoint2 +
@@ -171,6 +201,7 @@ void generateRandomMixedLines(
                     vertices.push_back(point.x);
                     vertices.push_back(point.y);
 
+                    // 计算并更新累计长度
                     float segmentLength = glm::distance(prevPoint, point);
                     dAccLen += segmentLength;
                     vertices.push_back(dAccLen);
@@ -182,6 +213,8 @@ void generateRandomMixedLines(
                 currentPoint = nextPoint;
             }
         }
+
+        // 如果不是最后一条线，添加图元重启标记
         if (line < numLines - 1)
         {
             flatIndices.push_back(0xFFFFFFFF);
@@ -189,28 +222,36 @@ void generateRandomMixedLines(
     }
 }
 
+// 缩放因子
 float zoomFactor = 1.0f;
 
+// 鼠标滚轮回调函数
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+    // 根据滚轮滚动调整缩放因子
     zoomFactor += float(yoffset) * 0.1f;
-    zoomFactor = std::max(zoomFactor, 0.1f);
+    zoomFactor = std::max(zoomFactor, 0.1f); // 限制最小缩放
 }
 
+// 主函数
 int main()
 {
+    // 初始化GLFW
     if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
 
+    // 设置随机数种子
     srand(static_cast<unsigned int>(time(NULL)));
 
+    // 配置OpenGL版本和核心模式
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
+    // 创建窗口
     GLFWwindow* window = glfwCreateWindow(1400, 1400, "OpenGL Dash Lines", nullptr, nullptr);
     if (!window)
     {
@@ -220,85 +261,113 @@ int main()
     }
     glfwMakeContextCurrent(window);
 
+    // 加载OpenGL函数指针
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
+    // 设置滚轮回调函数
     glfwSetScrollCallback(window, scroll_callback);
 
+    // 加载并编译着色器程序
     GLuint shaderProgram = loadShader(vertexShaderSource, fragmentShaderSource);
     glUseProgram(shaderProgram);
 
+    // 设置正交投影矩阵
     glm::mat4 cameraTrans = glm::ortho(-X, X, -X, X);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "cameraTrans"), 1, GL_FALSE, &cameraTrans[0][0]);
 
+    // 设置线条颜色（蓝色）
     glUniform4f(glGetUniformLocation(shaderProgram, "color"), 0.0f, 0.0f, 1.0f, 1.0f);
+    // 设置虚线缩放比例
     glUniform1f(glGetUniformLocation(shaderProgram, "dashScale"), 8.0f);
 
+    // 顶点数据和索引数据
     std::vector<float> shapeVertices;
     std::vector<unsigned int> flatIndices;
 
+    // 生成随机混合线条
     {
-        const int NUM_LINES = 6;
-        const int NUM_SEGMENTS = 3;
-        const int BEZIER_RES = 30;
+        const int NUM_LINES = 6;       // 线条数量
+        const int NUM_SEGMENTS = 3;    // 每条线的段数
+        const int BEZIER_RES = 30;     // 贝塞尔曲线细分段数
         generateRandomMixedLines(shapeVertices, flatIndices, NUM_LINES, NUM_SEGMENTS, BEZIER_RES, -X, X, -X, X);
     }
 
+    // 创建VAO、VBO和EBO
     GLuint VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
+    // 绑定VAO
     glBindVertexArray(VAO);
 
+    // 设置顶点缓冲区
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, shapeVertices.size() * sizeof(float), shapeVertices.data(), GL_STATIC_DRAW);
 
+    // 设置索引缓冲区
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, flatIndices.size() * sizeof(unsigned int), flatIndices.data(), GL_STATIC_DRAW);
 
+    // 设置顶点属性指针
+    // 位置属性（x,y）
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // 累计长度属性
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    // 启用图元重启
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xFFFFFFFF);
+    // 设置背景颜色（白色）
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
+    // 主渲染循环
     while (!glfwWindowShouldClose(window))
     {
+        // 根据缩放因子更新投影矩阵
         glm::mat4 cameraTrans = glm::ortho(-X * zoomFactor, X * zoomFactor, -X * zoomFactor, X * zoomFactor);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "cameraTrans"), 1, GL_FALSE, &cameraTrans[0][0]);
 
+        // 根据缩放调整虚线比例
         float dashScale = 12.0f / zoomFactor;
         glUniform1f(glGetUniformLocation(shaderProgram, "dashScale"), dashScale);
 
+        // 获取当前时间用于动画
         auto now = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration<float>(now.time_since_epoch());
         float time = duration.count();
 
+        // 设置时间偏移量
         glUniform1f(glGetUniformLocation(shaderProgram, "timeOffset"), time * 0.8f);
 
+        // 清除颜色缓冲区
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // 绑定VAO并绘制
         glBindVertexArray(VAO);
         glDrawElements(GL_LINE_STRIP, flatIndices.size(), GL_UNSIGNED_INT, 0);
 
+        // 检查OpenGL错误
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR)
         {
             std::cerr << "OpenGL Error: " << err << std::endl;
         }
 
+        // 交换缓冲区并处理事件
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glDisable(GL_PRIMITIVE_RESTART);     glDeleteProgram(shaderProgram);
+    // 清理资源
+    glDisable(GL_PRIMITIVE_RESTART);
+    glDeleteProgram(shaderProgram);
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -308,9 +377,11 @@ int main()
     return 0;
 }
 
-// 在 OpenGL 中，使用**图元重启（Primitive Restart）**是一种优化绘制多条折线（或多条线段、条带等）的技术。它允许你在单个索引缓冲区中通过插入一个特殊的索引值（通常是最大值，如 0xFFFFFFFF）来分隔不同的图元（如多条 GL_LINE_STRIP），从而避免多次调用绘制函数（如 glMultiDrawElements）或手动管理多个偏移和计数数组。
+// 在 OpenGL 中，使用**图元重启（Primitive Restart）**是一种优化绘制多条折线（或多条线段、条带等）的技术。
+// 它允许你在单个索引缓冲区中通过插入一个特殊的索引值（通常是最大值，如 0xFFFFFFFF）来分隔不同的图元（如多条 GL_LINE_STRIP），
+// 从而避免多次调用绘制函数（如 glMultiDrawElements）或手动管理多个偏移和计数数组。
 
-// 结合你的代码和需求（绘制多条连续的虚线折线，使用 GL_LINE_STRIP），我将对比图元重启与当前 glMultiDrawElements 的方式，并提供基于图元重启的实现代码，最后分析哪种方式更适合你的场景。
+// 绘制多条连续的虚线折线，使用 GL_LINE_STRIP
 
 // 图元重启 vs 当前方式 (glMultiDrawElements)
 // 当前方式：glMultiDrawElements
