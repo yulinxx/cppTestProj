@@ -6,15 +6,21 @@ set(CPP_DIR
     ./
 )
 
-# 查找 OpenSceneGraph
-find_package(OpenSceneGraph REQUIRED COMPONENTS osg osgDB osgUtil)
+#set(CMAKE_PREFIX_PATH "D:/Install/vcpkg/installed/x64-windows")
+
+# 鏌ユ壘 OpenSceneGraph
+find_package(OpenSceneGraph REQUIRED COMPONENTS osgDB osgGA osgUtil osgViewer)
 if(OpenSceneGraph_FOUND)
+    #include_directories(${OpenSceneGraph_INCLUDE_DIRS})
+    include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
     message(STATUS "Found OpenSceneGraph: ${OpenSceneGraph_VERSION}")
     message(STATUS "Include dirs: ${OpenSceneGraph_INCLUDE_DIRS}")
-    message(STATUS "Libraries: ${OpenSceneGraph_LIBRARIES}")
+    message(STATUS "Libraries: ${OPENSCENEGRAPH_LIBRARIES}")
 else()
     message(FATAL_ERROR "OpenSceneGraph not found!")
 endif()
+
 
 #################### EXE ##################################
 
@@ -26,9 +32,12 @@ foreach(SUB_DIR ${CPP_DIR})
         set(APP_NAME OSG_Base_${FILE_NAME})
         add_executable(${APP_NAME} ${CPP})
 
-        # 添加 OSG 的头文件路径
+        # 娣诲姞 OSG 鐨勫ご鏂囦欢璺緞
         target_include_directories(${APP_NAME} PRIVATE ${OpenSceneGraph_INCLUDE_DIRS})
-        # 链接 OSG 的库
-        target_link_libraries(${APP_NAME} PRIVATE ${OpenSceneGraph_LIBRARIES})
+        #target_include_directories(${APP_NAME} PRIVATE ${OSG_INCLUDE_DIRS})
+
+        # 閾炬帴 OSG 鐨勫簱
+        target_link_libraries(${APP_NAME} PRIVATE ${OpenSceneGraph_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES})
+        #target_link_libraries(${APP_NAME} PRIVATE ${OSG_LIBRARIES})
     endforeach(CPP)
 endforeach(SUB_DIR)
