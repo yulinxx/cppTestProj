@@ -53,10 +53,8 @@ osg::ref_ptr<osg::Geode> createRandomColoredSphere(float radius, unsigned int su
     // 创建球体的三角形面
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
-    for (unsigned int i = 0; i < subdivisions; ++i) 
-    {
-        for (unsigned int j = 0; j < subdivisions; ++j) 
-        {
+    for (unsigned int i = 0; i < subdivisions; ++i) {
+        for (unsigned int j = 0; j < subdivisions; ++j) {
             unsigned int first = i * (subdivisions + 1) + j;
             unsigned int second = first + subdivisions + 1;
 
