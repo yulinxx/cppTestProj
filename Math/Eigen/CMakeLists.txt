@@ -37,3 +37,5 @@ foreach(SUB_DIR ${CPP_DIR})
 
 endforeach(SUB_DIR)
 
+
+add_subdirectory(./EigeOrthGL)

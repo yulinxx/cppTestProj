@@ -308,7 +308,7 @@ float zoomFactor = 1.0f;
 // 拖动偏移
 glm::vec2 panOffset(0.0f, 0.0f);
 // 是否正在拖动
-bool isDragging = false;
+bool bIsDragging = false;
 // 上次鼠标位置
 double lastX, lastY;
 // 窗口宽度
@@ -359,14 +359,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         if (action == GLFW_PRESS)
         {
             // 按下中键,开始拖动
-            isDragging = true;
+            bIsDragging = true;
             // 获取当前鼠标位置
             glfwGetCursorPos(window, &lastX, &lastY);
         }
         else if (action == GLFW_RELEASE)
         {
             // 释放中键,停止拖动
-            isDragging = false;
+            bIsDragging = false;
         }
     }
 }
@@ -379,7 +379,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
  */
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (isDragging)
+    if (bIsDragging)
     {
         // 计算鼠标移动的偏移量
         double dx = xpos - lastX;
