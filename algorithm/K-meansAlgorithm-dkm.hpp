@@ -16,7 +16,7 @@
 
 /*
 DKM - A k-means implementation that is generic across variable data dimensions.
-DKM - 一个在不同数据维度上通用的k-means算法实现。
+DKM - 一个在不同数据维度上通用的k-means算法实现.
 */
 namespace dkm
 {
@@ -24,14 +24,14 @@ namespace dkm
     /*
     These functions are all private implementation details and shouldn't be referenced outside of this
     file.
-    这些函数都是私有实现细节，不应该在这个文件之外引用。
+    这些函数都是私有实现细节，不应该在这个文件之外引用.
     */
     namespace details
     {
 
         /*
         Calculate the square of the distance between two points.
-        计算两点之间距离的平方。
+        计算两点之间距离的平方.
         */
         template <typename T, size_t N>
         T distance_squared(const std::array<T, N> &point_a, const std::array<T, N> &point_b)
@@ -58,7 +58,7 @@ namespace dkm
 
         /*
         Calculate the smallest distance between each of the data points and any of the input means.
-        计算每个数据点与任何一个输入均值之间的最小距离。
+        计算每个数据点与任何一个输入均值之间的最小距离.
         */
         template <typename T, size_t N>
         std::vector<T> closest_distance(
@@ -91,7 +91,7 @@ namespace dkm
         /*
         This is an alternate initialization method based on the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
         initialization algorithm.
-        这是一种基于[kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)初始化算法的替代初始化方法。
+        这是一种基于[kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)初始化算法的替代初始化方法.
         */
         template <typename T, size_t N>
         std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>> &data, uint32_t k, uint64_t seed)
@@ -137,7 +137,7 @@ namespace dkm
 
         /*
         Calculate the index of the mean a particular data point is closest to (euclidean distance)
-        计算某个特定数据点最接近的均值的索引（欧几里得距离）。
+        计算某个特定数据点最接近的均值的索引（欧几里得距离).
         */
         template <typename T, size_t N>
         uint32_t closest_mean(const std::array<T, N> &point, const std::vector<std::array<T, N>> &means)
@@ -166,7 +166,7 @@ namespace dkm
 
         /*
         Calculate the index of the mean each data point is closest to (euclidean distance).
-        计算每个数据点最接近的均值的索引（欧几里得距离）。
+        计算每个数据点最接近的均值的索引（欧几里得距离).
         */
         template <typename T, size_t N>
         std::vector<uint32_t> calculate_clusters(
@@ -185,7 +185,7 @@ namespace dkm
 
         /*
         Calculate means based on data points and their cluster assignments.
-        根据数据点及其聚类分配计算均值。
+        根据数据点及其聚类分配计算均值.
         */
         template <typename T, size_t N>
         std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>> &data,
@@ -281,12 +281,12 @@ namespace dkm
       smaller than the specified distance.
     * Random seed; if present, this will be used in place of `std::random_device` for kmeans++
       initialization. This can be used to ensure reproducible/deterministic behavior.
-    clustering_parameters 是用于运行kmeans_lloyd算法的配置。
+    clustering_parameters 是用于运行kmeans_lloyd算法的配置.
 
     它需要一个k值进行初始化，随后可以配置可选参数，包括：
-    * 最大迭代次数；如果算法在收敛到解决方案之前达到此迭代次数，则将终止。返回的结果是终止前最后一次迭代中计算的均值和聚类分配。
-    * 最小变化量；如果所有均值的位置变化小于指定距离，则算法将终止。
-    * 随机种子；如果存在，将用于替代`std::random_device`进行kmeans++初始化。这可用于确保可重复/确定性的行为。
+    * 最大迭代次数；如果算法在收敛到解决方案之前达到此迭代次数，则将终止.返回的结果是终止前最后一次迭代中计算的均值和聚类分配.
+    * 最小变化量；如果所有均值的位置变化小于指定距离，则算法将终止.
+    * 随机种子；如果存在，将用于替代`std::random_device`进行kmeans++初始化.这可用于确保可重复/确定性的行为.
     */
     template <typename T>
     class clustering_parameters
@@ -294,7 +294,7 @@ namespace dkm
     public:
         /**
          * @brief 构造函数，初始化聚类参数
-         * 
+         *
          * @param k 聚类的数量，必须大于0
          */
         explicit clustering_parameters(uint32_t k) : _k(k),
@@ -306,7 +306,7 @@ namespace dkm
 
         /**
          * @brief 设置最大迭代次数
-         * 
+         *
          * @param max_iter 最大迭代次数
          */
         void set_max_iteration(uint64_t max_iter)
@@ -317,7 +317,7 @@ namespace dkm
 
         /**
          * @brief 设置最小变化量
-         * 
+         *
          * @param min_delta 最小变化量
          */
         void set_min_delta(T min_delta)
@@ -328,7 +328,7 @@ namespace dkm
 
         /**
          * @brief 设置随机种子
-         * 
+         *
          * @param rand_seed 随机种子
          */
         void set_random_seed(uint64_t rand_seed)
@@ -339,7 +339,7 @@ namespace dkm
 
         /**
          * @brief 检查是否设置了最大迭代次数
-         * 
+         *
          * @return true 如果设置了最大迭代次数
          * @return false 如果未设置最大迭代次数
          */
@@ -347,7 +347,7 @@ namespace dkm
 
         /**
          * @brief 检查是否设置了最小变化量
-         * 
+         *
          * @return true 如果设置了最小变化量
          * @return false 如果未设置最小变化量
          */
@@ -355,7 +355,7 @@ namespace dkm
 
         /**
          * @brief 检查是否设置了随机种子
-         * 
+         *
          * @return true 如果设置了随机种子
          * @return false 如果未设置随机种子
          */
@@ -363,28 +363,28 @@ namespace dkm
 
         /**
          * @brief 获取聚类的数量
-         * 
+         *
          * @return uint32_t 聚类的数量
          */
         uint32_t get_k() const { return _k; };
 
         /**
          * @brief 获取最大迭代次数
-         * 
+         *
          * @return uint64_t 最大迭代次数
          */
         uint64_t get_max_iteration() const { return _max_iter; }
 
         /**
          * @brief 获取最小变化量
-         * 
+         *
          * @return T 最小变化量
          */
         T get_min_delta() const { return _min_delta; }
 
         /**
          * @brief 获取随机种子
-         * 
+         *
          * @return uint64_t 随机种子
          */
         uint64_t get_random_seed() const { return _rand_seed; }
@@ -427,26 +427,26 @@ namespace dkm
     with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
     used for initializing the means.
 
-    实现了一个通用的k-means算法，适用于不同数据类型和数据维度。要求数据是一个固定大小数组的向量。
-    模板参数包括基础数据类型 (T) 和每个数据点的维度 (N)。所有数据点必须具有相同的维度。
+    实现了一个通用的k-means算法，适用于不同数据类型和数据维度.要求数据是一个固定大小数组的向量.
+    模板参数包括基础数据类型 (T) 和每个数据点的维度 (N).所有数据点必须具有相同的维度.
 
-    例如，形式为 (X, Y, Z) 的点，N = 3。
+    例如，形式为 (X, Y, Z) 的点，N = 3.
 
-    接受一个 `clustering_parameters` 结构体来配置算法。有关配置值及其对算法的影响，请参阅 `clustering_parameters` 结构体的注释。
+    接受一个 `clustering_parameters` 结构体来配置算法.有关配置值及其对算法的影响，请参阅 `clustering_parameters` 结构体的注释.
 
     返回一个 std::tuple，包含：
-      0: 一个向量，包含从 0 到 k-1 每个聚类的均值。
-      1: 一个向量，包含输入数据向量中每个对应元素的聚类编号 (0 到 k-1)。
+      0: 一个向量，包含从 0 到 k-1 每个聚类的均值.
+      1: 一个向量，包含输入数据向量中每个对应元素的聚类编号 (0 到 k-1).
 
     实现细节:
     这个 k-means 实现使用了 [Lloyd's 算法](https://en.wikipedia.org/wiki/Lloyd%27s_algorithm)，
-    并使用 [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B) 算法来初始化均值。
+    并使用 [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B) 算法来初始化均值.
     */
     template <typename T, size_t N>
     std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
         const std::vector<std::array<T, N>> &data, const clustering_parameters<T> &parameters)
     {
-        // 静态断言，确保模板参数T是有符号的算术类型（如float, double, int）
+        // 静态断言，确保模板参数T是有符号的算术类型（如float, double, int)
         static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
                       "kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
         // 确保k大于0
@@ -491,8 +491,8 @@ namespace dkm
     This overload exists to support legacy code which uses this signature of the kmeans_lloyd function.
     Any code still using this signature should move to the version of this function that uses a
     `clustering_parameters` struct for configuration.
-    此重载函数用于支持使用旧签名的kmeans_lloyd函数的遗留代码。
-    任何仍在使用此签名的代码都应迁移到使用`clustering_parameters`结构体进行配置的版本。
+    此重载函数用于支持使用旧签名的kmeans_lloyd函数的遗留代码.
+    任何仍在使用此签名的代码都应迁移到使用`clustering_parameters`结构体进行配置的版本.
     */
     template <typename T, size_t N>
     std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(

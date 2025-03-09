@@ -1,14 +1,14 @@
 // .\protoc.exe -I=E:\Proj\CAD\GraphicsComponent_QtExample\GraphicsComponent_QtExample\src\proto\ --cpp_out=E:\Proj\CAD\GraphicsComponent_QtExample\GraphicsComponent_QtExample\src\proto\   E:\Proj\CAD\GraphicsComponent_QtExample\GraphicsComponent_QtExample\src\proto\baseInfo.proto
 
 
-// 指定使用的protobuf版本, 写到 xxx.proto文件的第一行。
+// 指定使用的protobuf版本, 写到 xxx.proto文件的第一行.
 // syntax = "proto3";
 
 // message	类型名/变量名		// 相当于 struct、class、int
 // {
-// 	类型名 变量名 = 编号;	// 编号，必须从1.开始。
+// 	类型名 变量名 = 编号;	// 编号，必须从1.开始.
 // 	...
-// 	类型名 变量名 = 编号;	
+// 	类型名 变量名 = 编号;
 // }
 // 生成类文件
 // protoc ./xxxx.proto --cpp_out=.

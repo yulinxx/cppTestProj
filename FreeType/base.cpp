@@ -2,10 +2,12 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-int main() {
+int main()
+{
     // 初始化 FreeType 库
     FT_Library library;
-    if (FT_Init_FreeType(&library)) {
+    if (FT_Init_FreeType(&library))
+    {
         std::cerr << "Freetype 初始化失败!" << std::endl;
         return 1;
     }
@@ -13,7 +15,8 @@ int main() {
     // 加载字体
     const char* font_path = "C:/Windows/Fonts/arial.ttf";  // 替换为你本地的字体路径
     FT_Face face;
-    if (FT_New_Face(library, font_path, 0, &face)) {
+    if (FT_New_Face(library, font_path, 0, &face))
+    {
         std::cerr << "加载字体失败!" << std::endl;
         return 1;
     }
@@ -23,12 +26,14 @@ int main() {
 
     // 加载一个字符的轮廓
     FT_UInt glyph_index = FT_Get_Char_Index(face, 'A');
-    if (glyph_index == 0) {
+    if (glyph_index == 0)
+    {
         std::cerr << "字符未找到!" << std::endl;
         return 1;
     }
 
-    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) {
+    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT))
+    {
         std::cerr << "加载字符轮廓失败!" << std::endl;
         return 1;
     }

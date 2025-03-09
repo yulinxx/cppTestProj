@@ -2,12 +2,10 @@
 
 IAboutWidget::IAboutWidget(QWidget* parent /*=nullptr*/) :
     QDialog(parent)
-{
-}
+{}
 
 IAboutWidget::~IAboutWidget()
-{
-}
+{}
 
 //void IAboutWidget::Comfirm()
 //{

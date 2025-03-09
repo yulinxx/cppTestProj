@@ -23,10 +23,12 @@ osg::ref_ptr<osg::Geode> createRandomColoredSphere(float radius, unsigned int su
     // 随机数种子
     std::srand(std::time(0));
 
-    // 创建球体表面的顶点（简单的球体网格细分）
-    for (unsigned int i = 0; i <= subdivisions; ++i) {
+    // 创建球体表面的顶点(简单的球体网格细分）
+    for (unsigned int i = 0; i <= subdivisions; ++i)
+    {
         float phi = osg::PI * i / subdivisions;  // 纵向角度
-        for (unsigned int j = 0; j <= subdivisions; ++j) {
+        for (unsigned int j = 0; j <= subdivisions; ++j)
+        {
             float theta = 2 * osg::PI * j / subdivisions;  // 横向角度
 
             // 球体上的一个点
@@ -36,11 +38,13 @@ osg::ref_ptr<osg::Geode> createRandomColoredSphere(float radius, unsigned int su
 
             vertices->push_back(osg::Vec3(x, y, z));
 
-            // 随机分配颜色（蓝色或绿色）
-            if (std::rand() % 2 == 0) {
+            // 随机分配颜色(蓝色或绿色）
+            if (std::rand() % 2 == 0)
+            {
                 colors->push_back(osg::Vec4(0.0f, 0.0f, 1.0f, 1.0f));  // 蓝色
             }
-            else {
+            else
+            {
                 colors->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));  // 绿色
             }
         }
@@ -53,12 +57,14 @@ osg::ref_ptr<osg::Geode> createRandomColoredSphere(float radius, unsigned int su
     // 创建球体的三角形面
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
-    for (unsigned int i = 0; i < subdivisions; ++i) {
-        for (unsigned int j = 0; j < subdivisions; ++j) {
+    for (unsigned int i = 0; i < subdivisions; ++i)
+    {
+        for (unsigned int j = 0; j < subdivisions; ++j)
+        {
             unsigned int first = i * (subdivisions + 1) + j;
             unsigned int second = first + subdivisions + 1;
 
-            // 生成两个三角形（为了每个四边形）
+            // 生成两个三角形(为了每个四边形）
             indices->push_back(first);
             indices->push_back(second);
             indices->push_back(first + 1);
@@ -77,7 +83,6 @@ osg::ref_ptr<osg::Geode> createRandomColoredSphere(float radius, unsigned int su
     return geode;
 }
 
-
 int main()
 {
     // 创建一个随机颜色的球体
@@ -85,7 +90,7 @@ int main()
 
     // 创建 Viewer
     osgViewer::Viewer viewer;
-    viewer.setUpViewInWindow(100, 100, 800, 600);  // 参数分别为：x, y, width, height
+    viewer.setUpViewInWindow(100, 100, 800, 600);  // 参数分别为:x, y, width, height
 
     viewer.setSceneData(sphere);
 

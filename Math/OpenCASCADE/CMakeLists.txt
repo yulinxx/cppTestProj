@@ -15,7 +15,7 @@ set(CPP_DIR
     ./
 )
 
-find_package(OpenCASCADE CONFIG REQUIRED) 
+find_package(OpenCASCADE CONFIG REQUIRED)
 
 if(OpenCASCADE_FOUND)
     # MESSAGE( "--------------OpenCASCADE_FOUND Found")
@@ -29,7 +29,7 @@ elseif(OpenCASCADE_FOUND)
     MESSAGE(FATAL_ERROR "------OpenCASCADE Not Found")
 endif(OpenCASCADE_FOUND)
 
-# Vtk，（visualization toolkit）是一个开源的免费软件系统，主要用于三维计算机图形学、图像处理和可视化。
+# Vtk,(visualization toolkit)是一个开源的免费软件系统,主要用于三维计算机图形学、图像处理和可视化.
 find_package(VTK REQUIRED)
 if(VTK_FOUND)
     # MESSAGE( "--------------VTK_FOUND Found")
@@ -47,7 +47,7 @@ endif(VTK_FOUND)
 
 # 寻找freetype库和包含文件
 # OpenCASCADE依赖于freetype库用于一些文本和字体相关的操作
-find_package(freetype CONFIG REQUIRED) 
+find_package(freetype CONFIG REQUIRED)
 if(freetype_FOUND)
     # MESSAGE( "--------------freetype_FOUND Found")
     MESSAGE( " ---freetype_FOUND Include: ${freetype_INCLUDE_DIRS}")
@@ -87,7 +87,7 @@ foreach(SUB_DIR ${CPP_DIR})
         # target_link_libraries(OpenCASCADE_${FILE_NAME} PRIVATE OpenCASCADE::OpenCASCADE)
         target_link_libraries(OpenCASCADE_${FILE_NAME} PRIVATE TKBO TKBin TKCAF TKCDF ${OpenCASCADE_LIBRARIES} ${FREETYPE_LIBRARIES} ${VTK_LIBRARIES})
         # target_link_libraries(main PRIVATE ${VTK_LIBRARIES})
-    endforeach(CPP)    
+    endforeach(CPP)
 
 endforeach(SUB_DIR)
 

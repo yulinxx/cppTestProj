@@ -1,4 +1,4 @@
-// 使用几何着色器，绘制出一条简单的  --->--- 线
+// 使用几何着色器,绘制出一条简单的  --->--- 线
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -9,49 +9,49 @@
 
 /**
  * @brief 顶点着色器源代码
- * 
- * 该顶点着色器接收二维顶点位置，并将其转换为齐次坐标，然后乘以投影矩阵。
+ *
+ * 该顶点着色器接收二维顶点位置,并将其转换为齐次坐标,然后乘以投影矩阵.
  */
 const char* vertexShaderSource = R"(
 #version 330 core
-// 输入顶点位置，布局位置为 0
+// 输入顶点位置,布局位置为 0
 layout(location = 0) in vec2 in_pos;
 
-// 投影矩阵，用于将顶点从模型空间转换到裁剪空间
+// 投影矩阵,用于将顶点从模型空间转换到裁剪空间
 uniform mat4 projection;
 
 void main() {
-    // 将顶点位置转换为齐次坐标，并乘以投影矩阵
+    // 将顶点位置转换为齐次坐标,并乘以投影矩阵
     gl_Position = projection * vec4(in_pos, 0.0, 1.0);
 }
 )";
 
 /**
  * @brief 几何着色器源代码
- * 
- * 该几何着色器接收线段作为输入，并输出带有箭头的线段。
+ *
+ * 该几何着色器接收线段作为输入,并输出带有箭头的线段.
  */
 const char* geometryShaderSource = R"(
 #version 330 core
 // 输入为线段
 layout(lines) in;
-// 输出为线段带，最大顶点数为 6
-layout(line_strip, max_vertices = 6) out; // 增加顶点输出数量，确保完整箭头
+// 输出为线段带,最大顶点数为 6
+layout(line_strip, max_vertices = 6) out; // 增加顶点输出数量,确保完整箭头
 
-// 投影矩阵，用于将顶点从模型空间转换到裁剪空间
+// 投影矩阵,用于将顶点从模型空间转换到裁剪空间
 uniform mat4 projection;  // 传递投影矩阵
-// 箭头大小，默认为 0.1
+// 箭头大小,默认为 0.1
 uniform float arrowSize = 0.1;  // 箭头大小
 
 void main() {
     // 线段起点
-    vec2 p0 = gl_in[0].gl_Position.xy;  
+    vec2 p0 = gl_in[0].gl_Position.xy;
     // 线段终点
-    vec2 p1 = gl_in[1].gl_Position.xy;  
+    vec2 p1 = gl_in[1].gl_Position.xy;
     // 线段方向
-    vec2 dir = normalize(p1 - p0);  
+    vec2 dir = normalize(p1 - p0);
     // 垂直方向
-    vec2 perp = vec2(-dir.y, dir.x);  
+    vec2 perp = vec2(-dir.y, dir.x);
 
     // 绘制线段
     gl_Position = projection * vec4(p0, 0.0, 1.0);
@@ -60,24 +60,24 @@ void main() {
     EmitVertex();
     EndPrimitive();
 
-    // 绘制 > 形式的箭头（位于线段中点）
-    // 箭头中心位置（中点）
-    vec2 arrowPos = mix(p0, p1, 0.5);  
+    // 绘制 > 形式的箭头(位于线段中点)
+    // 箭头中心位置(中点)
+    vec2 arrowPos = mix(p0, p1, 0.5);
     // 箭头尖端
-    vec2 tip = arrowPos + dir * arrowSize;  
+    vec2 tip = arrowPos + dir * arrowSize;
     // 上翼
-    vec2 wing1 = arrowPos - dir * arrowSize * 0.5 + perp * arrowSize * 0.5;  
+    vec2 wing1 = arrowPos - dir * arrowSize * 0.5 + perp * arrowSize * 0.5;
     // 下翼
-    vec2 wing2 = arrowPos - dir * arrowSize * 0.5 - perp * arrowSize * 0.5;  
+    vec2 wing2 = arrowPos - dir * arrowSize * 0.5 - perp * arrowSize * 0.5;
 
-    // 第一条线段：中心到上翼
+    // 第一条线段:中心到上翼
     gl_Position = projection * vec4(arrowPos, 0.0, 1.0);
     EmitVertex();
     gl_Position = projection * vec4(wing1, 0.0, 1.0);
     EmitVertex();
     EndPrimitive();
 
-    // 第二条线段：中心到下翼
+    // 第二条线段:中心到下翼
     gl_Position = projection * vec4(arrowPos, 0.0, 1.0);
     EmitVertex();
     gl_Position = projection * vec4(wing2, 0.0, 1.0);
@@ -88,15 +88,15 @@ void main() {
 
 /**
  * @brief 片段着色器源代码
- * 
- * 该片段着色器设置片段的颜色。
+ *
+ * 该片段着色器设置片段的颜色.
  */
 const char* fragmentShaderSource = R"(
 #version 330 core
 // 输出片段颜色
 out vec4 fragColor;
 
-// 颜色，默认为蓝色
+// 颜色,默认为蓝色
 uniform vec4 color = vec4(0.0, 0.0, 1.0, 1.0);  // 蓝色
 
 void main() {
@@ -107,9 +107,9 @@ void main() {
 
 /**
  * @brief 加载并编译着色器程序
- * 
- * 该函数创建并编译顶点着色器、几何着色器和片段着色器，然后将它们链接到一个着色器程序中。
- * 
+ *
+ * 该函数创建并编译顶点着色器、几何着色器和片段着色器,然后将它们链接到一个着色器程序中.
+ *
  * @return GLuint 着色器程序的 ID
  */
 GLuint loadShader()
@@ -155,10 +155,10 @@ GLuint loadShader()
 }
 
 /**
- * @brief 主函数，程序入口
- * 
- * 该函数初始化 GLFW 和 GLAD，创建窗口和着色器程序，定义顶点数据，设置投影矩阵，然后进入渲染循环。
- * 
+ * @brief 主函数,程序入口
+ *
+ * 该函数初始化 GLFW 和 GLAD,创建窗口和着色器程序,定义顶点数据,设置投影矩阵,然后进入渲染循环.
+ *
  * @return int 程序退出状态码
  */
 int main()
@@ -220,12 +220,12 @@ int main()
     // 启用顶点属性
     glEnableVertexAttribArray(0);
 
-    // 设置正交投影矩阵，覆盖整个窗口
+    // 设置正交投影矩阵,覆盖整个窗口
     glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
     // 设置投影矩阵的统一变量
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
-    // 设置线宽（可选，增强可见性）
+    // 设置线宽(可选,增强可见性)
     glLineWidth(2.0f);
 
     // 设置清除颜色
@@ -240,7 +240,7 @@ int main()
         // 绑定 VAO
         glBindVertexArray(VAO);
         // 绘制一条线段
-        glDrawArrays(GL_LINES, 0, 2);  
+        glDrawArrays(GL_LINES, 0, 2);
 
         // 检查 OpenGL 错误
         GLenum err;

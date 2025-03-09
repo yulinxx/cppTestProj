@@ -1,15 +1,15 @@
 #include <glad/glad.h>  // 添加这一行以包含GLAD库
-// 包含 GLFW 库，用于创建窗口和处理输入等操作
+// 包含 GLFW 库,用于创建窗口和处理输入等操作
 #include <GLFW/glfw3.h>
-// 包含 stb_truetype 库，用于处理 TrueType 字体
+// 包含 stb_truetype 库,用于处理 TrueType 字体
 #include <stb_truetype.h>
-// 包含输入输出流库，用于输入输出操作
+// 包含输入输出流库,用于输入输出操作
 #include <iostream>
-// 包含向量容器库，用于存储动态数组
+// 包含向量容器库,用于存储动态数组
 #include <vector>
-// 包含文件流库，用于文件操作
+// 包含文件流库,用于文件操作
 #include <fstream>
-// 包含字符串流库，用于字符串操作
+// 包含字符串流库,用于字符串操作
 #include <sstream>
 // 包含宽字符输入输出流库
 #include <cwchar>
@@ -24,35 +24,35 @@
 #define WINDOW_HEIGHT 600
 
 /**
- * 顶点着色器代码，使用原始字符串字面量表示
- * 接收顶点位置，通过投影矩阵将其转换到裁剪空间
+ * 顶点着色器代码,使用原始字符串字面量表示
+ * 接收顶点位置,通过投影矩阵将其转换到裁剪空间
  */
 const char* vertexShaderSource = R"(
 #version 400
-// 顶点属性，位置坐标，在顶点缓冲区中的位置为 0
+// 顶点属性,位置坐标,在顶点缓冲区中的位置为 0
 layout (location = 0) in vec2 aPos;
-// 投影矩阵，用于将顶点从局部坐标转换到裁剪空间
+// 投影矩阵,用于将顶点从局部坐标转换到裁剪空间
 uniform mat4 projection;
-// 主函数，每个顶点都会执行此函数
+// 主函数,每个顶点都会执行此函数
 void main()
 {
-   // 通过投影矩阵变换顶点位置，得到裁剪空间坐标
+   // 通过投影矩阵变换顶点位置,得到裁剪空间坐标
    gl_Position = projection * vec4(aPos, 0.0, 1.0);
 }
 )";
 
 /**
- * 片段着色器代码，使用原始字符串字面量表示
+ * 片段着色器代码,使用原始字符串字面量表示
  * 为每个片段输出白色颜色
  */
 const char* fragmentShaderSource = R"(
 #version 400
-// 输出变量，最终的片段颜色
+// 输出变量,最终的片段颜色
 out vec4 FragColor;
-// 主函数，每个片段都会执行此函数
+// 主函数,每个片段都会执行此函数
 void main()
 {
-   // 设置片段颜色为白色，RGBA 各通道值均为 1.0
+   // 设置片段颜色为白色,RGBA 各通道值均为 1.0
    FragColor = vec4(1.0, 1.0, 1.0, 1.0); // 白色线条
 }
 )";
@@ -85,9 +85,9 @@ FontData font;
  * @param xOffset x 偏移量
  * @param yOffset y 偏移量
  * @param vertices 存储顶点的向量
- * @param segments 细分的段数，默认为 20
+ * @param segments 细分的段数,默认为 20
  */
-void addBezierCurve(float x0, float y0, float cx, float cy, float x1, float y1, float scale, float xOffset, float yOffset, 
+void addBezierCurve(float x0, float y0, float cx, float cy, float x1, float y1, float scale, float xOffset, float yOffset,
     std::vector<float>& vertices, int segments = 20)
 {
     // 遍历细分的段数
@@ -101,9 +101,9 @@ void addBezierCurve(float x0, float y0, float cx, float cy, float x1, float y1, 
         float x = u * u * x0 + 2 * u * t * cx + t * t * x1;
         // 根据贝塞尔曲线公式计算当前细分点的 y 坐标
         float y = u * u * y0 + 2 * u * t * cy + t * t * y1;
-        // 将细分点的 x 坐标添加到顶点向量中，并考虑偏移和缩放
+        // 将细分点的 x 坐标添加到顶点向量中,并考虑偏移和缩放
         vertices.push_back(xOffset + x * scale);
-        // 将细分点的 y 坐标添加到顶点向量中，并考虑偏移和缩放
+        // 将细分点的 y 坐标添加到顶点向量中,并考虑偏移和缩放
         vertices.push_back(yOffset + y * scale);
     }
 }
@@ -214,7 +214,7 @@ void renderText(GLuint program)
     // 绑定顶点数组对象
     glBindVertexArray(font.vao);
 
-    // 按字符逐个绘制，避免字符间连接
+    // 按字符逐个绘制,避免字符间连接
     int vertexOffset = 0;
     for (int count : font.glyphVertexCounts)
     {
@@ -226,7 +226,7 @@ void renderText(GLuint program)
 }
 
 /**
- * 主函数，程序入口
+ * 主函数,程序入口
  * @return 程序退出状态码
  */
 int main()
@@ -329,7 +329,7 @@ int main()
     // 初始化字体并生成轮廓顶点
     initFont("C:/Windows/Fonts/simhei.ttf", L"你好OpenGL", 64.0f, 100.0f, 300.0f);
 
-    // 主循环，直到窗口关闭
+    // 主循环,直到窗口关闭
     while (!glfwWindowShouldClose(window))
     {
         // 清除颜色缓冲区

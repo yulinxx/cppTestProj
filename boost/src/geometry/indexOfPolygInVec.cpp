@@ -1,9 +1,9 @@
 // 搜索GraphicalDebugging
-// 在视图中的其他窗口可以找到刚刚安装的插件的窗口，
-// Geometry Watch，Graphical Watch，Plot Watch，接下来就是找一段代码试一试；
+// 在视图中的其他窗口可以找到刚刚安装的插件的窗口,
+// Geometry Watch,Graphical Watch,Plot Watch,接下来就是找一段代码试一试;
 //
-// 使用：安装后，在调试的地方，可以看到
-// 在GraphicalWatch处，点 +
+// 使用:安装后,在调试的地方,可以看到
+// 在GraphicalWatch处,点 +
 // 然后输入要观察的变量即可
 
 #include <boost/geometry.hpp>

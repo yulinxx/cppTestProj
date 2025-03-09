@@ -1,12 +1,12 @@
 # C++ 测试项目
 
 ## 项目概述
-本项目包含基础的C++测试代码，用于学习和验证各种C++库的使用。
+本项目包含基础的C++测试代码，用于学习和验证各种C++库的使用.
 
 ## 环境配置
 使用VCPKG安装依赖库：
 ```bash
-vcpkg install boost eigen3 stb opencv vtk osg pybind11 glm glfw glad breakpad protobuf gtest glog spdlog opencascade:x64-windows 
+vcpkg install boost eigen3 stb opencv vtk osg pybind11 glm glfw glad breakpad protobuf gtest glog spdlog opencascade:x64-windows
 ```
 
 ## 库分类说明
@@ -14,16 +14,16 @@ vcpkg install boost eigen3 stb opencv vtk osg pybind11 glm glfw glad breakpad pr
 ### 1. 通用库
 - **Boost**：一系列高质量的C++库
   - boost-accumulators
-  - boost-algorithm  
+  - boost-algorithm
   - boost-filesystem
 - **C++标准库扩展**
-  - fmt（格式化库）
-  - spdlog（日志库）
-  - nlohmann-json（JSON处理库）
+  - fmt（格式化库)
+  - spdlog（日志库)
+  - nlohmann-json（JSON处理库)
 - **跨平台库**
-  - sqlite3（轻量级数据库）
-  - zlib（压缩库）
-  - openssl（加密库）
+  - sqlite3（轻量级数据库)
+  - zlib（压缩库)
+  - openssl（加密库)
 
 ### 2. 图形和图像处理库
 - OpenGL：标准的图形渲染库
@@ -33,7 +33,7 @@ vcpkg install boost eigen3 stb opencv vtk osg pybind11 glm glfw glad breakpad pr
   - libjpeg-turbo
   - libpng
   - libwebp
-- OpenEXR：高动态范围（HDR）图像处理
+- OpenEXR：高动态范围（HDR)图像处理
 
 ### 3. 数学和科学计算库
 - Eigen3：线性代数库
@@ -102,4 +102,4 @@ vcpkg install boost eigen3 stb opencv vtk osg pybind11 glm glfw glad breakpad pr
 ## 其它库
 1. [三角剖分：earcut](https://github.com/mapbox/earcut.hpp)
   - earcut.hpp 是一个高效、仅头文件的C++多边形三角剖分库，由 Mapbox 开发并开源
-  - 基于改进的耳切算法（Ear Clipping Algorithm），通过 Z-Order 曲线哈希优化，能够处理复杂的几何形状，包括带孔洞的多边形、扭曲的多边形、退化情况以及自交。
+  - 基于改进的耳切算法（Ear Clipping Algorithm)，通过 Z-Order 曲线哈希优化，能够处理复杂的几何形状，包括带孔洞的多边形、扭曲的多边形、退化情况以及自交.

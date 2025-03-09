@@ -40,7 +40,7 @@ typedef struct
 
 FontData font;
 
-// 贝塞尔曲线细分（二阶贝塞尔）
+// 贝塞尔曲线细分(二阶贝塞尔)
 void addBezierCurve(float x0, float y0, float cx, float cy, float x1, float y1, float scale, float xOffset, float yOffset, std::vector<float>& vertices, int segments = 20)
 {
     for (int i = 0; i <= segments; i++)
@@ -171,7 +171,7 @@ void renderText(GLuint program)
 
     glBindVertexArray(font.vao);
 
-    // 按字符逐个绘制，避免字符间连接
+    // 按字符逐个绘制,避免字符间连接
     int vertexOffset = 0;
     for (int count : font.glyphVertexCounts)
     {

@@ -68,8 +68,8 @@ int main()
 
     // swap函数
     // void swap (shared_ptr& x) noexcept;
-    // 参数x: 另一个相同类型的 shared_ptr 对象（即，具有相同的类模板参数 T）。
-    // 作用是将 shared_ptr 对象的内容与 x 的内容交换，在它们之间转移任何托管对象的所有权，而不会破坏或改变两者的使用计数。
+    // 参数x: 另一个相同类型的 shared_ptr 对象(即,具有相同的类模板参数 T）.
+    // 作用是将 shared_ptr 对象的内容与 x 的内容交换,在它们之间转移任何托管对象的所有权,而不会破坏或改变两者的使用计数.
     {
         std::shared_ptr<int> foo(new int(10));
         std::shared_ptr<int> bar(new int(20));
@@ -81,10 +81,10 @@ int main()
     }
 
     // reset函数
-    // 重置shared_ptr，对于声明1) 对象变为空（如同默认构造）。
-    // 在所有其他情况下，shared_ptr 以使用计数为 1 获取 p 的所有权，并且 - 可选地 - 使用 del 和/或 alloc 作为删除器 和分配器。
-    // 另外，调用这个函数有同样的副作用，就像在它的值改变之前调用了shared_ptr 的析构函数一样
-    // （包括删除托管对象，如果这个shared_ptr 是唯一的）。
+    // 重置shared_ptr,对于声明1) 对象变为空(如同默认构造）.
+    // 在所有其他情况下,shared_ptr 以使用计数为 1 获取 p 的所有权,并且 - 可选地 - 使用 del 和/或 alloc 作为删除器 和分配器.
+    // 另外,调用这个函数有同样的副作用,就像在它的值改变之前调用了shared_ptr 的析构函数一样
+    // (包括删除托管对象,如果这个shared_ptr 是唯一的）.
     {
         std::shared_ptr<int> sp; // empty
 
@@ -100,10 +100,10 @@ int main()
     }
 
     // get函数
-    // 函数声明：element_type* get() const noexcept; get()返回存储的指针。
-    // 存储的指针指向shared_ptr对象解引用的对象，一般与其拥有的指针相同。
-    // 存储的指针（即这个函数返回的指针）可能不是拥有的指针（即对象销毁时删除的指针）
-    // 如果 shared_ptr 对象是别名（即，别名构造的对象及其副本）
+    // 函数声明:element_type* get() const noexcept; get()返回存储的指针.
+    // 存储的指针指向shared_ptr对象解引用的对象,一般与其拥有的指针相同.
+    // 存储的指针(即这个函数返回的指针）可能不是拥有的指针(即对象销毁时删除的指针）
+    // 如果 shared_ptr 对象是别名(即,别名构造的对象及其副本）
     {
         int* p = new int(10);
         std::shared_ptr<int> a(p);
@@ -118,10 +118,10 @@ int main()
     }
 
     // 取对象运算“*”
-    // 函数声明：element_type& operator*() const noexcept;
-    // 取消引用对象。返回对存储指针指向的对象的引用。等价于：*get()。
-    // 如果shared_ptr的模板参数为void，则该成员函数是否定义取决于平台和编译器，
-    // 以及它的返回类型 在这种情况下。
+    // 函数声明:element_type& operator*() const noexcept;
+    // 取消引用对象.返回对存储指针指向的对象的引用.等价于:*get().
+    // 如果shared_ptr的模板参数为void,则该成员函数是否定义取决于平台和编译器,
+    // 以及它的返回类型 在这种情况下.
     {
         std::shared_ptr<int> foo(new int);
         std::shared_ptr<int> bar(new int(100));
@@ -133,9 +133,9 @@ int main()
     }
 
     // “->”操作符
-    // element_type* operator->() const noexcept; 取消引用对象成员。
-    // 返回一个指向存储指针指向的对象的指针，以便访问其成员之一。
-    // 如果存储的指针是空指针，则不应调用该成员函数，它返回与 get() 相同的值。
+    // element_type* operator->() const noexcept; 取消引用对象成员.
+    // 返回一个指向存储指针指向的对象的指针,以便访问其成员之一.
+    // 如果存储的指针是空指针,则不应调用该成员函数,它返回与 get() 相同的值.
     {
         std::shared_ptr<Data> foo;
         std::shared_ptr<Data> bar(new Data);

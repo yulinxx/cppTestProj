@@ -1,15 +1,15 @@
-#include <glad/glad.h>  // 包含 GLAD 库，用于加载 OpenGL 函数指针
-#include <GLFW/glfw3.h> // 包含 GLFW 库，用于创建窗口和处理输入
+#include <glad/glad.h>  // 包含 GLAD 库,用于加载 OpenGL 函数指针
+#include <GLFW/glfw3.h> // 包含 GLFW 库,用于创建窗口和处理输入
 
-#include <glm/glm.hpp>  // 包含 GLM 库，用于处理向量和矩阵运算
+#include <glm/glm.hpp>  // 包含 GLM 库,用于处理向量和矩阵运算
 #include <glm/gtc/matrix_transform.hpp> // 包含 GLM 的矩阵变换功能
 #include <glm/gtc/type_ptr.hpp> // 包含 GLM 的类型转换功能
 
 #include <stdio.h>      // 标准输入输出库
-#include <stdlib.h>     // 标准库，包含一些常用函数，如 exit
+#include <stdlib.h>     // 标准库,包含一些常用函数,如 exit
 #include <string.h>     // 字符串处理库
 
-#define STB_TRUETYPE_IMPLEMENTATION // 定义宏，用于实现 STB 字体库
+#define STB_TRUETYPE_IMPLEMENTATION // 定义宏,用于实现 STB 字体库
 #include "stb_truetype.h"          // 包含 STB 字体库
 
 ////////////////////////////////////////////////////////
@@ -32,16 +32,16 @@ GLuint shaderProgram, VAO, VBO;
 
 /**
  * @brief 读取字体文件并返回文件内容的字节向量
- * 
- * 该函数打开指定的字体文件，以二进制模式读取其内容，并将内容存储在一个字节向量中。
- * 如果文件打开失败，函数将输出错误信息并终止程序。
- * 
+ *
+ * 该函数打开指定的字体文件,以二进制模式读取其内容,并将内容存储在一个字节向量中.
+ * 如果文件打开失败,函数将输出错误信息并终止程序.
+ *
  * @param filename 字体文件的路径
  * @return std::vector<unsigned char> 包含字体文件内容的字节向量
  */
 std::vector<unsigned char> readFontFile(const std::string& filename)
 {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate); // 以二进制模式打开文件，并定位到文件末尾
+    std::ifstream file(filename, std::ios::binary | std::ios::ate); // 以二进制模式打开文件,并定位到文件末尾
     if (!file)
     {
         std::cerr << "无法打开字体文件: " << filename << std::endl; // 输出错误信息
@@ -75,11 +75,11 @@ void main() {
 
 /**
  * @brief 编译着色器
- * 
- * 该函数根据指定的着色器类型（顶点着色器或片段着色器）和着色器源代码编译着色器。
- * 如果编译失败，函数将输出错误信息。
- * 
- * @param type 着色器类型（GL_VERTEX_SHADER 或 GL_FRAGMENT_SHADER）
+ *
+ * 该函数根据指定的着色器类型(顶点着色器或片段着色器)和着色器源代码编译着色器.
+ * 如果编译失败,函数将输出错误信息.
+ *
+ * @param type 着色器类型(GL_VERTEX_SHADER 或 GL_FRAGMENT_SHADER)
  * @param source 着色器源代码
  * @return GLuint 编译后的着色器对象 ID
  */
@@ -101,9 +101,9 @@ GLuint compileShader(GLenum type, const char* source)
 
 /**
  * @brief 初始化 OpenGL 环境
- * 
- * 该函数编译顶点着色器和片段着色器，并将它们链接到一个着色器程序中。
- * 最后删除不再需要的着色器对象。
+ *
+ * 该函数编译顶点着色器和片段着色器,并将它们链接到一个着色器程序中.
+ * 最后删除不再需要的着色器对象.
  */
 void initOpenGL()
 {
@@ -121,9 +121,9 @@ void initOpenGL()
 
 /**
  * @brief 将二次贝塞尔曲线采样为直线段
- * 
- * 该函数将二次贝塞尔曲线采样为指定数量的直线段，并返回这些直线段的顶点坐标。
- * 
+ *
+ * 该函数将二次贝塞尔曲线采样为指定数量的直线段,并返回这些直线段的顶点坐标.
+ *
  * @param x0 起始点的 x 坐标
  * @param y0 起始点的 y 坐标
  * @param x1 控制点的 x 坐标
@@ -149,11 +149,11 @@ std::vector<float> tessellateQuadBezier(float x0, float y0, float x1, float y1, 
 }
 
 /**
- * @brief 获取字符轮廓并生成顶点（支持多个轮廓段）
- * 
- * 该函数根据指定的字体信息、字符编码点、缩放比例和偏移量，获取字符的轮廓并生成顶点坐标。
- * 支持多个轮廓段，每个轮廓段由一组顶点坐标表示。
- * 
+ * @brief 获取字符轮廓并生成顶点(支持多个轮廓段)
+ *
+ * 该函数根据指定的字体信息、字符编码点、缩放比例和偏移量,获取字符的轮廓并生成顶点坐标.
+ * 支持多个轮廓段,每个轮廓段由一组顶点坐标表示.
+ *
  * @param font 字体信息结构体指针
  * @param codepoint 字符编码点
  * @param scale 缩放比例
@@ -192,7 +192,7 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
             float x2 = v[i].x * scale; // 获取曲线终点的 x 坐标
             float y2 = v[i].y * scale; // 获取曲线终点的 y 坐标
             auto curve = tessellateQuadBezier(x0, y0, x1, y1, x2, y2, 10); // 将曲线采样为直线段
-            currentOutline.insert(currentOutline.end(), curve.begin() + 2, curve.end()); // 跳过起点，将采样后的顶点添加到当前轮廓段
+            currentOutline.insert(currentOutline.end(), curve.begin() + 2, curve.end()); // 跳过起点,将采样后的顶点添加到当前轮廓段
             break;
         }
     }
@@ -210,11 +210,11 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
 }
 
 /**
- * @brief 渲染文字轮廓（支持多个轮廓段）
- * 
- * 该函数根据指定的字体信息、文本内容、起始位置和缩放比例，渲染文字的轮廓。
- * 支持多个轮廓段，每个轮廓段由一组顶点坐标表示。
- * 
+ * @brief 渲染文字轮廓(支持多个轮廓段)
+ *
+ * 该函数根据指定的字体信息、文本内容、起始位置和缩放比例,渲染文字的轮廓.
+ * 支持多个轮廓段,每个轮廓段由一组顶点坐标表示.
+ *
  * @param font 字体信息结构体指针
  * @param text 要渲染的文本内容
  * @param x 起始位置的 x 坐标
@@ -254,7 +254,7 @@ void renderTextOutline(stbtt_fontinfo* font, const std::string& text, float x, f
 // 主函数
 int main()
 {
-    if (!glfwInit()) return -1; // 初始化 GLFW，如果失败则返回 -1
+    if (!glfwInit()) return -1; // 初始化 GLFW,如果失败则返回 -1
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL Text Outline", NULL, NULL); // 创建窗口
     if (!window) return -1; // 如果窗口创建失败则返回 -1
     glfwMakeContextCurrent(window); // 将窗口的上下文设置为当前上下文
@@ -285,7 +285,7 @@ int main()
     glUseProgram(shaderProgram); // 使用着色器程序
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection)); // 设置投影矩阵
 
-    // 设置线宽（可选）
+    // 设置线宽(可选)
     glLineWidth(2.0f);
 
     // 主循环

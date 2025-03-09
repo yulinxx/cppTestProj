@@ -15,11 +15,11 @@ typedef bg::model::segment<DPoint> DSegment;
 typedef bg::model::linestring<DPoint> DLineString;
 typedef bg::model::box<DPoint> DBox;
 
-//这里的ring就是我们通常说的多边形闭合区域(内部不存在缕空)，模板参数为true，表示顺时针存储点，为false，表示逆时针存储点，
-// 由于MM_TEXT坐标系与传统上的坐标系的Y轴方向是相反的，所以最后为false，将TopLeft、TopRight、BottomRight、BottomLeft、TopLeft以此存储到ring中，以便能正确计算
+//这里的ring就是我们通常说的多边形闭合区域(内部不存在缕空),模板参数为true,表示顺时针存储点,为false,表示逆时针存储点,
+// 由于MM_TEXT坐标系与传统上的坐标系的Y轴方向是相反的,所以最后为false,将TopLeft、TopRight、BottomRight、BottomLeft、TopLeft以此存储到ring中,以便能正确计算
 typedef bg::model::ring<DPoint, false> DRing;
 
-//polygon模板参数false，也是由上面相同的原因得出来的
+//polygon模板参数false,也是由上面相同的原因得出来的
 typedef bg::model::polygon<DPoint, false> DPolygon;
 
 int main()
@@ -34,7 +34,7 @@ int main()
     dDistance = bg::distance(pt0, pt1);
     std::cout << "Distance:" << dDistance << std::endl;
 
-    //2、点到线段的距离，如果点到直线的垂足不在线段上，所计算的距离为(点到直线的距离、线段到垂足延长的距离之和）
+    //2、点到线段的距离,如果点到直线的垂足不在线段上,所计算的距离为(点到直线的距离、线段到垂足延长的距离之和)
     dDistance = bg::distance(DPoint(200, 100), sg0);
     std::cout << "Distance:" << dDistance << std::endl;
     dDistance = bg::distance(DPoint(100, 0), sg0);

@@ -1,4 +1,4 @@
-// 此注释用于占位，表明后续代码将在此处添加
+// 此注释用于占位,表明后续代码将在此处添加
 // 不修改 正交投影, 从而改变虚线间隔
 
 #include <glad/glad.h>
@@ -43,11 +43,11 @@ void main() {
 )";
 
 /**
- * @brief 加载并编译顶点着色器和片段着色器，然后链接成一个着色器程序。
- * 
- * @param vertexShaderSource 顶点着色器的源代码。
- * @param fragmentShaderSource 片段着色器的源代码。
- * @return GLuint 编译并链接后的着色器程序的 ID。
+ * @brief 加载并编译顶点着色器和片段着色器,然后链接成一个着色器程序.
+ *
+ * @param vertexShaderSource 顶点着色器的源代码.
+ * @param fragmentShaderSource 片段着色器的源代码.
+ * @return GLuint 编译并链接后的着色器程序的 ID.
  */
 GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
 {
@@ -83,13 +83,13 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
 }
 
 /**
- * @brief 生成一个指定范围内的随机二维点。
- * 
- * @param minX 点的 x 坐标的最小值，默认为 -X。
- * @param maxX 点的 x 坐标的最大值，默认为 X。
- * @param minY 点的 y 坐标的最小值，默认为 -X。
- * @param maxY 点的 y 坐标的最大值，默认为 X。
- * @return glm::vec2 生成的随机二维点。
+ * @brief 生成一个指定范围内的随机二维点.
+ *
+ * @param minX 点的 x 坐标的最小值,默认为 -X.
+ * @param maxX 点的 x 坐标的最大值,默认为 X.
+ * @param minY 点的 y 坐标的最小值,默认为 -X.
+ * @param maxY 点的 y 坐标的最大值,默认为 X.
+ * @return glm::vec2 生成的随机二维点.
  */
 glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float maxY = X)
 {
@@ -102,16 +102,16 @@ glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float ma
 }
 
 /**
- * @brief 生成随机的混合线段，包括直线段和贝塞尔曲线段。
- * 
- * @param vertices 存储生成的顶点数据的向量。
- * @param numSegments 线段的总数。
- * @param lineSegments 每个直线段的细分数量。
- * @param bezierSegments 每个贝塞尔曲线段的细分数量。
- * @param minX 点的 x 坐标的最小值。
- * @param maxX 点的 x 坐标的最大值。
- * @param minY 点的 y 坐标的最小值。
- * @param maxY 点的 y 坐标的最大值。
+ * @brief 生成随机的混合线段,包括直线段和贝塞尔曲线段.
+ *
+ * @param vertices 存储生成的顶点数据的向量.
+ * @param numSegments 线段的总数.
+ * @param lineSegments 每个直线段的细分数量.
+ * @param bezierSegments 每个贝塞尔曲线段的细分数量.
+ * @param minX 点的 x 坐标的最小值.
+ * @param maxX 点的 x 坐标的最大值.
+ * @param minY 点的 y 坐标的最小值.
+ * @param maxY 点的 y 坐标的最大值.
  */
 void generateRandomMixedLine(
     std::vector<float>& vertices,
@@ -156,7 +156,7 @@ void generateRandomMixedLine(
             // 添加累积长度到顶点向量
             vertices.push_back(dAccLen);
 
-            // 重复添加点和累积长度，用于绘制线段
+            // 重复添加点和累积长度,用于绘制线段
             vertices.push_back(point.x);
             vertices.push_back(point.y);
             vertices.push_back(dAccLen);
@@ -200,7 +200,7 @@ void generateRandomMixedLine(
                 // 添加累积长度到顶点向量
                 vertices.push_back(dAccLen);
 
-                // 重复添加点和累积长度，用于绘制线段
+                // 重复添加点和累积长度,用于绘制线段
                 vertices.push_back(point.x);
                 vertices.push_back(point.y);
                 vertices.push_back(dAccLen);
@@ -218,14 +218,14 @@ void generateRandomMixedLine(
 // 缩放因子
 float zoomFactor = 1.0f;
 // 全局变量存储 cameraTrans uniform 的位置
-GLint cameraTransLoc;  
+GLint cameraTransLoc;
 
 /**
- * @brief 处理鼠标滚轮滚动事件，更新缩放因子和相机变换矩阵。
- * 
- * @param window 当前的 GLFW 窗口。
- * @param xoffset 鼠标滚轮在 x 方向的偏移量。
- * @param yoffset 鼠标滚轮在 y 方向的偏移量。
+ * @brief 处理鼠标滚轮滚动事件,更新缩放因子和相机变换矩阵.
+ *
+ * @param window 当前的 GLFW 窗口.
+ * @param xoffset 鼠标滚轮在 x 方向的偏移量.
+ * @param yoffset 鼠标滚轮在 y 方向的偏移量.
  */
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {

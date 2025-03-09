@@ -4,8 +4,7 @@
 using namespace ImgSpace;
 
 imgProcess::imgProcess()
-{
-}
+{}
 
 imgProcess::imgProcess(std::string& strPath)
 {
@@ -13,8 +12,7 @@ imgProcess::imgProcess(std::string& strPath)
 }
 
 imgProcess::~imgProcess()
-{
-}
+{}
 
 cv::Mat imgProcess::readImg(std::string& strPath, int nType /*=1*/)
 {
@@ -127,12 +125,12 @@ Mat imgProcess::setThreshold(const Mat& mat, int nValueA, int nValueB /*= 255*/,
     // threshold(m_oriImg, m_matRes, dValueA, dValueB, nType);
     //  cv::THRESH_BINARY
 
-    // threshold<> 会接受到5个参数：
-    // src_gray: 输入的灰度图像的地址。
-    // matRes: 输出图像的地址。
-    // threshold_value: 进行阈值操作时阈值的大小。
-    // max_BINARY_value: 设定的最大灰度值（该参数运用在二进制与反二进制阈值操作中）。
-    // threshold_type: 阈值的类型。从上面提到的5种中选择出的结果。
+    // threshold<> 会接受到5个参数:
+    // src_gray: 输入的灰度图像的地址.
+    // matRes: 输出图像的地址.
+    // threshold_value: 进行阈值操作时阈值的大小.
+    // max_BINARY_value: 设定的最大灰度值(该参数运用在二进制与反二进制阈值操作中).
+    // threshold_type: 阈值的类型.从上面提到的5种中选择出的结果.
 
     Mat matGray = this->getGray(mat);
 
@@ -271,10 +269,10 @@ Mat imgProcess::setRotateImg(const Mat& mat, double dAngle /*=0.0*/, bool bChang
         {
             for (int i = 0; i < nCols; i++)
             {
-                // 计算出输出图像在原图像中的对应点的坐标，然后复制该坐标的灰度值
-                // 因为是逆时针转换，所以这里映射到原图像的时候可以看成是，输出图像
-                // 到顺时针旋转到原图像的，而顺时针旋转矩阵刚好是逆时针旋转矩阵的转置
-                // 同时还要考虑到要把旋转后的图像的左上角移动到坐标原点。
+                // 计算出输出图像在原图像中的对应点的坐标,然后复制该坐标的灰度值
+                // 因为是逆时针转换,所以这里映射到原图像的时候可以看成是,输出图像
+                // 到顺时针旋转到原图像的,而顺时针旋转矩阵刚好是逆时针旋转矩阵的转置
+                // 同时还要考虑到要把旋转后的图像的左上角移动到坐标原点.
                 int x = (i + nMin_x) * matRotate[0][0] + (j + nMin_y) * matRotate[0][1];
                 int y = (i + nMin_x) * matRotate[1][0] + (j + nMin_y) * matRotate[1][1];
 
@@ -360,7 +358,7 @@ Mat imgProcess::setErodeImg(const Mat& mat, int w /*= 5*/, int h /*= 5*/, int nT
     if (0 == nType % 2)
     {
         // getStructuringElement函数返回的是指定形状和尺寸的结构元素
-        //获取自定义核  MORPH_RECT表示矩形的卷积核，当然还可以选择椭圆形的、交叉型的
+        //获取自定义核  MORPH_RECT表示矩形的卷积核,当然还可以选择椭圆形的、交叉型的
         Mat element = getStructuringElement(MORPH_RECT, Size(w, h));
         erode(mat, matRes, element); // 腐蚀操作
     }
@@ -411,16 +409,16 @@ Mat imgProcess::setCannyImg(const Mat& mat, int a, int b, int c, int w /*= 13*/,
     Mat matGradX, matGradY;
     Mat matGradAbsX, matGradAbsY;
 
-    //在 x 和 y 方向分别”求导“。 为此，我们使用函数 Sobel :
-    // src_gray: 在本例中为输入图像，元素类型 CV_8U
+    //在 x 和 y 方向分别”求导“. 为此,我们使用函数 Sobel :
+    // src_gray: 在本例中为输入图像,元素类型 CV_8U
     // matGradX / matGradY : 输出图像.
-    // ddepth : 输出图像的深度，设定为 CV_16S 避免外溢。
-    // x_order : x 方向求导的阶数。
-    // y_order : y 方向求导的阶数。
+    // ddepth : 输出图像的深度,设定为 CV_16S 避免外溢.
+    // x_order : x 方向求导的阶数.
+    // y_order : y 方向求导的阶数.
     // scale, delta 和 BORDER_DEFAULT : 使用默认值
 
-    //范围内, 计算绝对值, 并将结果转换为8位。
-    // 输入数组中的每一个元素，函数 convertScaleAbs 顺序执行三个操作 ：缩放、取绝对值、转换成一个无符号8位类型。
+    //范围内, 计算绝对值, 并将结果转换为8位.
+    // 输入数组中的每一个元素,函数 convertScaleAbs 顺序执行三个操作 :缩放、取绝对值、转换成一个无符号8位类型.
     // void cv::convertScaleAbs(
     //    cv::InputArray mat, // 输入数组
     //    cv::OutputArray matRes, // 输出数组
@@ -438,7 +436,7 @@ Mat imgProcess::setCannyImg(const Mat& mat, int a, int b, int c, int w /*= 13*/,
     Sobel(matGray, matGradY, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT);
     convertScaleAbs(matGradY, matGradAbsY);
 
-    /// 合并梯度(近似) // addWeighted使用OpenCV对两幅图像求和（求混合(blending)）
+    /// 合并梯度(近似) // addWeighted使用OpenCV对两幅图像求和(求混合(blending))
     addWeighted(matGradAbsX, 0.5, matGradAbsY, 0.5, 0, m_matRes);
     return m_matRes;
 
@@ -482,7 +480,7 @@ Mat imgProcess::setContrastAndBright(const Mat& mat, double dH, double dS, doubl
     // // S: [0,100]
     // // V: [0,100]
 
-    // // 但是在openCV中，HSV的范围却是
+    // // 但是在openCV中,HSV的范围却是
     // // H: [0,180]
     // // S: [0,255]
     // // V: [0,255]
@@ -494,8 +492,8 @@ Mat imgProcess::setContrastAndBright(const Mat& mat, double dH, double dS, doubl
     // // v = (float)v/100*255;
     // // https://www.jianshu.com/p/7361652e15b8
 
-    // // H指hue（色相）、S指saturation（饱和度）、L指lightness（亮度）、V指value(色调)、B指brightness（明度）
-    // // HSL是色相（Hue）、饱和度（Saturation）和亮度（Lightness）
+    // // H指hue(色相)、S指saturation(饱和度)、L指lightness(亮度)、V指value(色调)、B指brightness(明度)
+    // // HSL是色相(Hue)、饱和度(Saturation)和亮度(Lightness)
 
     // 色相调节
     Mat matHSV;
@@ -587,7 +585,7 @@ Mat imgProcess::setContrastAndBright(const Mat& mat, double dH, double dS, doubl
     cvtColor(matHSV, matShow, COLOR_HSV2BGR);
     return matShow;
 
-    // // 所以我们需要一个新的Mat对象，以存储变换后的图像。我们希望这个Mat对象拥有下面的性质：
+    // // 所以我们需要一个新的Mat对象,以存储变换后的图像.我们希望这个Mat对象拥有下面的性质:
     // // 像素值初始化为0 与原图像有相同的大小和类型
     // Mat matRes = Mat::zeros(mat.size(), mat.type());
     // int channels = mat.channels(); //获取图像通道数
@@ -621,8 +619,8 @@ Mat imgProcess::setContrastAndBright(const Mat& mat, double dH, double dS, doubl
     //             for (int c = 0; c < 3; c++)
     //             {
     //                 //    实现调整图片亮度和对比度的公式 new_img = a*original_img + b
-    //                 //      a 表示图片的对比度，> 1，就是高对比度；如果在 0 - 1 之间，那就是低对比度； 等于 1，表示没有任何变化
-    //                 //      b  数值范围是 - 127 到 127；
+    //                 //      a 表示图片的对比度,> 1,就是高对比度;如果在 0 - 1 之间,那就是低对比度; 等于 1,表示没有任何变化
+    //                 //      b  数值范围是 - 127 到 127;
     //                 matRes.at<Vec3b>(row, col)[c] = saturate_cast<uchar>((mat.at<Vec3b>(row, col)[c] * dH * 0.01) + dS);
     //             }
     //         }
@@ -688,7 +686,7 @@ Mat imgProcess::setImgBlur(const Mat& mat, int nBrushSize, int nType)
     Mat matCpy = mat.clone();
 
     // 归一化块滤波器(Normalized Box Filter)  就是 均值平滑
-    // 最简单的滤波器， 输出像素值是核窗口内像素值的 均值(所有像素加权系数相等)
+    // 最简单的滤波器, 输出像素值是核窗口内像素值的 均值(所有像素加权系数相等)
 
     int DELAY_CAPTION = 1500;
     int DELAY_BLUR = 300;
@@ -701,20 +699,20 @@ Mat imgProcess::setImgBlur(const Mat& mat, int nBrushSize, int nType)
         /// 使用 均值平滑
         // mat: 输入图像
         // matCpy : 输出图像
-        // Size(w, h) : 定义内核大小(w 像素宽度， h 像素高度)
-        // Point(-1, -1) : 指定锚点位置(被平滑点)， 如果是负值，取核的中心为锚点。
+        // Size(w, h) : 定义内核大小(w 像素宽度, h 像素高度)
+        // Point(-1, -1) : 指定锚点位置(被平滑点), 如果是负值,取核的中心为锚点.
         blur(mat, matCpy, Size(nBrushSize, nBrushSize), Point(-1, -1)); // 归一化块滤波器  均值平滑
     }
     break;
     case 1:
     {
         /// 使用高斯平滑 (Gaussian Filter)
-        //高斯滤波是将输入数组的每一个像素点与 高斯内核 卷积将卷积和当作输出像素值。
+        //高斯滤波是将输入数组的每一个像素点与 高斯内核 卷积将卷积和当作输出像素值.
         // mat: 输入图像
         // matCpy : 输出图像
-        // Size(w, h) : 定义内核的大小(需要考虑的邻域范围)。 w 和 h 必须是正奇数，否则将使用 \sigma_{ x } 和 \sigma_{ y } 参数来计算内核大小。
-        //\sigma_{ x }: x 方向标准方差， 如果是 0 则 \sigma_{ x } 使用内核大小计算得到。
-        //\sigma_{ y }: y 方向标准方差， 如果是 0 则 \sigma_{ y } 使用内核大小计算得到。.
+        // Size(w, h) : 定义内核的大小(需要考虑的邻域范围). w 和 h 必须是正奇数,否则将使用 \sigma_{ x } 和 \sigma_{ y } 参数来计算内核大小.
+        //\sigma_{ x }: x 方向标准方差, 如果是 0 则 \sigma_{ x } 使用内核大小计算得到.
+        //\sigma_{ y }: y 方向标准方差, 如果是 0 则 \sigma_{ y } 使用内核大小计算得到..
         GaussianBlur(mat, matCpy, Size(nBrushSize, nBrushSize), 0, 0); // 高斯平滑
     }
     break;
@@ -724,7 +722,7 @@ Mat imgProcess::setImgBlur(const Mat& mat, int nBrushSize, int nType)
         // 中值滤波将图像的每个像素用邻域 (以当前像素为中心的正方形区域)像素的 中值 代替
         // mat: 输入图像
         // matCpy : 输出图像, 必须与 mat 相同类型
-        // nBrushSize : 内核大小(只需一个值，因为我们使用正方形窗口)，必须为奇数。
+        // nBrushSize : 内核大小(只需一个值,因为我们使用正方形窗口),必须为奇数.
         medianBlur(mat, matCpy, nBrushSize); // 中值滤波
     }
     break;
@@ -804,7 +802,7 @@ Mat imgProcess::setRelief(const Mat& mat, int nBrushSize, int nType)
         {
             for (int i = 0; i < 3; i++)
             {
-                // 当前点和右边一个点相减，再加150
+                // 当前点和右边一个点相减,再加150
                 int tmp0 = p1[3 * (x + 1) + i] - p0[3 * (x - 1) + i] + nBrushSize; //浮雕
 
                 if (tmp0 < 0)
@@ -883,7 +881,7 @@ Mat imgProcess::setImgSketch(const Mat& mat, int nBrushSize, int nType)
 
     GaussianBlur(matGrayB, matGrayB, Size(nBrushSize, nBrushSize), 0);
 
-    // 融合：颜色减淡
+    // 融合:颜色减淡
     Mat matRes(matGrayB.size(), CV_8UC1);
     for (int y = 0; y < heigh; y++)
     {
@@ -929,23 +927,23 @@ Mat imgProcess::setColorStyle(const Mat& mat, int nA)
 
 Mat imgProcess::setImgOilPaint(const Mat& mat, int nBrushSize, int nCoarseness)
 {
-    // 1.把（0~255）灰度值均分成n个区间
-    // 2.遍历图像的每个像素点 将模板范围内的所有像素值进一步离散化，根据像素的灰度落入不同的区间，
+    // 1.把(0~255)灰度值均分成n个区间
+    // 2.遍历图像的每个像素点 将模板范围内的所有像素值进一步离散化,根据像素的灰度落入不同的区间,
     // 3.找到落入像素最多的一个区间 并桶对该区间中的所有像素求出颜色平均值 作为位置 (x, y) 的结果值
-    // 链接：https://www.jianshu.com/p/7237529e1eb1
+    // 链接:https://www.jianshu.com/p/7237529e1eb1
 
     //将一副图像转换成油画 - yxysuanfa - 博客园
     // https ://www.cnblogs.com/yxysuanfa/p/7289369.html
 
-    // 油画原理：
-    // 一、获取图像灰度图，灰度值范围0~255
-    // 二、mask大小，比如5*5，计算mask对应灰度图像的灰度等级（0~level）
-    // 三、将当前mask，level占有最多数量的像素点，对应到彩色图像进行RGB求和，算平均值。
-    // 四、以此类推，最终得到油画特效后的彩色图像。
+    // 油画原理:
+    // 一、获取图像灰度图,灰度值范围0~255
+    // 二、mask大小,比如5*5,计算mask对应灰度图像的灰度等级(0~level)
+    // 三、将当前mask,level占有最多数量的像素点,对应到彩色图像进行RGB求和,算平均值.
+    // 四、以此类推,最终得到油画特效后的彩色图像.
 
-    //  将图像分为8x8的多个小块，并统计小块每个像素的灰度值
-    //  划分灰度等级，例如0-255: 0-63, 64-127, ...
-    //  找出每个小块中，每个等级的个数，找出最多的
+    //  将图像分为8x8的多个小块,并统计小块每个像素的灰度值
+    //  划分灰度等级,例如0-255: 0-63, 64-127, ...
+    //  找出每个小块中,每个等级的个数,找出最多的
     //  用最多的的平均值替换原像素
 
     // nBrushSize = 5;  // 笔刷大小
@@ -978,7 +976,7 @@ Mat imgProcess::setImgOilPaint(const Mat& mat, int nBrushSize, int nCoarseness)
     /// 目标图像
     Mat matRes = Mat::zeros(mat.size(), mat.type());
 
-    // 1.把（0~255）灰度值均分成n个区间
+    // 1.把(0~255)灰度值均分成n个区间
     for (int nY = 0; nY < nH; nY++)
     {
         // 油画渲染范围上下边界
@@ -1012,7 +1010,7 @@ Mat imgProcess::setImgOilPaint(const Mat& mat, int nBrushSize, int nCoarseness)
 
             // 下面这个内循环相似于外面的大循环 也是油画特效处理的关键部分
 
-            // 2.遍历图像的每个像素点 将模板范围内的所有像素值进一步离散化，根据像素的灰度落入不同的区间，
+            // 2.遍历图像的每个像素点 将模板范围内的所有像素值进一步离散化,根据像素的灰度落入不同的区间,
             // 3.找到落入像素最多的一个区间 并桶对该区间中的所有像素求出颜色平均值 作为位置 (x, y) 的结果值
             for (int j = nTop; j < nBottom; j++)
             {
@@ -1029,7 +1027,7 @@ Mat imgProcess::setImgOilPaint(const Mat& mat, int nBrushSize, int nCoarseness)
                 }
             }
 
-            // 求最大值，并记录下数组索引
+            // 求最大值,并记录下数组索引
             int chosenIntensity = 0;
             int maxInstance = pCountIntensity[0];
             for (int i = 1; i < nLenArray; i++)
@@ -1393,7 +1391,7 @@ Mat imgProcess::setDither(const Mat& mat, double dScale, int nBright, int nType,
     convertScaleAbs(grad_y, abs_grad_y);
 
     Mat gradEdge;
-    /// 合并梯度(近似) // addWeighted使用OpenCV对两幅图像求和（求混合(blending)）
+    /// 合并梯度(近似) // addWeighted使用OpenCV对两幅图像求和(求混合(blending))
     addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, gradEdge);
 
     // imshow("Grad", grad);
@@ -1626,13 +1624,13 @@ Mat imgProcess::setBeautify(const Mat& mat, int nA, int nB)
     }
 
     Mat matResult;
-    GaussianBlur(srcMat, srcMat, Size(9, 9), 0, 0);        // 高斯模糊，消除椒盐噪声
+    GaussianBlur(srcMat, srcMat, Size(9, 9), 0, 0);        // 高斯模糊,消除椒盐噪声
     bilateralFilter(srcMat, matResult, bilateralFilterVal, // 整体磨皮
         bilateralFilterVal * 2, bilateralFilterVal / 2);
 
     Mat matFinal;
 
-    // 图像增强，使用非锐化掩蔽（Unsharpening Mask）方案。
+    // 图像增强,使用非锐化掩蔽(Unsharpening Mask)方案.
     cv::GaussianBlur(matResult, matFinal, cv::Size(0, 0), 9);
     cv::addWeighted(matResult, 1.5, matFinal, -0.5, 0, matFinal);
     return matFinal;
@@ -1816,7 +1814,7 @@ Mat imgProcess::setImgMask(const Mat& mat, double dA)
     std::vector<std::vector<cv::Point>> vecPtss;
     vecPtss.emplace_back(vecPts);
 
-    //填充区域之前，首先采用polylines()函数，可以使填充的区域边缘更光滑
+    //填充区域之前,首先采用polylines()函数,可以使填充的区域边缘更光滑
     cv::polylines(matMask, vecPtss, true, cv::Scalar(255, 255, 255), 2, cv::LINE_AA);
     cv::fillPoly(matMask, vecPtss, cv::Scalar(255, 255, 255));
 
@@ -1833,7 +1831,7 @@ Mat imgProcess::setImgMask(const Mat& mat, double dA)
     std::vector<std::vector<cv::Point>> vecArrs2;
     vecArrs2.emplace_back(vecPts2);
 
-    //填充区域之前，首先采用polylines()函数，可以使填充的区域边缘更光滑
+    //填充区域之前,首先采用polylines()函数,可以使填充的区域边缘更光滑
     cv::polylines(matMask, vecArrs2, true, cv::Scalar(255, 255, 255), 2, cv::LINE_AA);
     cv::fillPoly(matMask, vecArrs2, cv::Scalar(255, 255, 255));
 
@@ -1963,7 +1961,7 @@ Mat imgProcess::imgTransparent(const Mat& mat, double dA, double dB, double dC)
     std::vector<std::vector<cv::Point>> vecPtss;
     vecPtss.emplace_back(vecPts);
 
-    //填充区域之前，首先采用polylines()函数，可以使填充的区域边缘更光滑
+    //填充区域之前,首先采用polylines()函数,可以使填充的区域边缘更光滑
     cv::polylines(matMask, vecPtss, true, cv::Scalar(225, 5, 5), 2, cv::LINE_AA);
     cv::fillPoly(matMask, vecPtss, cv::Scalar(125, 155, 155));
 
@@ -2261,7 +2259,7 @@ Mat imgProcess::setImgEdgePaperEffect(const Mat& mat, double dLineInterval, doub
     convertScaleAbs(grad_y, abs_grad_y);
 
     Mat gradEdge;
-    // 合并梯度(近似) // addWeighted使用OpenCV对两幅图像求和（求混合(blending)）
+    // 合并梯度(近似) // addWeighted使用OpenCV对两幅图像求和(求混合(blending))
     addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, gradEdge);
 
     // imshow("Grad", grad);

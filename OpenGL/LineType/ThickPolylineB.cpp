@@ -5,7 +5,7 @@
 #include <time.h>    // 用于 srand()
 #include <vector>    // 添加 vector 头文件
 
-// 顶点着色器（使用 Raw String Literal）
+// 顶点着色器(使用 Raw String Literal)
 const char* vertexShaderSource = R"(
 #version 400
 layout (location = 0) in vec2 aPos;
@@ -15,21 +15,21 @@ void main()
 }
 )";
 
-// 几何着色器（优化法线和偏移计算，使用 Raw String Literal）
+// 几何着色器(优化法线和偏移计算,使用 Raw String Literal)
 const char* geometryShaderSource = R"(
 #version 400
-layout (lines_adjacency) in;           // 输入：带邻接信息的线段
-layout (triangle_strip, max_vertices = 32) out; // 输出：三角形条带，增加顶点数支持圆角
+layout (lines_adjacency) in;           // 输入:带邻接信息的线段
+layout (triangle_strip, max_vertices = 32) out; // 输出:三角形条带,增加顶点数支持圆角
 uniform float thickness;               // 线条厚度
 uniform int segments = 8;              // 圆角细分段数
 
 void main()
 {
     // 获取四个输入点
-    vec2 p0 = gl_in[0].gl_Position.xy; // 前一个点（邻接）
+    vec2 p0 = gl_in[0].gl_Position.xy; // 前一个点(邻接)
     vec2 p1 = gl_in[1].gl_Position.xy; // 线段起点
     vec2 p2 = gl_in[2].gl_Position.xy; // 线段终点
-    vec2 p3 = gl_in[3].gl_Position.xy; // 后一个点（邻接）
+    vec2 p3 = gl_in[3].gl_Position.xy; // 后一个点(邻接)
 
     // 计算线段方向
     vec2 dir1 = normalize(p2 - p1);    // 第一段方向
@@ -48,7 +48,7 @@ void main()
     gl_Position = vec4(p2 - offset2, 0.0, 1.0); EmitVertex();
     gl_Position = vec4(p2 + offset2, 0.0, 1.0); EmitVertex();
 
-    // 生成圆角顶点（仅在转折处）
+    // 生成圆角顶点(仅在转折处)
     if (dot(dir1, dir2) < 0.999) {  // 判断是否为转折处
         vec2 center = p2;  // 转折点为中心
         float angle1 = atan(normal1.y, normal1.x);
@@ -70,7 +70,7 @@ void main()
 }
 )";
 
-// 片段着色器（使用 Raw String Literal）
+// 片段着色器(使用 Raw String Literal)
 const char* fragmentShaderSource = R"(
 #version 400
 out vec4 FragColor;
@@ -82,7 +82,7 @@ void main()
 }
 )";
 
-// 生成随机顶点的函数，返回 vector
+// 生成随机顶点的函数,返回 vector
 std::vector<float> generateRandomVertices(int numPoints)
 {
     std::vector<float> vertices(numPoints * 2);  // 每个点需要2个float (x, y)
@@ -107,9 +107,9 @@ std::vector<float> generateRandomVertices(int numPoints)
 std::vector<float> prepareAdjacencyVertices(const std::vector<float>& vertices, int numPoints)
 {
     std::vector<float> adjVertices;
-    adjVertices.reserve(4 * (numPoints - 1) * 2);  // 每个图元4个点，每个点2个float
+    adjVertices.reserve(4 * (numPoints - 1) * 2);  // 每个图元4个点,每个点2个float
 
-    // 第一个图元：重复第一个点
+    // 第一个图元:重复第一个点
     adjVertices.push_back(vertices[0]);  // p0 (重复)
     adjVertices.push_back(vertices[1]);
     adjVertices.push_back(vertices[0]);  // p1
@@ -132,7 +132,7 @@ std::vector<float> prepareAdjacencyVertices(const std::vector<float>& vertices, 
         adjVertices.push_back(vertices[2 * (i + 2) + 1]);
     }
 
-    // 最后一个图元：重复最后一个点
+    // 最后一个图元:重复最后一个点
     adjVertices.push_back(vertices[2 * (numPoints - 3)]);  // p0
     adjVertices.push_back(vertices[2 * (numPoints - 3) + 1]);
     adjVertices.push_back(vertices[2 * (numPoints - 2)]);  // p1
@@ -239,7 +239,7 @@ int main()
     glDeleteShader(geometryShader);
     glDeleteShader(fragmentShader);
 
-    // 生成随机顶点（增加点数以改善平滑性）
+    // 生成随机顶点(增加点数以改善平滑性)
     int numPoints = 10;  // 增加点数
     std::vector<float> vertices = generateRandomVertices(numPoints);
 

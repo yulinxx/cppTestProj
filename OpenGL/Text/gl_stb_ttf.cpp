@@ -1,199 +1,259 @@
-#include <glad/glad.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
-
-////////////////////////////////////////////////////////
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <iostream>
-#include <vector>
-#include <fstream>
+#include <map>
+#include <string>
 
-const int WIDTH = 800;
-const int HEIGHT = 600;
-
-GLuint shaderProgram;
-GLuint VAO, VBO, texture;
-
-stbtt_bakedchar charData[96];
-GLuint fontTexture;
-
-std::vector<unsigned char> readFontFile(const std::string& filename)
+struct Character
 {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
-    if (!file)
-    {
-        exit(EXIT_FAILURE);
+    GLuint textureID;   // 字形纹理ID
+    glm::ivec2 size;    // 字形大小
+    glm::ivec2 bearing; // 基线偏移量
+    GLuint advance;     // 字符间距
+};
+
+std::map<wchar_t, Character> Characters;
+GLuint VAO, VBO, shaderProgram;
+
+const char* vertexShaderSource = R"glsl(
+    #version 330 core
+    layout(location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
+    out vec2 TexCoords;
+    uniform mat4 projection;
+    void main() {
+        gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+        TexCoords = vertex.zw;
     }
-    size_t size = file.tellg();
-    std::vector<unsigned char> buffer(size);
-    file.seekg(0);
-    file.read(reinterpret_cast<char*>(buffer.data()), size);
-    return buffer;
-}
+)glsl";
 
-void loadFontTexture(const std::string& fontPath)
+const char* fragmentShaderSource = R"glsl(
+    #version 330 core
+    in vec2 TexCoords;
+    out vec4 color;
+    uniform sampler2D text;
+    uniform vec3 textColor;
+    void main() {
+        vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
+        color = vec4(textColor, 1.0) * sampled;
+    }
+)glsl";
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    auto fontBuffer = readFontFile(fontPath);
-
-    unsigned char bitmap[512 * 512] = { 0 };
-    stbtt_BakeFontBitmap(fontBuffer.data(), 0, 48.0, bitmap, 512, 512, 32, 96, charData);
-
-    glGenTextures(1, &fontTexture);
-    glBindTexture(GL_TEXTURE_2D, fontTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glViewport(0, 0, width, height);
 }
 
-const char* vertexShaderSource = R"(
-#version 330 core
-layout (location = 0) in vec4 vertex;
-out vec2 TexCoords;
-uniform mat4 projection;
-
-void main() {
-    gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
-    TexCoords = vertex.zw;
-}
-)";
-
-const char* fragmentShaderSource = R"(
-#version 330 core
-in vec2 TexCoords;
-out vec4 FragColor;
-uniform sampler2D text;
-void main() {
-    float alpha = texture(text, TexCoords).r;
-    FragColor = vec4(1.0, 1.0, 1.0, alpha);
-}
-)";
-
-GLuint compileShader(GLenum type, const char* source)
+GLuint createShaderProgram()
 {
-    GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, NULL);
-    glCompileShader(shader);
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
 
-    int success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    GLint success;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        char log[512];
-        glGetShaderInfoLog(shader, 512, NULL, log);
+        char infoLog[512];
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cerr << "Vertex Shader Compilation Failed:\n" << infoLog << std::endl;
     }
-    return shader;
-}
 
-void initOpenGL()
-{
-    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
 
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        char infoLog[512];
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cerr << "Fragment Shader Compilation Failed:\n" << infoLog << std::endl;
+    }
+
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        char infoLog[512];
+        glGetProgramInfoLog(program, 512, NULL, infoLog);
+        std::cerr << "Shader Program Linking Failed:\n" << infoLog << std::endl;
+    }
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    // Enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    return program;
 }
 
-void renderText(const std::string& text, float x, float y, float scale, GLuint texture)
+void initBuffers()
 {
-    glUseProgram(shaderProgram);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    std::vector<float> vertices;
-    float startX = x;
-    for (char c : text)
-    {
-        if (c < 32 || c > 126) continue;
-
-        stbtt_bakedchar* ch = &charData[c - 32];
-        float x0 = startX + ch->xoff * scale;
-        float y0 = y - ch->yoff * scale;
-        float x1 = x0 + (ch->x1 - ch->x0) * scale;
-        float y1 = y0 - (ch->y1 - ch->y0) * scale;
-
-        float s0 = ch->x0 / 512.0f, t0 = ch->y0 / 512.0f;
-        float s1 = ch->x1 / 512.0f, t1 = ch->y1 / 512.0f;
-
-        vertices.insert(vertices.end(), {
-            x0, y0, s0, t0,
-            x1, y0, s1, t0,
-            x1, y1, s1, t1,
-
-            x0, y0, s0, t0,
-            x1, y1, s1, t1,
-            x0, y1, s0, t1
-            });
-
-        startX += ch->xadvance * scale;
-    }
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
 
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 4);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void loadFont(const char* fontPath)
+{
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+    {
+        std::cerr << "Could not init FreeType Library" << std::endl;
+        return;
+    }
+
+    FT_Face face;
+    if (FT_New_Face(ft, fontPath, 0, &face))
+    {
+        std::cerr << "Failed to load font" << std::endl;
+        return;
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, 48);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // 加载常用中文字符(这里只加载部分范围以加快速度,可根据需要调整)
+    for (wchar_t c = 0x4E00; c <= 0x9FFF; c++)
+    { // 中文基本汉字范围
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+            continue;
+
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows,
+            0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        Character character = {
+            texture,
+            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            static_cast<GLuint>(face->glyph->advance.x)
+        };
+        Characters[c] = character;
+    }
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+}
+
+void renderText(GLuint shader, std::wstring text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glUseProgram(shader);
+    glUniform3f(glGetUniformLocation(shader, "textColor"), color.x, color.y, color.z);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(VAO);
+
+    for (std::wstring::const_iterator c = text.begin(); c != text.end(); ++c)
+    {
+        if (Characters.find(*c) == Characters.end()) continue; // 跳过未加载的字符
+
+        Character ch = Characters[*c];
+        GLfloat xpos = x + ch.bearing.x * scale;
+        GLfloat ypos = y - (ch.size.y - ch.bearing.y) * scale;
+        GLfloat w = ch.size.x * scale;
+        GLfloat h = ch.size.y * scale;
+
+        GLfloat vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }
+        };
+
+        glBindTexture(GL_TEXTURE_2D, ch.textureID);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        x += (ch.advance >> 6) * scale;
+    }
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 int main()
 {
     if (!glfwInit())
+    {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
+    }
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL Font Rendering", NULL, NULL);
-    if (!window) return -1;
+    GLFWwindow* window = glfwCreateWindow(800, 600, "FreeType OpenGL 中文示例", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        return -1;
+    }
+
     glfwMakeContextCurrent(window);
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    initOpenGL();
+    if (glewInit() != GLEW_OK)
+    {
+        std::cerr << "Failed to initialize GLEW" << std::endl;
+        return -1;
+    }
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // TTF
-    loadFontTexture("C:/Windows/Fonts/arial.ttf");
+    shaderProgram = createShaderProgram();
+    initBuffers();
 
-    glm::mat4 projection = glm::ortho(0.0f, (float)WIDTH, 0.0f, (float)HEIGHT);
+    // 设置投影矩阵
+    glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+    // 加载字体(替换为你的字体文件路径)
+    loadFont("C:/Windows/Fonts/simsun.ttc"); // 示例路径,需替换为实际字体路径
+
     while (!glfwWindowShouldClose(window))
     {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        renderText("你好 Hello World!", 100.0f, 300.0f, 1.0f, fontTexture);
+
+        renderText(shaderProgram, L"你好,世界！", 200.0f, 300.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(shaderProgram);
+
+    glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }

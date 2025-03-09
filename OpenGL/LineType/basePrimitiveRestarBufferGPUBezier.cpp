@@ -1,82 +1,82 @@
-// 这种方法将计算负担放在了 CPU 端，而 GPU 的强大并行计算能力未被充分利用。
-// 直接将直线和曲线的控制点传给 GPU，让 GPU 负责绘制曲线是一个非常可行的优化方向。这种方法可以减少数据传输量，提高渲染效率，同时保留高质量的曲线绘制。
+// 这种方法将计算负担放在了 CPU 端,而 GPU 的强大并行计算能力未被充分利用.
+// 直接将直线和曲线的控制点传给 GPU,让 GPU 负责绘制曲线是一个非常可行的优化方向.这种方法可以减少数据传输量,提高渲染效率,同时保留高质量的曲线绘制.
 
-// 以下我会分析这种方法的优势、可行性，并提供实现思路和代码示例。
+// 以下我会分析这种方法的优势、可行性,并提供实现思路和代码示例.
 
 // 当前方法的局限性
-// 数据量大：每条曲线被离散成多个短线段（例如贝塞尔曲线细分 10 次生成 11 个顶点），导致顶点和索引数量激增。例如：
-// 10,000 条线，每条平均 3 段（1 直线 + 2 曲线），每条曲线离散为 10 段，总顶点数 ≈ 10,000 × (1 + 2 × 10) ≈ 210,000。
-// 数据大小 ≈ 210,000 × 3 × 4 字节 ≈ 2.5MB。
-// CPU 开销：离散化过程需要在 CPU 端计算所有顶点，增加了预处理时间。
-// 带宽压力：大量顶点数据需要从 CPU 传输到 GPU，占用宝贵的内存带宽。
-// 优化思路：将控制点传给 GPU
-// 目标：将直线的两个端点和曲线的控制点（例如贝塞尔曲线的 4 个控制点）直接传给 GPU，由 GPU 的着色器（通常是Tessellation Shader 或 Geometry Shader）动态生成曲线上的点。
-// 优势：
-// 减少数据量：
-// 直线：2 个顶点。
-// 三次贝塞尔曲线：4 个控制点。
-// 示例：10,000 条线，每条 3 段（1 直线 + 2 曲线），总顶点数 ≈ 10,000 × (2 + 4 × 2) = 100,000，数据大小 ≈ 1.2MB，比离散化少一半以上。
-// 降低 CPU 负担：
-// CPU 只需提供控制点，曲线计算移到 GPU，充分利用 GPU 的并行性。
-// 动态质量：
-// GPU 可以根据缩放级别（LOD，Level of Detail）动态调整曲线的细分程度，避免远距离时生成过多不必要的顶点。
-// 带宽优化：
-// 传输数据量减少，减轻 CPU 到 GPU 的通信压力。
+// 数据量大:每条曲线被离散成多个短线段(例如贝塞尔曲线细分 10 次生成 11 个顶点),导致顶点和索引数量激增.例如:
+// 10,000 条线,每条平均 3 段(1 直线 + 2 曲线),每条曲线离散为 10 段,总顶点数 ≈ 10,000 × (1 + 2 × 10) ≈ 210,000.
+// 数据大小 ≈ 210,000 × 3 × 4 字节 ≈ 2.5MB.
+// CPU 开销:离散化过程需要在 CPU 端计算所有顶点,增加了预处理时间.
+// 带宽压力:大量顶点数据需要从 CPU 传输到 GPU,占用宝贵的内存带宽.
+// 优化思路:将控制点传给 GPU
+// 目标:将直线的两个端点和曲线的控制点(例如贝塞尔曲线的 4 个控制点)直接传给 GPU,由 GPU 的着色器(通常是Tessellation Shader 或 Geometry Shader)动态生成曲线上的点.
+// 优势:
+// 减少数据量:
+// 直线:2 个顶点.
+// 三次贝塞尔曲线:4 个控制点.
+// 示例:10,000 条线,每条 3 段(1 直线 + 2 曲线),总顶点数 ≈ 10,000 × (2 + 4 × 2) = 100,000,数据大小 ≈ 1.2MB,比离散化少一半以上.
+// 降低 CPU 负担:
+// CPU 只需提供控制点,曲线计算移到 GPU,充分利用 GPU 的并行性.
+// 动态质量:
+// GPU 可以根据缩放级别(LOD,Level of Detail)动态调整曲线的细分程度,避免远距离时生成过多不必要的顶点.
+// 带宽优化:
+// 传输数据量减少,减轻 CPU 到 GPU 的通信压力.
 // 可行性与实现方式
-// OpenGL 提供了几种方法让 GPU 绘制曲线：
+// OpenGL 提供了几种方法让 GPU 绘制曲线:
 
-// 1. 使用 Tessellation Shader（推荐）
-// 概述：Tessellation Shader（镶嵌着色器）是 OpenGL 4.0+ 引入的功能，专门用于动态细分几何体，非常适合生成曲线。
-// 流程：
-// 将直线的两个端点和曲线的控制点作为输入（GL_PATCHES 图元）。
-// Tessellation Control Shader (TCS) 指定细分级别。
-// Tessellation Evaluation Shader (TES) 根据控制点计算曲线上的点（例如三次贝塞尔曲线公式）。
-// 要求：需要 OpenGL 4.0+，你的硬件和驱动需支持。
-// 适用性：CAD 软件需要高质量曲线和高性能渲染，Tessellation 是最佳选择。
+// 1. 使用 Tessellation Shader(推荐)
+// 概述:Tessellation Shader(镶嵌着色器)是 OpenGL 4.0+ 引入的功能,专门用于动态细分几何体,非常适合生成曲线.
+// 流程:
+// 将直线的两个端点和曲线的控制点作为输入(GL_PATCHES 图元).
+// Tessellation Control Shader (TCS) 指定细分级别.
+// Tessellation Evaluation Shader (TES) 根据控制点计算曲线上的点(例如三次贝塞尔曲线公式).
+// 要求:需要 OpenGL 4.0+,你的硬件和驱动需支持.
+// 适用性:CAD 软件需要高质量曲线和高性能渲染,Tessellation 是最佳选择.
 // 2. 使用 Geometry Shader
-// 概述：Geometry Shader 可以从输入的控制点生成新的顶点，形成曲线上的线段。
-// 流程：
-// 输入控制点（例如 GL_POINTS 或 GL_LINES）。
-// Geometry Shader 动态生成曲线上的点，输出 GL_LINE_STRIP。
-// 要求：OpenGL 3.2+，你的当前代码基于 3.3，已满足。
-// 适用性：适合中等复杂度的曲线，但性能不如 Tessellation，尤其在大量曲线时。
+// 概述:Geometry Shader 可以从输入的控制点生成新的顶点,形成曲线上的线段.
+// 流程:
+// 输入控制点(例如 GL_POINTS 或 GL_LINES).
+// Geometry Shader 动态生成曲线上的点,输出 GL_LINE_STRIP.
+// 要求:OpenGL 3.2+,你的当前代码基于 3.3,已满足.
+// 适用性:适合中等复杂度的曲线,但性能不如 Tessellation,尤其在大量曲线时.
 // 3. 使用 Compute Shader
-// 概述：Compute Shader 可以预计算曲线点，存储到缓冲区，再用常规 Vertex Shader 绘制。
-// 流程：
-// 输入控制点到 Compute Shader。
-// Compute Shader 计算离散点，写入缓冲区。
-// 使用 GL_LINE_STRIP 绘制。
-// 要求：OpenGL 4.3+。
-// 适用性：灵活性高，但需要额外的缓冲区管理，不如 Tessellation 直接。
-// 推荐方案：Tessellation Shader
-// 理由：
-// Tessellation Shader 专为动态几何生成设计，性能和质量最佳。
-// 你的 CAD 软件需要处理数万条线，Tessellation 支持动态细分，能根据缩放级别优化渲染。
-// OpenGL 4.0+ 在现代硬件上广泛支持（你的 NVIDIA GPU 应没问题）。
-// 数据结构：
-// 每条直线：2 个顶点（x, y）。
-// 每条贝塞尔曲线：4 个控制点（x, y）。
-// 使用 GL_PATCHES 图元，区分直线和曲线。
+// 概述:Compute Shader 可以预计算曲线点,存储到缓冲区,再用常规 Vertex Shader 绘制.
+// 流程:
+// 输入控制点到 Compute Shader.
+// Compute Shader 计算离散点,写入缓冲区.
+// 使用 GL_LINE_STRIP 绘制.
+// 要求:OpenGL 4.3+.
+// 适用性:灵活性高,但需要额外的缓冲区管理,不如 Tessellation 直接.
+// 推荐方案:Tessellation Shader
+// 理由:
+// Tessellation Shader 专为动态几何生成设计,性能和质量最佳.
+// 你的 CAD 软件需要处理数万条线,Tessellation 支持动态细分,能根据缩放级别优化渲染.
+// OpenGL 4.0+ 在现代硬件上广泛支持(你的 NVIDIA GPU 应没问题).
+// 数据结构:
+// 每条直线:2 个顶点(x, y).
+// 每条贝塞尔曲线:4 个控制点(x, y).
+// 使用 GL_PATCHES 图元,区分直线和曲线.
 
 // 实现要点
-// 数据结构：
-// LineSegment 区分直线（2 个点）和曲线（4 个控制点）。
-// 顶点只存储控制点坐标 (x, y)，dashParam 在 TES 中计算。
-// Tessellation Shader：
-// TCS 根据输入顶点数（2 或 4）判断是直线还是曲线，设置细分级别。
-// TES 根据贝塞尔公式生成曲线点，或直接插值直线点。
-// 动态细分：
-// tessLevel 根据缩放级别调整，避免远距离时生成过多顶点。
-// 图元重启：
-// 保留 0xFFFFFFFF 分隔不同段。
+// 数据结构:
+// LineSegment 区分直线(2 个点)和曲线(4 个控制点).
+// 顶点只存储控制点坐标 (x, y),dashParam 在 TES 中计算.
+// Tessellation Shader:
+// TCS 根据输入顶点数(2 或 4)判断是直线还是曲线,设置细分级别.
+// TES 根据贝塞尔公式生成曲线点,或直接插值直线点.
+// 动态细分:
+// tessLevel 根据缩放级别调整,避免远距离时生成过多顶点.
+// 图元重启:
+// 保留 0xFFFFFFFF 分隔不同段.
 // 优化效果
-// 数据量：从 210,000 个顶点减少到 100,000 个控制点，节省约 50% 数据。
-// 性能：GPU 动态生成曲线点，减少 CPU 计算和传输开销。
-// 质量：曲线平滑度随缩放自适应，适合 CAD 的精确需求。
+// 数据量:从 210,000 个顶点减少到 100,000 个控制点,节省约 50% 数据.
+// 性能:GPU 动态生成曲线点,减少 CPU 计算和传输开销.
+// 质量:曲线平滑度随缩放自适应,适合 CAD 的精确需求.
 // 注意事项
-// 硬件要求：需要 OpenGL 4.0+，请确认你的开发环境和目标硬件支持。
-// 调试：Tessellation Shader 可能需要调试，确保曲线生成正确。
-// 扩展：可添加更多曲线类型（如二次贝塞尔、样条曲线），只需调整 TES。
+// 硬件要求:需要 OpenGL 4.0+,请确认你的开发环境和目标硬件支持.
+// 调试:Tessellation Shader 可能需要调试,确保曲线生成正确.
+// 扩展:可添加更多曲线类型(如二次贝塞尔、样条曲线),只需调整 TES.
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -87,21 +87,21 @@
 #include <chrono>
 #include <string>
 
-// 初始世界坐标范围（-X 到 X）
-constexpr float X = 4.0f; 
+// 初始世界坐标范围(-X 到 X)
+constexpr float X = 4.0f;
 
 // Vertex Shader: 传递控制点位置和累计长度
 const char* vertexShaderSource = R"(
 #version 400 core
 // 输入控制点坐标
-layout(location = 0) in vec2 in_pos;   
+layout(location = 0) in vec2 in_pos;
 // 输入累计长度
-layout(location = 1) in float in_len;  
+layout(location = 1) in float in_len;
 
 // 传递给 Tessellation 的位置
-out vec2 v_pos;    
+out vec2 v_pos;
 // 传递给 Tessellation 的长度
-out float v_len;   
+out float v_len;
 
 void main() {
     v_pos = in_pos;
@@ -115,8 +115,8 @@ const char* tessControlShaderSource = R"(
 // 输出顶点数为 4
 layout(vertices = 4) out;
 
-// 细分级别，动态调整
-uniform float tessLevel = 10.0;  
+// 细分级别,动态调整
+uniform float tessLevel = 10.0;
 
 // 从 Vertex Shader 传入的位置
 in vec2 v_pos[];
@@ -134,10 +134,10 @@ void main() {
     tc_len[gl_InvocationID] = v_len[gl_InvocationID];
 
     if (gl_InvocationID == 0) {
-        if (gl_in.length() == 2) {  // 直线：无需细分
+        if (gl_in.length() == 2) {  // 直线:无需细分
             gl_TessLevelOuter[0] = 1.0;
             gl_TessLevelOuter[1] = 1.0;
-        } else {  // 曲线：根据 tessLevel 细分
+        } else {  // 曲线:根据 tessLevel 细分
             gl_TessLevelOuter[0] = tessLevel;
             gl_TessLevelOuter[1] = tessLevel;
         }
@@ -152,11 +152,11 @@ const char* tessEvaluationShaderSource = R"(
 layout(isolines, equal_spacing) in;
 
 // 相机变换矩阵
-uniform mat4 cameraTrans;       
+uniform mat4 cameraTrans;
 // 虚线缩放因子
-uniform float dashScale = 8.0;  
-// 时间偏移，用于虚线动画
-uniform float timeOffset = 0.0; 
+uniform float dashScale = 8.0;
+// 时间偏移,用于虚线动画
+uniform float timeOffset = 0.0;
 
 // 从 Tessellation Control Shader 传入的位置
 in vec2 tc_pos[];
@@ -164,7 +164,7 @@ in vec2 tc_pos[];
 in float tc_len[];
 
 // 传递给 Fragment Shader 的虚线参数
-out float dashParam;  
+out float dashParam;
 
 void main() {
     // 获取细分坐标
@@ -189,13 +189,13 @@ void main() {
               u3 * vec4(tc_pos[3], 0.0, 1.0);
 
         // 近似长度
-        len = mix(tc_len[0], tc_len[3], u);  
+        len = mix(tc_len[0], tc_len[3], u);
     }
 
     // 计算虚线参数
-    dashParam = len * dashScale + timeOffset;  
+    dashParam = len * dashScale + timeOffset;
     // 应用相机变换
-    gl_Position = cameraTrans * pos;           
+    gl_Position = cameraTrans * pos;
 }
 )";
 
@@ -239,7 +239,7 @@ void main() {
 
     if (!draw)
         // 不绘制虚线空白部分
-        discard;  
+        discard;
 
     fragColor = color;
 }
@@ -324,20 +324,20 @@ glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float ma
 // 线段结构体
 struct LineSegment
 {
-    // 控制点（直线2个，曲线4个）
-    std::vector<glm::vec2> controlPoints; 
+    // 控制点(直线2个,曲线4个)
+    std::vector<glm::vec2> controlPoints;
     // 累计长度
-    std::vector<float> lengths;           
+    std::vector<float> lengths;
     // 是否为曲线
-    bool isCurve;                         
+    bool isCurve;
     // VBO 中的顶点偏移
-    size_t vertexOffset;                  
+    size_t vertexOffset;
     // EBO 中的索引偏移
-    size_t indexOffset;                   
+    size_t indexOffset;
 };
 
 /**
- * @brief 生成随机线条（直线和曲线混合）
+ * @brief 生成随机线条(直线和曲线混合)
  * @param lines 存储生成的线条
  * @param numLines 线条数量
  * @param numSegments 每条线条的段数
@@ -455,7 +455,7 @@ void updateBuffers(GLuint VBO, GLuint EBO, std::vector<LineSegment>& lines,
         }
 
         // 添加图元重启标记
-        indices.push_back(0xFFFFFFFF); 
+        indices.push_back(0xFFFFFFFF);
         indexOffset++;
     }
 
@@ -615,18 +615,18 @@ void deleteLine(std::vector<LineSegment>& lines, int lineIdx, GLuint VBO, GLuint
 }
 
 // 缩放因子
-float zoomFactor = 1.0f;         
+float zoomFactor = 1.0f;
 // 相机位置
-glm::vec2 cameraPos(0.0f, 0.0f); 
+glm::vec2 cameraPos(0.0f, 0.0f);
 // 中键按下状态
-bool middleMousePressed = false; 
+bool middleMousePressed = false;
 // 上一次鼠标位置
-glm::vec2 lastMousePos;          
+glm::vec2 lastMousePos;
 // 窗口宽高比
-float aspectRatio = 1.0f;        
+float aspectRatio = 1.0f;
 
 /**
- * @brief 滚轮回调：调整缩放
+ * @brief 滚轮回调:调整缩放
  * @param window GLFW 窗口指针
  * @param xoffset 鼠标滚轮水平偏移
  * @param yoffset 鼠标滚轮垂直偏移
@@ -640,7 +640,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 /**
- * @brief 鼠标按键回调：检测中键
+ * @brief 鼠标按键回调:检测中键
  * @param window GLFW 窗口指针
  * @param button 鼠标按键
  * @param action 按键动作
@@ -669,7 +669,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 /**
- * @brief 鼠标移动回调：拖动画面
+ * @brief 鼠标移动回调:拖动画面
  * @param window GLFW 窗口指针
  * @param xpos 鼠标当前 X 坐标
  * @param ypos 鼠标当前 Y 坐标
@@ -699,7 +699,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 /**
- * @brief 窗口大小变化回调：更新视口和宽高比
+ * @brief 窗口大小变化回调:更新视口和宽高比
  * @param window GLFW 窗口指针
  * @param width 窗口新宽度
  * @param height 窗口新高度
@@ -707,9 +707,9 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // 更新视口
-    glViewport(0, 0, width, height);                                      
+    glViewport(0, 0, width, height);
     // 更新宽高比
-    aspectRatio = static_cast<float>(width) / static_cast<float>(height); 
+    aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
 
 int main()
@@ -828,7 +828,7 @@ int main()
     // 渲染循环
     while (!glfwWindowShouldClose(window))
     {
-        // 更新相机变换矩阵，考虑宽高比
+        // 更新相机变换矩阵,考虑宽高比
         glm::mat4 cameraTrans = glm::ortho(
             -X * zoomFactor * aspectRatio + cameraPos.x, // 左边界
             X * zoomFactor * aspectRatio + cameraPos.x,  // 右边界

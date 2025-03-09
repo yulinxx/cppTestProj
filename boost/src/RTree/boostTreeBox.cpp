@@ -118,7 +118,7 @@ int main()
 
 
 // // 要将自定义结构体添加到Boost的Rtree中，需要先定义一个适配器类，
-// // 该类将自定义结构体转换为Boost Rtree所需的类型。以下是一个示例适配器类：
+// // 该类将自定义结构体转换为Boost Rtree所需的类型.以下是一个示例适配器类：
 
 // #include <boost/geometry.hpp>
 // #include <boost/geometry/index/rtree.hpp>

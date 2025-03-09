@@ -1,4 +1,4 @@
-// 使用几何着色器，绘制出一条有三阶贝塞尔曲线的  --->--- 线
+// 使用几何着色器,绘制出一条有三阶贝塞尔曲线的  --->--- 线
 // 能缩放以及拖动画面
 
 #include <glad/glad.h>
@@ -12,14 +12,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // 初始视图范围
-constexpr float X = 4.0f;  
+constexpr float X = 4.0f;
 
 // Vertex Shader: 传递控制点位置
 const char* vertexShaderSource = R"(
 #version 400 core
-// 输入：顶点位置
+// 输入:顶点位置
 layout(location = 0) in vec2 in_pos;
-// 输出：传递给下一个阶段的顶点位置
+// 输出:传递给下一个阶段的顶点位置
 out vec2 v_pos;
 
 void main() {
@@ -35,9 +35,9 @@ const char* tessControlShaderSource = R"(
 layout(vertices = 4) out;
 // 细分级别统一变量
 uniform float tessLevel = 10.0;
-// 输入：从顶点着色器传递过来的顶点位置
+// 输入:从顶点着色器传递过来的顶点位置
 in vec2 v_pos[];
-// 输出：传递给细分评估着色器的顶点位置
+// 输出:传递给细分评估着色器的顶点位置
 out vec2 tc_pos[];
 
 void main() {
@@ -61,13 +61,13 @@ void main() {
 // Tessellation Evaluation Shader: 计算直线和曲线的点
 const char* tessEvaluationShaderSource = R"(
 #version 400 core
-// 细分模式：等间距的孤立线段
+// 细分模式:等间距的孤立线段
 layout(isolines, equal_spacing) in;
 // 包含缩放和拖动的变换矩阵
 uniform mat4 transform;
-// 输入：从细分控制着色器传递过来的顶点位置
+// 输入:从细分控制着色器传递过来的顶点位置
 in vec2 tc_pos[];
-// 输出：传递给几何着色器的位置
+// 输出:传递给几何着色器的位置
 out vec2 tes_pos;
 
 void main() {
@@ -104,13 +104,13 @@ void main() {
 // Geometry Shader: 生成线段和动态调整的箭头
 const char* geometryShaderSource = R"(
 #version 400 core
-// 输入：线段
+// 输入:线段
 layout(lines) in;
-// 输出：线段带，最多8个顶点
+// 输出:线段带,最多8个顶点
 layout(line_strip, max_vertices = 8) out;
-// 输入：从细分评估着色器传递过来的顶点位置
+// 输入:从细分评估着色器传递过来的顶点位置
 in vec2 tes_pos[];
-// 输出：传递给片段着色器的位置
+// 输出:传递给片段着色器的位置
 out vec2 geo_pos;
 // 变换矩阵
 uniform mat4 transform;
@@ -147,11 +147,11 @@ void main() {
     EndPrimitive();
 
     // 动态调整箭头密度和大小
-    // 限制密度，防止过密或过稀疏
+    // 限制密度,防止过密或过稀疏
     float baseDensity = clamp(0.5f / arrowDensity, 0.2f, 2.0f);
-    // 最大箭头数，防止过密
+    // 最大箭头数,防止过密
     int maxArrows = 5;
-    // 计算箭头数量，限制箭头数量
+    // 计算箭头数量,限制箭头数量
     int numArrows = min(int(floor(len / baseDensity)), maxArrows);
     // 至少一个箭头
     if (numArrows < 1) numArrows = 1;
@@ -162,7 +162,7 @@ void main() {
         // 计算箭头位置
         vec2 arrowPos = mix(p0, p1, t);
 
-        // 动态调整箭头大小，保持可见性
+        // 动态调整箭头大小,保持可见性
         float adjustedArrowSize = clamp(arrowSize / arrowDensity, 0.05f, 0.2f);
         // 计算箭头尖端位置
         vec2 tip = arrowPos + dir * adjustedArrowSize;
@@ -171,7 +171,7 @@ void main() {
         // 计算箭头另一个翼的位置
         vec2 wing2 = arrowPos - dir * adjustedArrowSize * 0.5 - perp * adjustedArrowSize * 0.5;
 
-        // 第一条线段：中心到上翼
+        // 第一条线段:中心到上翼
         gl_Position = transform * vec4(arrowPos, 0.0, 1.0);
         geo_pos = arrowPos;
         EmitVertex();
@@ -180,7 +180,7 @@ void main() {
         EmitVertex();
         EndPrimitive();
 
-        // 第二条线段：中心到下翼
+        // 第二条线段:中心到下翼
         gl_Position = transform * vec4(arrowPos, 0.0, 1.0);
         geo_pos = arrowPos;
         EmitVertex();
@@ -195,9 +195,9 @@ void main() {
 // Fragment Shader: 绘制蓝色线条
 const char* fragmentShaderSource = R"(
 #version 400 core
-// 输入：从几何着色器传递过来的位置
+// 输入:从几何着色器传递过来的位置
 in vec2 geo_pos;
-// 输出：片段颜色
+// 输出:片段颜色
 out vec4 fragColor;
 // 蓝色
 uniform vec4 color = vec4(0.0, 0.0, 1.0, 1.0);
@@ -209,7 +209,7 @@ void main() {
 )";
 
 /**
- * @brief 加载并编译所有着色器，链接成一个着色器程序
+ * @brief 加载并编译所有着色器,链接成一个着色器程序
  * @return 着色器程序的ID
  */
 GLuint loadShader()
@@ -274,11 +274,11 @@ GLuint loadShader()
     return shaderProgram;
 }
 
-// 路径结构体，包含控制点
+// 路径结构体,包含控制点
 struct Path
 {
     // 直线 (2 点) + 曲线 (4 点)
-    std::vector<glm::vec2> controlPoints;  
+    std::vector<glm::vec2> controlPoints;
 };
 
 /**
@@ -292,11 +292,11 @@ void generatePath(std::vector<Path>& paths)
     // 获取路径引用
     Path& path = paths[0];
 
-    // 直线部分：从 (-X, 0) 到 (-X/2, 0)
+    // 直线部分:从 (-X, 0) 到 (-X/2, 0)
     path.controlPoints.push_back(glm::vec2(-X, 0.0f));
     path.controlPoints.push_back(glm::vec2(-X / 2.0f, 0.0f));
 
-    // 三阶贝塞尔曲线：从 (-X/2, 0) 到 (X, 0)
+    // 三阶贝塞尔曲线:从 (-X/2, 0) 到 (X, 0)
     path.controlPoints.push_back(glm::vec2(-X / 2.0f, 0.0f));  // 起始点
     path.controlPoints.push_back(glm::vec2(-X / 4.0f, X / 2.0f));  // 控制点 1
     path.controlPoints.push_back(glm::vec2(X / 2.0f, -X / 2.0f));  // 控制点 2
@@ -349,7 +349,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
  * @brief 鼠标按钮事件的回调函数
  * @param window 窗口句柄
  * @param button 鼠标按钮
- * @param action 按钮动作（按下或释放）
+ * @param action 按钮动作(按下或释放)
  * @param mods 修饰键状态
  */
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -358,14 +358,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
-            // 按下中键，开始拖动
+            // 按下中键,开始拖动
             isDragging = true;
             // 获取当前鼠标位置
             glfwGetCursorPos(window, &lastX, &lastY);
         }
         else if (action == GLFW_RELEASE)
         {
-            // 释放中键，停止拖动
+            // 释放中键,停止拖动
             isDragging = false;
         }
     }
@@ -388,7 +388,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         float scale = 0.01f / zoomFactor;
         // 更新拖动偏移量
         panOffset.x += dx * scale;
-        // y 方向反向（OpenGL 坐标系）
+        // y 方向反向(OpenGL 坐标系)
         panOffset.y -= dy * scale;
         // 更新上次鼠标位置
         lastX = xpos;
@@ -446,7 +446,7 @@ int main()
     // 生成路径
     generatePath(paths);
 
-    // 准备顶点数据：直线 (2 点) + 曲线 (4 点)
+    // 准备顶点数据:直线 (2 点) + 曲线 (4 点)
     std::vector<float> vertices;
     for (const auto& point : paths[0].controlPoints)
     {
@@ -470,7 +470,7 @@ int main()
     // 将顶点数据复制到顶点缓冲对象
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    // 索引数据：直线 (2 点) 和曲线 (4 点)
+    // 索引数据:直线 (2 点) 和曲线 (4 点)
     std::vector<unsigned int> indices = {
         0, 1,          // 直线
         2, 3, 4, 5     // 曲线
@@ -522,7 +522,7 @@ int main()
         int width, height;
         glfwGetWindowSize(window, &width, &height);
 
-        // 更新视口和投影矩阵，适配窗口大小
+        // 更新视口和投影矩阵,适配窗口大小
         glViewport(0, 0, width, height);
         float aspect = static_cast<float>(width) / height;
         glm::mat4 projection = glm::ortho(-X * aspect / zoomFactor + panOffset.x,
@@ -532,7 +532,7 @@ int main()
         // 设置投影矩阵的统一变量
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, &projection[0][0]);
 
-        // 更新变换矩阵：缩放 + 拖动
+        // 更新变换矩阵:缩放 + 拖动
         glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(zoomFactor, zoomFactor, 1.0f));
         glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(panOffset, 0.0f));
         transform = translate * scale;
@@ -540,11 +540,11 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, &transform[0][0]);
 
         // 动态调整箭头密度和大小
-        // 限制密度，防止过密或过稀疏
+        // 限制密度,防止过密或过稀疏
         arrowDensity = std::clamp(0.5f / zoomFactor, 0.2f, 2.0f);
         // 设置箭头密度的统一变量
         glUniform1f(glGetUniformLocation(shaderProgram, "arrowDensity"), arrowDensity);
-        // 限制大小，确保可见性
+        // 限制大小,确保可见性
         arrowSize = std::clamp(0.1f / zoomFactor, 0.05f, 0.2f);
         // 设置箭头大小的统一变量
         glUniform1f(glGetUniformLocation(shaderProgram, "arrowSize"), arrowSize);

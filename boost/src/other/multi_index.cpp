@@ -1,7 +1,7 @@
-// boost是基于C++11的被广泛使用的开源库；
-// 多索引容器实现了可以通过多个索引去查找数据，不像std::map 一样 只能通过单一索引key查找对应value值。
-// 多索引容器可以通过多个索引key查找对应value值。多对多的方式，有了更多的应用场景。
-// 其实现了STL的一些基本操作，如迭代器等。如下示例作为对多索引容器的进一步了解。
+// boost是基于C++11的被广泛使用的开源库;
+// 多索引容器实现了可以通过多个索引去查找数据,不像std::map 一样 只能通过单一索引key查找对应value值.
+// 多索引容器可以通过多个索引key查找对应value值.多对多的方式,有了更多的应用场景.
+// 其实现了STL的一些基本操作,如迭代器等.如下示例作为对多索引容器的进一步了解.
 // https://blog.csdn.net/weixin_44328568/article/details/129424977
 
 #include <algorithm>
@@ -16,13 +16,12 @@
 
 using namespace std; /* 项目里不要这样 */
 
-/* 定义学生信息，同理可以使用结构定义 */
+/* 定义学生信息,同理可以使用结构定义 */
 class student
 {
 public:
     student(int id, string name, int score, string remark) :id(id), name(name), score(score), remark(remark)
-    {
-    }
+    {}
 
     void print() const
     {
@@ -34,7 +33,7 @@ public:
     string remark;
 };
 
-/* 如果要把student某个属性字段设置为搜索引擎，则需要定义用于排序的空结构体对象 */
+/* 如果要把student某个属性字段设置为搜索引擎,则需要定义用于排序的空结构体对象 */
 struct _id
 {
 };
@@ -45,12 +44,12 @@ struct _score
 {
 };
 
-// 定义一个multi_index_container（多索引容器）
+// 定义一个multi_index_container(多索引容器)
 using student_table =
 boost::multi_index::multi_index_container<
     student,
     boost::multi_index::indexed_by<
-    boost::multi_index::ordered_unique<boost::multi_index::tag<_id>, BOOST_MULTI_INDEX_MEMBER(student, int, id)>,   // ID为唯一索引，类似主键
+    boost::multi_index::ordered_unique<boost::multi_index::tag<_id>, BOOST_MULTI_INDEX_MEMBER(student, int, id)>,   // ID为唯一索引,类似主键
     boost::multi_index::ordered_non_unique<boost::multi_index::tag<_name>, BOOST_MULTI_INDEX_MEMBER(student, string, name)>, // 非唯一索引
     boost::multi_index::ordered_non_unique<boost::multi_index::tag<_score>, BOOST_MULTI_INDEX_MEMBER(student, int, score)>
     >
@@ -114,7 +113,7 @@ int main()
 }
 
 /*
-编译及结果：
+编译及结果:
 
 -- sort by student id:
 

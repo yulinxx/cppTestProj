@@ -1,9 +1,9 @@
-// 引入 GLAD 库，用于管理 OpenGL 函数指针
+// 引入 GLAD 库,用于管理 OpenGL 函数指针
 #include <glad/glad.h>
-// 引入 GLFW 库，用于创建窗口和处理输入事件
+// 引入 GLFW 库,用于创建窗口和处理输入事件
 #include <GLFW/glfw3.h>
 
-// 引入 GLM 库，用于进行向量和矩阵运算
+// 引入 GLM 库,用于进行向量和矩阵运算
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -14,9 +14,9 @@
 #include <vector>
 // 引入标准数组容器
 #include <array>
-// 引入文件流库，用于文件操作
+// 引入文件流库,用于文件操作
 #include <fstream>
-// 引入数学库，用于数学计算
+// 引入数学库,用于数学计算
 #include <cmath>
 
 // 实现 STB 字体库
@@ -24,7 +24,7 @@
 // 引入 STB 字体库头文件
 #include "stb_truetype.h"
 
-// 引入 earcut 库，用于多边形三角剖分
+// 引入 earcut 库,用于多边形三角剖分
 #include "earcut.hpp"
 
 //==========================================================
@@ -42,13 +42,13 @@ VAO,
 VBO;
 
 /**
- * @brief 读取字体文件并将其内容存储在向量中。
+ * @brief 读取字体文件并将其内容存储在向量中.
  *
- * 该函数以二进制模式打开指定的字体文件，并将文件内容读取到一个无符号字符向量中。
- * 如果文件打开失败，将输出错误信息并终止程序。
+ * 该函数以二进制模式打开指定的字体文件,并将文件内容读取到一个无符号字符向量中.
+ * 如果文件打开失败,将输出错误信息并终止程序.
  *
- * @param filename 字体文件的路径和文件名。
- * @return std::vector<unsigned char> 包含字体文件内容的向量。
+ * @param filename 字体文件的路径和文件名.
+ * @return std::vector<unsigned char> 包含字体文件内容的向量.
  */
 std::vector<unsigned char> readFontFile(const std::string& filename)
 {
@@ -64,7 +64,7 @@ std::vector<unsigned char> readFontFile(const std::string& filename)
     }
     // 获取文件大小
     size_t size = file.tellg();
-    // 创建一个无符号字符向量，用于存储文件内容
+    // 创建一个无符号字符向量,用于存储文件内容
     std::vector<unsigned char> buffer(size);
     // 将文件指针移动到文件开头
     file.seekg(0);
@@ -77,7 +77,7 @@ std::vector<unsigned char> readFontFile(const std::string& filename)
 // 顶点着色器源代码
 const char* vertexShaderSource = R"(
 #version 330 core
-// 定义顶点属性，位置为 0 的二维向量
+// 定义顶点属性,位置为 0 的二维向量
 layout(location = 0) in vec2 aPos;
 // 定义投影矩阵统一变量
 uniform mat4 projection;
@@ -101,14 +101,14 @@ void main()
 )";
 
 /**
- * @brief 编译指定类型的着色器。
+ * @brief 编译指定类型的着色器.
  *
- * 该函数创建一个指定类型的着色器对象，并将源代码加载到该对象中进行编译。
- * 目前省略了错误检查。
+ * 该函数创建一个指定类型的着色器对象,并将源代码加载到该对象中进行编译.
+ * 目前省略了错误检查.
  *
- * @param type 着色器类型，如 GL_VERTEX_SHADER 或 GL_FRAGMENT_SHADER。
- * @param src 着色器源代码。
- * @return GLuint 编译后的着色器对象 ID。
+ * @param type 着色器类型,如 GL_VERTEX_SHADER 或 GL_FRAGMENT_SHADER.
+ * @param src 着色器源代码.
+ * @return GLuint 编译后的着色器对象 ID.
  */
 GLuint compileShader(GLenum type, const char* src)
 {
@@ -124,10 +124,10 @@ GLuint compileShader(GLenum type, const char* src)
 }
 
 /**
- * @brief 初始化 OpenGL 着色器程序。
+ * @brief 初始化 OpenGL 着色器程序.
  *
- * 该函数编译顶点着色器和片段着色器，并将它们链接到一个着色器程序中。
- * 编译和链接完成后，删除临时的着色器对象。
+ * 该函数编译顶点着色器和片段着色器,并将它们链接到一个着色器程序中.
+ * 编译和链接完成后,删除临时的着色器对象.
  */
 void initOpenGL()
 {
@@ -150,13 +150,13 @@ void initOpenGL()
 }
 
 /**
- * @brief 计算多边形的面积。
+ * @brief 计算多边形的面积.
  *
- * 该函数根据多边形的顶点坐标计算其面积。面积的正负表示多边形的顶点顺序：
- * 顺时针顺序为负，逆时针顺序为正。
+ * 该函数根据多边形的顶点坐标计算其面积.面积的正负表示多边形的顶点顺序:
+ * 顺时针顺序为负,逆时针顺序为正.
  *
- * @param poly 包含多边形顶点坐标的向量，格式为 [x0, y0, x1, y1, ...]。
- * @return float 多边形的面积。
+ * @param poly 包含多边形顶点坐标的向量,格式为 [x0, y0, x1, y1, ...].
+ * @return float 多边形的面积.
  */
 float computeArea(const std::vector<float>& poly)
 {
@@ -177,12 +177,12 @@ float computeArea(const std::vector<float>& poly)
 }
 
 /**
- * @brief 翻转多边形的顶点顺序。
+ * @brief 翻转多边形的顶点顺序.
  *
- * 该函数将多边形的顶点顺序从顺时针翻转到逆时针，或从逆时针翻转到顺时针。
- * 顶点坐标存储在向量中，格式为 [x0, y0, x1, y1, ...]。
+ * 该函数将多边形的顶点顺序从顺时针翻转到逆时针,或从逆时针翻转到顺时针.
+ * 顶点坐标存储在向量中,格式为 [x0, y0, x1, y1, ...].
  *
- * @param poly 包含多边形顶点坐标的向量。
+ * @param poly 包含多边形顶点坐标的向量.
  */
 void reversePolygon(std::vector<float>& poly)
 {
@@ -203,22 +203,22 @@ void reversePolygon(std::vector<float>& poly)
 }
 
 /**
- * @brief 细分二次贝塞尔曲线。
+ * @brief 细分二次贝塞尔曲线.
  *
- * 该函数将二次贝塞尔曲线细分为多个线段，并返回细分后的顶点坐标。
+ * 该函数将二次贝塞尔曲线细分为多个线段,并返回细分后的顶点坐标.
  *
- * @param x0 起始点的 x 坐标。
- * @param y0 起始点的 y 坐标。
- * @param x1 控制点的 x 坐标。
- * @param y1 控制点的 y 坐标。
- * @param x2 结束点的 x 坐标。
- * @param y2 结束点的 y 坐标。
- * @param segments 细分的线段数量。
- * @return std::vector<float> 细分后的顶点坐标向量，格式为 [x0, y0, x1, y1, ...]。
+ * @param x0 起始点的 x 坐标.
+ * @param y0 起始点的 y 坐标.
+ * @param x1 控制点的 x 坐标.
+ * @param y1 控制点的 y 坐标.
+ * @param x2 结束点的 x 坐标.
+ * @param y2 结束点的 y 坐标.
+ * @param segments 细分的线段数量.
+ * @return std::vector<float> 细分后的顶点坐标向量,格式为 [x0, y0, x1, y1, ...].
  */
 std::vector<float> tessellateQuadBezier(float x0, float y0, float x1, float y1, float x2, float y2, int segments)
 {
-    // 创建一个向量，用于存储细分后的顶点坐标
+    // 创建一个向量,用于存储细分后的顶点坐标
     std::vector<float> result;
     // 遍历细分的线段数量
     for (int i = 0; i <= segments; ++i)
@@ -241,26 +241,26 @@ std::vector<float> tessellateQuadBezier(float x0, float y0, float x1, float y1, 
 }
 
 /**
- * @brief 获取字符的轮廓。
+ * @brief 获取字符的轮廓.
  *
- * 该函数使用 STB 字体库获取指定字符的轮廓，并将轮廓存储在一个二维向量中。
- * 同时，计算字符的水平偏移量。
+ * 该函数使用 STB 字体库获取指定字符的轮廓,并将轮廓存储在一个二维向量中.
+ * 同时,计算字符的水平偏移量.
  *
- * @param font 字体信息结构体指针。
- * @param codepoint 字符的 Unicode 码点。
- * @param scale 字体缩放比例。
- * @param xOffset 字符的水平偏移量。
- * @return std::vector<std::vector<float>> 包含字符轮廓的二维向量，每个子向量表示一个轮廓。
+ * @param font 字体信息结构体指针.
+ * @param codepoint 字符的 Unicode 码点.
+ * @param scale 字体缩放比例.
+ * @param xOffset 字符的水平偏移量.
+ * @return std::vector<std::vector<float>> 包含字符轮廓的二维向量,每个子向量表示一个轮廓.
  */
 std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codepoint, float scale, float& xOffset)
 {
-    // 创建一个二维向量，用于存储字符的轮廓
+    // 创建一个二维向量,用于存储字符的轮廓
     std::vector<std::vector<float>> outlines;
     // 定义一个指向 STB 顶点结构体的指针
     stbtt_vertex* v;
     // 获取指定字符的顶点数量
     int numVerts = stbtt_GetCodepointShape(font, codepoint, &v);
-    // 创建一个向量，用于存储当前轮廓的顶点坐标
+    // 创建一个向量,用于存储当前轮廓的顶点坐标
     std::vector<float> current;
 
     // 遍历字符的每个顶点
@@ -308,7 +308,7 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
             float y2 = v[i].y * scale;
             // 细分二次贝塞尔曲线
             auto curve = tessellateQuadBezier(x0, y0, x1, y1, x2, y2, 10);
-            // curve 第一个点与 current 最后一个点重叠，故跳过 curve 的前 2 个 float
+            // curve 第一个点与 current 最后一个点重叠,故跳过 curve 的前 2 个 float
             // 将细分后的曲线顶点添加到当前轮廓中
             current.insert(current.end(), curve.begin() + 2, curve.end());
             break;
@@ -333,20 +333,20 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
 }
 
 /**
- * @brief 对单个轮廓进行三角剖分。
+ * @brief 对单个轮廓进行三角剖分.
  *
- * 该函数使用 earcut 库对单个轮廓进行三角剖分，并将三角剖分后的顶点坐标存储在输出向量中。
+ * 该函数使用 earcut 库对单个轮廓进行三角剖分,并将三角剖分后的顶点坐标存储在输出向量中.
  *
- * @param outline 包含单个轮廓顶点坐标的向量，格式为 [x0, y0, x1, y1, ...]。
- * @param outVertices 存储三角剖分后顶点坐标的输出向量。
+ * @param outline 包含单个轮廓顶点坐标的向量,格式为 [x0, y0, x1, y1, ...].
+ * @param outVertices 存储三角剖分后顶点坐标的输出向量.
  */
 void triangulateSingleOutline(const std::vector<float>& outline, std::vector<float>& outVertices)
 {
     // earcut 的输入必须是 2D 点的多重多边形: std::vector<std::vector<std::array<T,2>>>
-    // 这里我们只做“单个外轮廓”，不考虑孔洞 => 只有一层 vector
-    // 创建一个二维数组向量，用于存储轮廓的顶点
+    // 这里我们只做“单个外轮廓”,不考虑孔洞 => 只有一层 vector
+    // 创建一个二维数组向量,用于存储轮廓的顶点
     std::vector<std::array<float, 2>> polygon;
-    // 预分配内存，提高性能
+    // 预分配内存,提高性能
     polygon.reserve(outline.size() / 2);
     // 遍历轮廓的顶点坐标
     for (size_t i = 0; i < outline.size(); i += 2)
@@ -355,12 +355,12 @@ void triangulateSingleOutline(const std::vector<float>& outline, std::vector<flo
         polygon.push_back({ outline[i], outline[i + 1] });
     }
 
-    // 创建一个二维数组向量的向量，用于存储多重多边形
+    // 创建一个二维数组向量的向量,用于存储多重多边形
     std::vector<std::vector<std::array<float, 2>>> polygonSet;
     // 将单个轮廓添加到多重多边形向量中
     polygonSet.push_back(polygon);
 
-    // 使用 earcut 库进行三角剖分，返回索引序列
+    // 使用 earcut 库进行三角剖分,返回索引序列
     auto indices = mapbox::earcut<unsigned int>(polygonSet);
 
     // 根据索引序列构造最终顶点
@@ -375,16 +375,16 @@ void triangulateSingleOutline(const std::vector<float>& outline, std::vector<flo
 }
 
 /**
- * @brief 绘制单个字符。
+ * @brief 绘制单个字符.
  *
- * 该函数获取指定字符的轮廓，对轮廓进行三角剖分，并将三角剖分后的顶点数据上传到 OpenGL 缓冲区进行绘制。
- * 同时，更新光标位置。
+ * 该函数获取指定字符的轮廓,对轮廓进行三角剖分,并将三角剖分后的顶点数据上传到 OpenGL 缓冲区进行绘制.
+ * 同时,更新光标位置.
  *
- * @param font 字体信息结构体指针。
- * @param codepoint 字符的 Unicode 码点。
- * @param cursorX 光标当前的 x 坐标。
- * @param baseY 字符的基线 y 坐标。
- * @param scale 字体缩放比例。
+ * @param font 字体信息结构体指针.
+ * @param codepoint 字符的 Unicode 码点.
+ * @param cursorX 光标当前的 x 坐标.
+ * @param baseY 字符的基线 y 坐标.
+ * @param scale 字体缩放比例.
  */
 void renderGlyph(stbtt_fontinfo* font, int codepoint, float& cursorX, float baseY, float scale)
 {
@@ -398,7 +398,7 @@ void renderGlyph(stbtt_fontinfo* font, int codepoint, float& cursorX, float base
     // 遍历字符的每个轮廓
     for (auto& outline : outlines)
     {
-        // 如果轮廓的顶点数量少于 6 个（即少于 3 个点）
+        // 如果轮廓的顶点数量少于 6 个(即少于 3 个点)
         if (outline.size() < 6) continue; // 至少要3个点
         // 计算轮廓的面积
         float area = computeArea(outline);
@@ -421,7 +421,7 @@ void renderGlyph(stbtt_fontinfo* font, int codepoint, float& cursorX, float base
         }
 
         // earcut
-        // 创建一个向量，用于存储三角剖分后的顶点坐标
+        // 创建一个向量,用于存储三角剖分后的顶点坐标
         std::vector<float> triVerts;
         // 对轮廓进行三角剖分
         triangulateSingleOutline(outline, triVerts);
@@ -439,15 +439,15 @@ void renderGlyph(stbtt_fontinfo* font, int codepoint, float& cursorX, float base
 }
 
 /**
- * @brief 渲染填充文本。
+ * @brief 渲染填充文本.
  *
- * 该函数遍历字符串中的每个字符，调用 renderGlyph 函数绘制每个字符，并更新光标位置。
+ * 该函数遍历字符串中的每个字符,调用 renderGlyph 函数绘制每个字符,并更新光标位置.
  *
- * @param font 字体信息结构体指针。
- * @param text 要渲染的字符串。
- * @param x 文本的起始 x 坐标。
- * @param y 文本的起始 y 坐标。
- * @param scale 字体缩放比例。
+ * @param font 字体信息结构体指针.
+ * @param text 要渲染的字符串.
+ * @param x 文本的起始 x 坐标.
+ * @param y 文本的起始 y 坐标.
+ * @param scale 字体缩放比例.
  */
 void renderFilledText(stbtt_fontinfo* font, const std::string& text, float x, float y, float scale)
 {
@@ -462,12 +462,12 @@ void renderFilledText(stbtt_fontinfo* font, const std::string& text, float x, fl
 }
 
 /**
- * @brief 主函数，程序的入口点。
+ * @brief 主函数,程序的入口点.
  *
- * 该函数初始化 GLFW 和 GLAD，创建窗口，初始化 OpenGL 着色器程序，加载字体，设置投影矩阵，
- * 并在主循环中渲染填充文本。最后，清理资源并退出程序。
+ * 该函数初始化 GLFW 和 GLAD,创建窗口,初始化 OpenGL 着色器程序,加载字体,设置投影矩阵,
+ * 并在主循环中渲染填充文本.最后,清理资源并退出程序.
  *
- * @return int 程序的退出状态码，0 表示正常退出。
+ * @return int 程序的退出状态码,0 表示正常退出.
  */
 int main()
 {

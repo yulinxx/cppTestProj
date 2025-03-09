@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <iostream>
 
-// Point2D 的类定义，也包括运算符重构
+// Point2D 的类定义,也包括运算符重构
 
 class Point2D
 {
@@ -93,7 +93,7 @@ int main()
 
     Point2D p2d, p2;
 
-    // //--注释的是原文数据，我这里把数据的顺序反了一下
+    // //--注释的是原文数据,我这里把数据的顺序反了一下
     // p2d.x = 0;
     // p2d.y = 0;
     // pList.push_back(p2d);
@@ -152,7 +152,7 @@ int main()
         DpList.push_back(p2d);
     }
 
-    // 初始化ndpList，单位化两顶点向量差
+    // 初始化ndpList,单位化两顶点向量差
     double r;
     for (i = 0; i < count; i++)
     {
@@ -162,9 +162,9 @@ int main()
         nDpList.push_back(p2d);
     }
 
-    // 计算新顶点， 注意参数dist为负是向内收缩， 为正是向外扩张
+    // 计算新顶点, 注意参数dist为负是向内收缩, 为正是向外扩张
     //上述说法只是对于顺时针而言
-    //我把数据改为逆时针，结论刚好相反
+    //我把数据改为逆时针,结论刚好相反
     double lenth;
     double dist = 0.1;
     int startindex, endindex;

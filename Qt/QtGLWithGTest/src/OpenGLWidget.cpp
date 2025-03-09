@@ -22,9 +22,8 @@ QVector3D OpenGLWidget::bezierCurve(const QVector3D& p0, const QVector3D& p1,
     return p;
 }
 
-OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent)
-{
-}
+OpenGLWidget::OpenGLWidget(QWidget* parent) : QOpenGLWidget(parent)
+{}
 
 OpenGLWidget::~OpenGLWidget()
 {

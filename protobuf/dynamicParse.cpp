@@ -13,18 +13,18 @@
 #include <sstream>
 
 // filename proto文件名
-// classname proto文件里面的class， 格式package.Classname
-// cb, 创建好proto文件里面的classname类之后执行的回调，可以在该回调里面操作数据
+// classname proto文件里面的class, 格式package.Classname
+// cb, 创建好proto文件里面的classname类之后执行的回调,可以在该回调里面操作数据
 int DynamicParseFromPBFile(const std::string& filename, const std::string& classname, std::function<void(::google::protobuf::Message* msg)> cb);
 
 // proto_string proto文件的内容
-// classname proto文件里面的class， 格式package.Classname
-// cb, 创建好proto文件里面的classname类之后执行的回调，可以在该回调里面操作数据
+// classname proto文件里面的class, 格式package.Classname
+// cb, 创建好proto文件里面的classname类之后执行的回调,可以在该回调里面操作数据
 int DynamicParseFromPBString(const std::string& proto_string, const std::string& classname, std::function<void(::google::protobuf::Message* msg)> cb);
 
 int main(int argc, char** argv)
 {
-    //创建一个测试类，并进行初始化
+    //创建一个测试类,并进行初始化
     sylarPkg::Test test;
     test.set_name("test_name");
     test.set_age(100);
@@ -43,14 +43,14 @@ int main(int argc, char** argv)
     }
 
     std::string pb_str;
-    //把测试类，序列化到string中，以供后续解析
+    //把测试类,序列化到string中,以供后续解析
     test.SerializeToString(&pb_str);
 
     //打印测试类的数据信息
     std::cout << test.DebugString() << std::endl;
     std::cout << "===============================" << std::endl;
 
-    //从文件中sylar.proto中的sylar.XX类，解析上面测试类的序列化二进制
+    //从文件中sylar.proto中的sylar.XX类,解析上面测试类的序列化二进制
     //并输出序列化后的sylar.XX的信息
     DynamicParseFromPBFile("sylar.proto", "sylar.XX", [pb_str](::google::protobuf::Message* msg) {
         if (msg->ParseFromString(pb_str))
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 
         std::cout << "===============================" << std::endl;
 
-        //从文件中sylar.proto中的sylar.Test，解析上面测试类的序列化二进制
+        //从文件中sylar.proto中的sylar.Test,解析上面测试类的序列化二进制
         //并输出序列化后的sylar.Test的信息
         DynamicParseFromPBFile("sylar.proto", "sylar.Test", [pb_str](::google::protobuf::Message* msg) {
             if (msg->ParseFromString(pb_str))
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
             std::cout << "===============================" << std::endl;
 
-            // pbstr的proto信息中的xx.TT，解析上面测试类的序列化二进制
+            // pbstr的proto信息中的xx.TT,解析上面测试类的序列化二进制
             //并输出序列化后的xx.TT的信息
             DynamicParseFromPBString(pbstr, "xx.TT", [pb_str](::google::protobuf::Message* msg) {
                 if (msg->ParseFromString(pb_str))

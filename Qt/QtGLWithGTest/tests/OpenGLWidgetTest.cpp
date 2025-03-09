@@ -4,7 +4,6 @@
 
 #include "../src/OpenGLWidget.h"
 
-
 TEST(BezierCurveTest, BasicCalculation)
 {
     QVector3D p0(0.0f, 0.0f, 0.0f);
@@ -22,12 +21,11 @@ TEST(BezierCurveTest, BasicCalculation)
     EXPECT_FLOAT_EQ(resultEnd.y(), p3.y());
     EXPECT_FLOAT_EQ(resultEnd.z(), p3.z());
 
-
     // resultMid(0.5f, 0.0f, 0.0f)
     QVector3D resultMid = OpenGLWidget::bezierCurve(p0, p1, p2, p3, 0.5f);
-    EXPECT_NEAR(resultMid.x(), 0.5f, 0.01f);
+    EXPECT_NEAR(resultMid.x(), 0.5f, 0.01f);    // Right
+    EXPECT_NEAR(resultMid.x(), 0.9f, 0.01f);    // Error
     EXPECT_NEAR(resultMid.y(), 0.0f, 0.01f);
-    EXPECT_NEAR(resultMid.y(), 0.10f, 0.01f);
     EXPECT_FLOAT_EQ(resultMid.z(), 0.0f);
 }
 

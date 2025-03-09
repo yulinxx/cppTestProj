@@ -19,12 +19,10 @@ xxThreadPool& xxThreadPool::operator = (const xxThreadPool&)
 }
 
 xxThreadPool::~xxThreadPool()
-{
-}
+{}
 
 void xxThreadPool::init()
-{
-}
+{}
 
 ThreadPool* xxThreadPool::instance(int CpuNum /*=4*/)
 {

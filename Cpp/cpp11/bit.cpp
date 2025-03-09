@@ -1,8 +1,8 @@
 // C++——std::Bitset_zy2317878的博客-CSDN博客_std::bitset实现
 // https://blog.csdn.net/zy2317878/article/details/80082863
 
-// 一个bitset是用来储存诸多bit，这些元素可以用来表示两种状态：0或1，true或false
-// bitset头文件引用如下：
+// 一个bitset是用来储存诸多bit,这些元素可以用来表示两种状态:0或1,true或false
+// bitset头文件引用如下:
 // #include <bitset>
 
 #include <iostream> // std::cout
@@ -11,7 +11,7 @@
 
 int main()
 {
-    // 构造一个bitset，方法如下所示：
+    // 构造一个bitset,方法如下所示:
     // bitset< n > b;	创建一个初始值均为0的n位bitset b
     // bitset< n > b(u);	根据unsigned long数u创建一个bitset b
     // bitset< n > b(s);	根据string s中含有位数的情况创建一个bitset b
@@ -34,7 +34,7 @@ int main()
     }
 
     // bitset::operator[]
-    // 访问一个bit元素，返回bool类型的值或者对该元素的引用reference。
+    // 访问一个bit元素,返回bool类型的值或者对该元素的引用reference.
     {
         std::bitset<4> foo;
 
@@ -51,9 +51,9 @@ int main()
     // --- bitset::set()
     // 设定bitset中某一个元素或者所有元素为1
     // --- bitset::reset()
-    // 将bitset中某一个元素或者所有元素重置为0，
+    // 将bitset中某一个元素或者所有元素重置为0,
     // --- bitset::flip()
-    // 反转一个bitset，即将一个bitset中所有元素0置1，1置0
+    // 反转一个bitset,即将一个bitset中所有元素0置1,1置0
     // --- bitset::to_string()
     // 将一个bitset转换为string类型
     {
@@ -82,7 +82,7 @@ int main()
     }
 
     // bitset::count()
-    // 统计bitset中被设置的bits的个数，也就是bitset中值为1的元素个数。对于要求bitset中元素总个数，可以参考：set::size()
+    // 统计bitset中被设置的bits的个数,也就是bitset中值为1的元素个数.对于要求bitset中元素总个数,可以参考:set::size()
     {
         std::bitset<8> foo(std::string("10110011"));
 
@@ -96,7 +96,7 @@ int main()
     }
 
     // itset::size()
-    // 返回bitset中元素总个数。即通常意义上bitset的大小。
+    // 返回bitset中元素总个数.即通常意义上bitset的大小.
     {
         std::bitset<8> foo;
         std::bitset<4> bar;
@@ -111,7 +111,7 @@ int main()
     }
 
     // bitset::test()
-    // 返回pos位置的元素是否被设置，或者是否为1。返回值为true，或false。
+    // 返回pos位置的元素是否被设置,或者是否为1.返回值为true,或false.
     {
         std::bitset<5> foo(std::string("01011"));
 
@@ -131,7 +131,7 @@ int main()
     }
 
     // bitset::any()
-    // 判断是否任何一个元素被设置，或者判断是否至少有一个元素为1。
+    // 判断是否任何一个元素被设置,或者判断是否至少有一个元素为1.
     {
         std::bitset<16> foo = 0x0b; // 0x0b = 11 = 0000 1011
 
@@ -146,7 +146,7 @@ int main()
     }
 
     // bitset::none()
-    // 判断一个bitset是否没被set。如果一个bitset中有元素为1，则返回false，否则返回true
+    // 判断一个bitset是否没被set.如果一个bitset中有元素为1,则返回false,否则返回true
     {
         std::bitset<16> foo = 0x4f; // 0x4f = 79 = 0100 1111
 
@@ -164,7 +164,7 @@ int main()
     }
 
     // bitset::all()
-    // 判断一个bitset是否里面所有元素都为1，如果都为1，则返回true；否则返回false
+    // 判断一个bitset是否里面所有元素都为1,如果都为1,则返回true;否则返回false
     {
         std::bitset<8> foo = 0b10110101;
 

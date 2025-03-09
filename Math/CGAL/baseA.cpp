@@ -16,17 +16,17 @@ int main()
     std::cout << "q = " << q.x() << " " << q.y() << std::endl;
 
     // 计算两点之间的平方距离
-    std::cout << "两点之间的平方距离：" << CGAL::squared_distance(p, q) << std::endl;
+    std::cout << "两点之间的平方距离:" << CGAL::squared_distance(p, q) << std::endl;
 
     // 计算m到线段pq的平方距离
     Segment_2 s(p, q); // p和q两点构成的线段
     Point_2 m(5, 9);   // 点坐标m
 
     std::cout << "m = " << m << std::endl;
-    std::cout << "点m到线段pq的平方距离：" << CGAL::squared_distance(s, m) << std::endl;
+    std::cout << "点m到线段pq的平方距离:" << CGAL::squared_distance(s, m) << std::endl;
 
     // 判断三点之间的位置关系
-    std::cout << "p 到 q 再到 m 三点的关系为(与先后顺序有关)： ";
+    std::cout << "p 到 q 再到 m 三点的关系为(与先后顺序有关): ";
     switch (CGAL::orientation(p, q, m))
     {
     case CGAL::COLLINEAR:
@@ -40,7 +40,7 @@ int main()
         break;
     }
 
-    std::cout << "p和q的中点为： " << CGAL::midpoint(p, q) << std::endl;
+    std::cout << "p和q的中点为: " << CGAL::midpoint(p, q) << std::endl;
 
     return 0;
 }

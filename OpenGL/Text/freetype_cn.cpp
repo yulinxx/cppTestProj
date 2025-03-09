@@ -155,7 +155,7 @@ void loadFont(const char* fontPath)
         Characters[c] = character;
     }
 
-    // 加载常用中文字符（这里只加载部分范围以加快速度，可根据需要调整）
+    // 加载常用中文字符(这里只加载部分范围以加快速度,可根据需要调整）
     for (wchar_t c = 0x4E00; c <= 0x9FFF; c++)
     { // 中文基本汉字范围
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
@@ -265,7 +265,7 @@ int main()
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-    // 加载字体（替换为你的字体文件路径）
+    // 加载字体(替换为你的字体文件路径）
     loadFont("C:/Windows/Fonts/XiManFeiFei-2.ttf"); // 使用宋体字体
 
     while (!glfwWindowShouldClose(window))
@@ -273,7 +273,7 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        renderText(shaderProgram, L"ABCabc.你好，世界！", 200.0f, 300.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        renderText(shaderProgram, L"ABCabc.你好,世界！", 200.0f, 300.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
         glfwSwapBuffers(window);
         glfwPollEvents();

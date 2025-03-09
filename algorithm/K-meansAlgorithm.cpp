@@ -14,10 +14,10 @@
 int main()
 {
     //  //训练函数的签名
-    // std::tuple>, std::vector> kmeans_lloyd(const std::vector>&data,   //训练数据集， 必填
-    //                                        uint32_t k,                // K值（也就是目标类别的数量）， 必填
-    //                                        uint64_t max_iter = 0,     //最大迭代次数，默认不填
-    //                                        T min_delta = -1.0)        //最小的停止阈值，默认不填
+    // std::tuple>, std::vector> kmeans_lloyd(const std::vector>&data,   //训练数据集, 必填
+    //                                        uint32_t k,                // K值(也就是目标类别的数量), 必填
+    //                                        uint64_t max_iter = 0,     //最大迭代次数,默认不填
+    //                                        T min_delta = -1.0)        //最小的停止阈值,默认不填
 
     // 返回的结果是一个Tuple
     // Tuple[0]:返回的是数据集聚类中心的列表(长度为K)
@@ -64,7 +64,7 @@ int main()
     while (std::getline(ss, item, ','))
         values.push_back(std::stod(item));
 
-    // 实际训练； 将4种颜色分成3类
+    // 实际训练; 将4种颜色分成3类
     //  std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
 
     std::vector<std::array<float, 2>> data;
@@ -73,7 +73,7 @@ int main()
     for (size_t i = 0; i < values.size(); i += 2)
         data.emplace_back(std::array<float, 2>{static_cast<float>(values[i]), static_cast<float>(values[i + 1])});
 
-    // 返回数据的中心点，以及数据所属的哪个簇
+    // 返回数据的中心点,以及数据所属的哪个簇
     auto cluster_data = dkm::kmeans_lloyd(data, 5);
     // std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>
     auto vCenter = std::get<0>(cluster_data);
@@ -127,7 +127,7 @@ int main()
 //     double dX = 0.0;
 //     double dY = 0.0;
 
-//     int kinds = 0;                // 模式样本所属类别，0为未分类状态
+//     int kinds = 0;                // 模式样本所属类别,0为未分类状态
 // };
 
 // double Distance(const Node& X, const Node& Z, int n) // 欧式距离计算函数
@@ -183,7 +183,7 @@ int main()
 //         /* 统计每个模式类中的样本数和样本 */
 //         for (int i = 0; i < k; i++)
 //         {
-//             // std::cout << "第" << number << "次迭代计算后，模式类" << i + 1 << "中包括{ ";
+//             // std::cout << "第" << number << "次迭代计算后,模式类" << i + 1 << "中包括{ ";
 //             int temp = 0;
 //             for (int j = 0; j < m; j++)
 //             {
@@ -245,11 +245,11 @@ int main()
 //     /* 数据的输入与初始化 */
 //     int n = 2; // 模式样本的维数
 //     int m = 4; // 模式样本的个数
-//     // std::cout << "请输入需要分类的模式样本的维数：";
+//     // std::cout << "请输入需要分类的模式样本的维数:";
 //     // cin >> n;
-//     // std::cout << "请输入需要分类的模式样本的个数：";
+//     // std::cout << "请输入需要分类的模式样本的个数:";
 //     // cin >> m;
-//     // std::cout << "请输入需要分类的模式样本：\n";
+//     // std::cout << "请输入需要分类的模式样本:\n";
 
 //     std::string trData = "-0.623,9.188,0.54,5.305,-2.300,7.546,4.225,2.824,-3.181,9.445,-8.684,7.548,1.065,3.927,-6.435,\
 //     -7.058,-8.704,7.105,2.716,3.163,3.685,2.626,-2.843,7.421,4.997,2.376,-3.026,8.553,1.043,3.014,-3.784,7.651,4.743,\

@@ -16,7 +16,7 @@ void initLog(std::string &strName)
 {
     // log
     FLAGS_log_dir = "./";   // 日志文件保存目录，这个目录必须是已经存在的
-    FLAGS_max_log_size = 1; //设置最大日志文件大小（以MB为单位）
+    FLAGS_max_log_size = 1; //设置最大日志文件大小（以MB为单位)
     FLAGS_logtostderr = false;
     // FLAGS_colorlogtostderr = true;  // Set log color
     FLAGS_stop_logging_if_full_disk = true; // If disk is full

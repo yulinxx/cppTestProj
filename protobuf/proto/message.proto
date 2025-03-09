@@ -1,6 +1,6 @@
 // https://blog.csdn.net/qq_34673519/article/details/107224578
 // message.proto
-// C:\Install\vcpkg\installed\x64-windows\tools\protobuf> 
+// C:\Install\vcpkg\installed\x64-windows\tools\protobuf>
 //  ./protoc.exe  -I=E:\testProj\protobufTestProj --cpp_out=E:\testProj\protobufTestProj  E:\testProj\protobufTestProj\message.proto
 
 syntax = "proto3";
@@ -13,7 +13,7 @@ message MessageTest{
       string info = 4;
   // 字段规则：required -> 字段只能也必须出现 1 次
   // 字段规则：optional -> 字段可出现 0 次或1次
-  // 字段规则：repeated -> 字段可出现任意多次（包括 0）
+  // 字段规则：repeated -> 字段可出现任意多次（包括 0)
   // 类型：int32、int64、sint32、sint64、string、32-bit ....
-  // 字段编号：0 ~ 536870911（除去 19000 到 19999 之间的数字）字段规则 类型 名称 = 字段编号;
+  // 字段编号：0 ~ 536870911（除去 19000 到 19999 之间的数字)字段规则 类型 名称 = 字段编号;
 }

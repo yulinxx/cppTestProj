@@ -1,4 +1,4 @@
-// boost::geometry简介，真香_南城小金刚的博客-CSDN博客_boost geometry
+// boost::geometry简介,真香_南城小金刚的博客-CSDN博客_boost geometry
 // https://blog.csdn.net/iLuoPu/article/details/124034790
 
 // 求地理距离
@@ -9,16 +9,15 @@
 
 namespace bg = boost::geometry;
 
-// 自定义点，继承
-// 当我们想在点结构中加入其他信息，比如一个字段id，该怎么办？你可能会使用继承，
-// 但这样你就不能用相关算法了，因为想要使用相关算法，类必须要满足对应的concept。
-// 那如何是好？你应该将自定义类，用BOOST_GEOMETRY_REGISTER*宏，
-// 注册到boost的native geometry type中。啥？来个例子你就明白了。
+// 自定义点,继承
+// 当我们想在点结构中加入其他信息,比如一个字段id,该怎么办？你可能会使用继承,
+// 但这样你就不能用相关算法了,因为想要使用相关算法,类必须要满足对应的concept.
+// 那如何是好？你应该将自定义类,用BOOST_GEOMETRY_REGISTER*宏,
+// 注册到boost的native geometry type中.啥？来个例子你就明白了.
 struct MyPoint // 自定义的点
 {
     MyPoint(double x, double y, int id) : m_x(x), m_y(y), m_id(id)
-    {
-    }
+    {}
     double m_x;
     double m_y;
     int m_id; // 标识id

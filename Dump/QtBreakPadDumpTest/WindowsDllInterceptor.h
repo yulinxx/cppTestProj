@@ -20,8 +20,7 @@ public:
     WindowsDllNopSpacePatcher()
         : mModule(0)
         , mPatchedFnsLen(0)
-    {
-    }
+    {}
 
     ~WindowsDllNopSpacePatcher()
     {
@@ -164,8 +163,7 @@ class WindowsDllDetourPatcher
 public:
     WindowsDllDetourPatcher()
         : mModule(0), mHookPage(0), mMaxHooks(0), mCurHooks(0)
-    {
-    }
+    {}
 
     ~WindowsDllDetourPatcher()
     {
@@ -708,8 +706,7 @@ public:
     WindowsDllInterceptor()
         : mModuleName(nullptr)
         , mNHooks(0)
-    {
-    }
+    {}
 
     void Init(const char* moduleName, int nhooks = 0)
     {

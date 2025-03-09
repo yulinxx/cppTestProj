@@ -51,8 +51,7 @@ namespace
         cd_detected_Event(std::string name, DiskTypeEnum diskType)
             : name(name),
             disc_type(diskType)
-        {
-        }
+        {}
 
         std::string name;
         DiskTypeEnum disc_type;
@@ -150,7 +149,7 @@ namespace
         {
         };
 
-        // typedef xxx initial_state 表示状态机 从状态 xxx 开始。
+        // typedef xxx initial_state 表示状态机 从状态 xxx 开始.
         // the initial state of the player SM. Must be defined
         typedef EmptyStat initial_state;
 
@@ -217,68 +216,68 @@ namespace
         typedef playerSM p; // makes transition table cleaner
 
         // 转换表 Transition table for player
-        // 守卫和动作是可调用的对象，将由状态机执行，以验证转换后的操作是否应该发生
+        // 守卫和动作是可调用的对象,将由状态机执行,以验证转换后的操作是否应该发生
 
-        // 在Boost.Statechart库中，"Start"、"Event"、"Next"、"Action"和"Guard"是用于定义状态机转换表的概念。
-        // 执行顺序：Guard -> Action -> Start -> Event -> Next
+        // 在Boost.Statechart库中,"Start"、"Event"、"Next"、"Action"和"Guard"是用于定义状态机转换表的概念.
+        // 执行顺序:Guard -> Action -> Start -> Event -> Next
 
-        // "Start"（起始状态）：
-        // "Start"表示转换规则中的当前状态（源状态）。
-        // 在转换发生之前，状态机必须处于"Start"状态。
-        // 它指定了转换规则的起始状态。
+        // "Start"(起始状态):
+        // "Start"表示转换规则中的当前状态(源状态).
+        // 在转换发生之前,状态机必须处于"Start"状态.
+        // 它指定了转换规则的起始状态.
 
-        // "Event"（事件）：
-        // "Event"表示触发状态转换的事件。
-        // 当某个特定事件发生时，状态机可以根据转换规则进行状态转换。
-        // 事件可以是用户定义的任何类型，通常是一个类或结构体。
+        // "Event"(事件):
+        // "Event"表示触发状态转换的事件.
+        // 当某个特定事件发生时,状态机可以根据转换规则进行状态转换.
+        // 事件可以是用户定义的任何类型,通常是一个类或结构体.
 
-        // "Next"（下一个状态）：
-        // "Next"表示转换规则中的目标状态。
-        // 当状态机接收到指定的事件时，它将从当前状态转移到"Next"状态。
-        // 目标状态可以是任何有效的状态，通常是状态机中定义的另一个状态。
+        // "Next"(下一个状态):
+        // "Next"表示转换规则中的目标状态.
+        // 当状态机接收到指定的事件时,它将从当前状态转移到"Next"状态.
+        // 目标状态可以是任何有效的状态,通常是状态机中定义的另一个状态.
 
-        // "Action"（动作）：
-        // "Action"表示在状态转换发生时执行的操作。
-        // 它可以是一个函数、成员函数、函数对象或Lambda表达式，用于在状态转换时执行特定的逻辑。
-        // "Action"可以用于更新状态机的内部状态、执行某些任务或发出其他事件。
+        // "Action"(动作):
+        // "Action"表示在状态转换发生时执行的操作.
+        // 它可以是一个函数、成员函数、函数对象或Lambda表达式,用于在状态转换时执行特定的逻辑.
+        // "Action"可以用于更新状态机的内部状态、执行某些任务或发出其他事件.
 
-        // "Guard"（条件）：
-        // "Guard"表示在执行状态转换之前进行的条件检查。
-        // 它是一个函数、成员函数或函数对象，用于判断是否满足执行状态转换的条件。
-        // 如果"Guard"返回true，则状态转换会发生；如果返回false，则状态转换被阻止。
-        // 综上所述，"Start"指定了转换规则的起始状态，"Event"表示触发状态转换的事件，"Next"表示转换规则的目标状态，
-        // "Action"表示状态转换时执行的动作，"Guard"表示执行状态转换之前的条件检查。
+        // "Guard"(条件):
+        // "Guard"表示在执行状态转换之前进行的条件检查.
+        // 它是一个函数、成员函数或函数对象,用于判断是否满足执行状态转换的条件.
+        // 如果"Guard"返回true,则状态转换会发生;如果返回false,则状态转换被阻止.
+        // 综上所述,"Start"指定了转换规则的起始状态,"Event"表示触发状态转换的事件,"Next"表示转换规则的目标状态,
+        // "Action"表示状态转换时执行的动作,"Guard"表示执行状态转换之前的条件检查.
 
-        // 通过定义转换表中的这些概念，可以规定状态机在特定事件发生时如何从一个状态转移到另一个状态，并在转换过程中执行相应的动作和条件检查。
+        // 通过定义转换表中的这些概念,可以规定状态机在特定事件发生时如何从一个状态转移到另一个状态,并在转换过程中执行相应的动作和条件检查.
 
-        // 在Boost.Statechart库中，状态机转换中的各个部分（Start、Event、Next、Action、Guard）的执行顺序如下：
+        // 在Boost.Statechart库中,状态机转换中的各个部分(Start、Event、Next、Action、Guard)的执行顺序如下:
 
-        // Guard（条件/守卫）：
-        // 在执行状态转换之前，首先会评估条件（Guard）。
-        // Guard函数将根据条件判断是否允许执行状态转换。
-        // 如果Guard返回true，则允许执行状态转换；如果返回false，则阻止状态转换。
+        // Guard(条件/守卫):
+        // 在执行状态转换之前,首先会评估条件(Guard).
+        // Guard函数将根据条件判断是否允许执行状态转换.
+        // 如果Guard返回true,则允许执行状态转换;如果返回false,则阻止状态转换.
 
-        // Action（动作）：
-        // 如果Guard返回true，则在执行状态转换之前会执行相应的动作（Action）。
-        // 动作可以是一个函数、成员函数、函数对象或Lambda表达式。
-        // 它用于在状态转换时执行特定的逻辑，例如更新状态机的内部状态、执行某些任务或发出其他事件。
+        // Action(动作):
+        // 如果Guard返回true,则在执行状态转换之前会执行相应的动作(Action).
+        // 动作可以是一个函数、成员函数、函数对象或Lambda表达式.
+        // 它用于在状态转换时执行特定的逻辑,例如更新状态机的内部状态、执行某些任务或发出其他事件.
 
-        // Start（起始状态）：
-        // 在经过Guard检查和执行Action后，状态机将当前状态切换到转换规则中指定的起始状态（Start）。
-        // 转换规则中的起始状态将成为当前状态，准备进行下一步的状态转换。
+        // Start(起始状态):
+        // 在经过Guard检查和执行Action后,状态机将当前状态切换到转换规则中指定的起始状态(Start).
+        // 转换规则中的起始状态将成为当前状态,准备进行下一步的状态转换.
 
-        // Event（事件）：
-        // 当状态机处于起始状态时，它等待特定的事件（Event）发生。
-        // 当接收到匹配的事件时，状态机将会根据转换规则进行状态转换。
+        // Event(事件):
+        // 当状态机处于起始状态时,它等待特定的事件(Event)发生.
+        // 当接收到匹配的事件时,状态机将会根据转换规则进行状态转换.
 
-        // Next（下一个状态）：
-        // 如果收到匹配的事件，则状态机将从当前状态转移到转换规则中指定的目标状态（Next）。
-        // 目标状态可以是状态机中定义的另一个状态。
+        // Next(下一个状态):
+        // 如果收到匹配的事件,则状态机将从当前状态转移到转换规则中指定的目标状态(Next).
+        // 目标状态可以是状态机中定义的另一个状态.
 
-        // 总结一下执行顺序：Guard -> Action -> Start -> Event -> Next
+        // 总结一下执行顺序:Guard -> Action -> Start -> Event -> Next
 
-        // 请注意，Guard和Action都是可选的。如果转换规则中没有定义Guard，状态机将直接执行Action和状态转换。
-        // 如果没有定义Action，状态转换将在Guard通过后立即发生。
+        // 请注意,Guard和Action都是可选的.如果转换规则中没有定义Guard,状态机将直接执行Action和状态转换.
+        // 如果没有定义Action,状态转换将在Guard通过后立即发生.
 
         // row takes 5 arguments: start state, event, target state, action and guard.
         // • a_row (“a” for action) allows defining only the action and omit the guard condition.
@@ -286,21 +285,21 @@ namespace
         // • _row allows omitting action and guard.
         // The transition table is actually a MPL vector (or list), which brings the limitation that the default maximum size of the table is 20
 
-        // 在Boost.Statechart库中，a_row是一种特殊的宏，用于定义状态机的转换表。
-        // 具体来说，a_row是一个宏，用于创建转换表中的单个转换规则。它提供了一种简洁的语法，使得定义转换表更加方便。
-        // 使用a_row宏，可以按以下格式定义转换规则：
+        // 在Boost.Statechart库中,a_row是一种特殊的宏,用于定义状态机的转换表.
+        // 具体来说,a_row是一个宏,用于创建转换表中的单个转换规则.它提供了一种简洁的语法,使得定义转换表更加方便.
+        // 使用a_row宏,可以按以下格式定义转换规则:
         // a_row<Event, Source, Target, Action, Guard>
 
-        // 其中：
-        // Event是触发状态转换的事件类型。
-        // Source是当前状态。
-        // Target是目标状态。
-        // Action是在状态转换时执行的动作（可选）。
-        // Guard是在执行状态转换之前进行的条件检查（可选）。
+        // 其中:
+        // Event是触发状态转换的事件类型.
+        // Source是当前状态.
+        // Target是目标状态.
+        // Action是在状态转换时执行的动作(可选).
+        // Guard是在执行状态转换之前进行的条件检查(可选).
 
-        // _row是a_row的别名，用于创建转换表中的单个转换规则。
-        // _row宏与a_row宏在功能上是相同的，只是名称不同。
-        // _row宏主要用于提供一种简短的写法，使代码更紧凑。
+        // _row是a_row的别名,用于创建转换表中的单个转换规则.
+        // _row宏与a_row宏在功能上是相同的,只是名称不同.
+        // _row宏主要用于提供一种简短的写法,使代码更紧凑.
 
         struct transition_table : mpl::vector<
             //    Start          Event                Next           Action				 Guard

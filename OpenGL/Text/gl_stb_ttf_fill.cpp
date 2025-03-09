@@ -25,26 +25,26 @@
 
 // 文字填充
 //
-//以下是问题的可能原因和解决方法：
+//以下是问题的可能原因和解决方法:
 //
 
-//GL_TRIANGLE_FAN 的局限性：
-//当前的 renderFilledText 使用 GL_TRIANGLE_FAN 从轮廓的第一个点开始填充，但它假设轮廓是一个简单的闭合多边形，且没有内部孔洞。
-// 对于有孔洞的字符（如 "O" 或 "e"），GL_TRIANGLE_FAN 会填充整个区域，包括孔洞内部，导致文字变得不可识别。
-//轮廓数据未正确区分外部和内部轮廓：
-//stb_truetype 的轮廓数据可能包含多个轮廓段（外部轮廓和内部孔洞），但当前代码没有区分这些轮廓，导致所有轮廓都被当成单个区域填充。
-//顶点顺序或方向问题：
-//如果轮廓的顶点顺序（顺时针或逆时针）不一致，可能会导致填充区域错误。OpenGL 根据顶点顺序（通过环绕规则）判断内部和外部区域。
+//GL_TRIANGLE_FAN 的局限性:
+//当前的 renderFilledText 使用 GL_TRIANGLE_FAN 从轮廓的第一个点开始填充,但它假设轮廓是一个简单的闭合多边形,且没有内部孔洞.
+// 对于有孔洞的字符(如 "O" 或 "e"),GL_TRIANGLE_FAN 会填充整个区域,包括孔洞内部,导致文字变得不可识别.
+//轮廓数据未正确区分外部和内部轮廓:
+//stb_truetype 的轮廓数据可能包含多个轮廓段(外部轮廓和内部孔洞),但当前代码没有区分这些轮廓,导致所有轮廓都被当成单个区域填充.
+//顶点顺序或方向问题:
+//如果轮廓的顶点顺序(顺时针或逆时针)不一致,可能会导致填充区域错误.OpenGL 根据顶点顺序(通过环绕规则)判断内部和外部区域.
 //解决方法
-//为了正确填充文字轮廓，同时处理外部轮廓和内部孔洞，我们需要：
+//为了正确填充文字轮廓,同时处理外部轮廓和内部孔洞,我们需要:
 //
-//区分外部轮廓和内部孔洞：
-//检查每个轮廓的顶点顺序（顺时针或逆时针），根据 OpenGL 的非零环绕规则（Non - Zero Winding Rule）或奇偶规则（Even - Odd Rule）确定填充区域。
-//外部轮廓通常是逆时针，内部孔洞是顺时针（或相反，取决于字体数据）。
-//使用三角形分解：
-//将每个轮廓转换为三角形网格（三角剖分），然后用 GL_TRIANGLES 填充。可以使用简单的三角形生成方法（如耳分法）或引入专门的几何库（如 poly2tri）。
-//改进填充逻辑：
-//仅填充外部轮廓，跳过或反向填充内部孔洞。
+//区分外部轮廓和内部孔洞:
+//检查每个轮廓的顶点顺序(顺时针或逆时针),根据 OpenGL 的非零环绕规则(Non - Zero Winding Rule)或奇偶规则(Even - Odd Rule)确定填充区域.
+//外部轮廓通常是逆时针,内部孔洞是顺时针(或相反,取决于字体数据).
+//使用三角形分解:
+//将每个轮廓转换为三角形网格(三角剖分),然后用 GL_TRIANGLES 填充.可以使用简单的三角形生成方法(如耳分法)或引入专门的几何库(如 poly2tri).
+//改进填充逻辑:
+//仅填充外部轮廓,跳过或反向填充内部孔洞.
 
 // 窗口大小
 const int WIDTH = 800;
@@ -79,7 +79,7 @@ void main() {
 }
 )";
 
-// 片段着色器（填充颜色）
+// 片段着色器(填充颜色)
 const char* fragmentShaderSource = R"(
 #version 330 core
 out vec4 FragColor;
@@ -120,7 +120,7 @@ void initOpenGL()
     glDeleteShader(fragmentShader);
 }
 
-// 计算多边形的面积（用于判断顺时针/逆时针）
+// 计算多边形的面积(用于判断顺时针/逆时针)
 float calculateArea(const std::vector<float>& vertices)
 {
     if (vertices.size() < 6) return 0.0f; // 至少需要 3 个点
@@ -152,7 +152,7 @@ std::vector<float> tessellateQuadBezier(float x0, float y0, float x1, float y1, 
     return vertices;
 }
 
-// 获取字符轮廓并生成顶点（支持多个轮廓段）
+// 获取字符轮廓并生成顶点(支持多个轮廓段)
 std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codepoint, float scale, float& xOffset)
 {
     std::vector<std::vector<float>> outlines;
@@ -201,7 +201,7 @@ std::vector<std::vector<float>> getGlyphOutlines(stbtt_fontinfo* font, int codep
 
     return outlines;
 }
-// 渲染实心文字（修正轮廓方向，处理外部和内部）
+// 渲染实心文字(修正轮廓方向,处理外部和内部)
 void renderFilledText(stbtt_fontinfo* font, const std::string& text, float x, float y, float scale)
 {
     glUseProgram(shaderProgram);
@@ -233,15 +233,15 @@ void renderFilledText(stbtt_fontinfo* font, const std::string& text, float x, fl
                 float area = calculateArea(outline);
                 bool isClockwise = (area < 0); // 面积负数表示顺时针
 
-                // 假设外部轮廓为逆时针（面积正），内部孔洞为顺时针（面积负）
-                if (isClockwise) // 逆时针轮廓（外部轮廓）填充
+                // 假设外部轮廓为逆时针(面积正),内部孔洞为顺时针(面积负)
+                if (isClockwise) // 逆时针轮廓(外部轮廓)填充
                 {
                     // 这里应该使用三角形分解生成填充顶点
-                    // 临时使用 GL_TRIANGLE_FAN 调试（需替换为三角剖分）
+                    // 临时使用 GL_TRIANGLE_FAN 调试(需替换为三角剖分)
                     glBufferData(GL_ARRAY_BUFFER, filledVertices.size() * sizeof(float), filledVertices.data(), GL_STATIC_DRAW);
                     glDrawArrays(GL_TRIANGLE_FAN, 0, filledVertices.size() / 2);
                 }
-                // 顺时针轮廓（内部孔洞）不填充
+                // 顺时针轮廓(内部孔洞)不填充
             }
         }
         cursorX += xOffset; // 更新光标位置

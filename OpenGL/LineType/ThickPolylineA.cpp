@@ -1,22 +1,22 @@
-// 引入GLAD库，用于加载OpenGL函数指针
+// 引入GLAD库,用于加载OpenGL函数指针
 #include <glad/glad.h>
-// 引入GLFW库，用于创建窗口和处理输入事件
+// 引入GLFW库,用于创建窗口和处理输入事件
 #include <GLFW/glfw3.h>
-// 引入标准输入输出库，用于打印错误信息
+// 引入标准输入输出库,用于打印错误信息
 #include <stdio.h>
-// 引入标准库，用于使用rand()函数生成随机数
-#include <stdlib.h>  
-// 引入时间库，用于初始化随机数种子
-#include <time.h>    
-// 引入向量容器库，用于存储顶点数据
-#include <vector>    
+// 引入标准库,用于使用rand()函数生成随机数
+#include <stdlib.h>
+// 引入时间库,用于初始化随机数种子
+#include <time.h>
+// 引入向量容器库,用于存储顶点数据
+#include <vector>
 
 /**
  * 顶点着色器源码
- * 该着色器接收顶点位置数据，并将其转换为齐次坐标
+ * 该着色器接收顶点位置数据,并将其转换为齐次坐标
  */
 const char* vertexShaderSource = "#version 400\n"
-// 定义顶点位置属性，位置为0
+// 定义顶点位置属性,位置为0
 "layout (location = 0) in vec2 aPos;\n"
 // 主函数
 "void main()\n"
@@ -27,14 +27,14 @@ const char* vertexShaderSource = "#version 400\n"
 
 /**
  * 几何着色器源码
- * 该着色器将输入的线段转换为三角形带，以实现粗线效果
+ * 该着色器将输入的线段转换为三角形带,以实现粗线效果
  */
 const char* geometryShaderSource = "#version 400\n"
 // 定义输入图元类型为线段
 "layout (lines) in;\n"
-// 定义输出图元类型为三角形带，最大顶点数为4
+// 定义输出图元类型为三角形带,最大顶点数为4
 "layout (triangle_strip, max_vertices = 4) out;\n"
-// 定义线宽的统一变量，默认值为0.003
+// 定义线宽的统一变量,默认值为0.003
 "uniform float thickness = 0.003;\n"
 // 主函数
 "void main()\n"
@@ -43,7 +43,7 @@ const char* geometryShaderSource = "#version 400\n"
 "   vec2 p0 = gl_in[0].gl_Position.xy;\n"
 // 获取第二个顶点的位置
 "   vec2 p1 = gl_in[1].gl_Position.xy;\n"
-// 计算线段的方向向量，并归一化
+// 计算线段的方向向量,并归一化
 "   vec2 dir = normalize(p1 - p0);\n"
 // 计算线段的法向量
 "   vec2 normal = vec2(-dir.y, dir.x);\n"
@@ -87,9 +87,9 @@ const char* fragmentShaderSource = "#version 400\n"
 std::vector<float> generateRandomVertices(int numPoints)
 {
     // 每个点需要2个float (x,y)
-    std::vector<float> vertices(numPoints * 2);  
+    std::vector<float> vertices(numPoints * 2);
 
-    // 随机数种子，只需初始化一次
+    // 随机数种子,只需初始化一次
     static int seeded = 0;
     if (!seeded)
     {
@@ -98,13 +98,13 @@ std::vector<float> generateRandomVertices(int numPoints)
         seeded = 1;
     }
 
-    // 生成随机坐标，范围在 [-1, 1]
+    // 生成随机坐标,范围在 [-1, 1]
     for (int i = 0; i < numPoints * 2; i += 2)
     {
         // 生成x坐标
-        vertices[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;     
+        vertices[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
         // 生成y坐标
-        vertices[i + 1] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; 
+        vertices[i + 1] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
     }
 
     return vertices;
@@ -255,7 +255,7 @@ int main()
     glDeleteBuffers(1, &VBO);
     // 删除着色器程序
     glDeleteProgram(shaderProgram);
-    // vector会自动析构，无需手动释放
+    // vector会自动析构,无需手动释放
 
     // 终止GLFW库
     glfwTerminate();

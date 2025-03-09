@@ -1,32 +1,32 @@
-// 既不在主循环中更新 cameraTrans，也不在 scroll_callback 中更新cameraTrans，因为投影矩阵可能会影响其他 Shader，而你想让缩放逻辑独立于投影矩阵，同时保持虚线间隔固定。
+// 既不在主循环中更新 cameraTrans,也不在 scroll_callback 中更新cameraTrans,因为投影矩阵可能会影响其他 Shader,而你想让缩放逻辑独立于投影矩阵,同时保持虚线间隔固定.
 
-// 在这种情况下，我们需要一种方法，让缩放效果不依赖于修改 cameraTrans，而是将缩放逻辑完全隔离到当前 Shader 的顶点处理中，并且不影响其他 Shader。最好的办法是：
+// 在这种情况下,我们需要一种方法,让缩放效果不依赖于修改 cameraTrans,而是将缩放逻辑完全隔离到当前 Shader 的顶点处理中,并且不影响其他 Shader.最好的办法是:
 
-// 在顶点着色器中引入一个独立的缩放因子（zoomFactor），直接作用于顶点位置。
-// 将固定的 cameraTrans 设置一次，不再动态修改。
-// 通过主循环更新 zoomFactor 和 dashScale，以保持虚线间隔固定。
-// 以下是完整实现：
+// 在顶点着色器中引入一个独立的缩放因子(zoomFactor),直接作用于顶点位置.
+// 将固定的 cameraTrans 设置一次,不再动态修改.
+// 通过主循环更新 zoomFactor 和 dashScale,以保持虚线间隔固定.
+// 以下是完整实现:
 
 // 关键改动
 
-// 顶点着色器中的缩放：
-// 添加 uniform float zoomFactor = 1.0f，并在着色器中对顶点位置应用缩放：scaledPos = in_pos / zoomFactor。
-// 使用除法（/）而不是乘法（*），因为 zoomFactor 增大时应缩小视图，反之亦然，这样与你的滚轮方向一致（向上滚放大，向下滚缩小）。
-// 固定 cameraTrans：
-// 在初始化时设置一次 glm::ortho(-X, X, -X, X)，之后不再修改，保证不影响其他 Shader。
-// 主循环中更新：
-// 只更新 dashScale（4.0f / zoomFactor）和 zoomFactor，保持虚线间隔固定。
-// scroll_callback 的简化：
-// 只更新 zoomFactor，不触及 OpenGL 状态。
+// 顶点着色器中的缩放:
+// 添加 uniform float zoomFactor = 1.0f,并在着色器中对顶点位置应用缩放:scaledPos = in_pos / zoomFactor.
+// 使用除法(/)而不是乘法(*),因为 zoomFactor 增大时应缩小视图,反之亦然,这样与你的滚轮方向一致(向上滚放大,向下滚缩小).
+// 固定 cameraTrans:
+// 在初始化时设置一次 glm::ortho(-X, X, -X, X),之后不再修改,保证不影响其他 Shader.
+// 主循环中更新:
+// 只更新 dashScale(4.0f / zoomFactor)和 zoomFactor,保持虚线间隔固定.
+// scroll_callback 的简化:
+// 只更新 zoomFactor,不触及 OpenGL 状态.
 
 // 工作原理
-// zoomFactor 在着色器中的作用：
-// 当 zoomFactor 增大（例如从 1.0 到 2.0），in_pos / zoomFactor 使顶点坐标变小，视图放大。
-// 当 zoomFactor 减小（例如从 1.0 到 0.5），in_pos / zoomFactor 使顶点坐标变大，视图缩小。
-// dashScale 的调整：
-// dashScale = 4.0f / zoomFactor 确保虚线间隔在屏幕空间中保持固定，因为它与缩放因子反向关联。
-// 不影响其他 Shader：
-// cameraTrans 保持不变，其他 Shader 不会受到影响。
+// zoomFactor 在着色器中的作用:
+// 当 zoomFactor 增大(例如从 1.0 到 2.0),in_pos / zoomFactor 使顶点坐标变小,视图放大.
+// 当 zoomFactor 减小(例如从 1.0 到 0.5),in_pos / zoomFactor 使顶点坐标变大,视图缩小.
+// dashScale 的调整:
+// dashScale = 4.0f / zoomFactor 确保虚线间隔在屏幕空间中保持固定,因为它与缩放因子反向关联.
+// 不影响其他 Shader:
+// cameraTrans 保持不变,其他 Shader 不会受到影响.
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -48,7 +48,7 @@ layout(location = 1) in float in_len;
 uniform mat4 cameraTrans;
 // 虚线缩放因子
 uniform float dashScale;
-// 独立的缩放因子，默认值为 1.0f
+// 独立的缩放因子,默认值为 1.0f
 uniform float zoomFactor = 1.0f;
 // 时间偏移量
 uniform float timeOffset = 0.0;
@@ -56,7 +56,7 @@ uniform float timeOffset = 0.0;
 out float dashParam;
 
 void main() {
-    // 在着色器中应用缩放（除以 zoomFactor 表示放大）
+    // 在着色器中应用缩放(除以 zoomFactor 表示放大)
     vec2 scaledPos = in_pos / zoomFactor;
     // 计算顶点的最终位置
     gl_Position = cameraTrans * vec4(scaledPos, 0.0, 1.0);
@@ -77,7 +77,7 @@ out vec4 fragColor;
 void main() {
     // 计算虚线模式
     float dashPattern = mod(dashParam, 1.0);
-    // 如果虚线模式小于 0.5，则绘制颜色
+    // 如果虚线模式小于 0.5,则绘制颜色
     if (dashPattern < 0.5) {
         fragColor = color;
     } else {
@@ -88,8 +88,8 @@ void main() {
 )";
 
 /**
- * @brief 加载并编译顶点着色器和片段着色器，然后链接着色器程序
- * 
+ * @brief 加载并编译顶点着色器和片段着色器,然后链接着色器程序
+ *
  * @param vertexShaderSource 顶点着色器的源代码
  * @param fragmentShaderSource 片段着色器的源代码
  * @return GLuint 编译并链接好的着色器程序的 ID
@@ -129,7 +129,7 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
 
 /**
  * @brief 生成一个指定范围内的随机点
- * 
+ *
  * @param minX 点的最小 x 坐标
  * @param maxX 点的最大 x 坐标
  * @param minY 点的最小 y 坐标
@@ -147,8 +147,8 @@ glm::vec2 randomPoint(float minX = -X, float maxX = X, float minY = -X, float ma
 }
 
 /**
- * @brief 生成随机的混合线段（直线和贝塞尔曲线）
- * 
+ * @brief 生成随机的混合线段(直线和贝塞尔曲线)
+ *
  * @param vertices 存储生成的顶点数据的向量
  * @param numSegments 线段的总数
  * @param lineSegments 直线段的数量
@@ -264,12 +264,12 @@ void generateRandomMixedLine(
     }
 }
 
-// 缩放因子，初始值为 1.0f
+// 缩放因子,初始值为 1.0f
 float zoomFactor = 1.0f;
 
 /**
- * @brief 处理鼠标滚轮滚动事件，更新缩放因子
- * 
+ * @brief 处理鼠标滚轮滚动事件,更新缩放因子
+ *
  * @param window GLFW 窗口指针
  * @param xoffset 鼠标滚轮在 x 方向的偏移量
  * @param yoffset 鼠标滚轮在 y 方向的偏移量
@@ -279,7 +279,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     // 根据鼠标滚轮的偏移量更新缩放因子
     zoomFactor += float(yoffset) * 0.1f;
     // 确保缩放因子不小于 0.1f
-    zoomFactor = std::max(zoomFactor, 0.1f);  // 只更新 zoomFactor，不触动 cameraTrans
+    zoomFactor = std::max(zoomFactor, 0.1f);  // 只更新 zoomFactor,不触动 cameraTrans
 }
 
 int main()
@@ -329,7 +329,7 @@ int main()
     // 使用着色器程序
     glUseProgram(shaderProgram);
 
-    // 设置固定的投影矩阵，只初始化一次
+    // 设置固定的投影矩阵,只初始化一次
     glm::mat4 cameraTrans = glm::ortho(-X, X, -X, X);
     // 设置相机变换矩阵的统一变量
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "cameraTrans"), 1, GL_FALSE, &cameraTrans[0][0]);
@@ -382,8 +382,8 @@ int main()
     // 主循环
     while (!glfwWindowShouldClose(window))
     {
-        // 更新 dashScale 和 zoomFactor，不触动 cameraTrans
-        // 计算虚线缩放因子，保持虚线间隔固定
+        // 更新 dashScale 和 zoomFactor,不触动 cameraTrans
+        // 计算虚线缩放因子,保持虚线间隔固定
         float dashScale = 4.0f / zoomFactor;
         // 设置虚线缩放因子的统一变量
         glUniform1f(glGetUniformLocation(shaderProgram, "dashScale"), dashScale);

@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget* parent /*=nullptr*/) :
     QLabel* label = new QLabel("MainWindow", centralWidget);
     label->setAlignment(Qt::AlignCenter);
 
-    // 设置布局（这里我们简单地将标签放在中心）
+    // 设置布局(这里我们简单地将标签放在中心)
     m_pMainLayout = new QVBoxLayout(centralWidget);
     m_pMainLayout->addWidget(label);
 

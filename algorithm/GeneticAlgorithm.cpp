@@ -28,7 +28,7 @@ int main()
 
     InitialGroup(pGraph);			// 使用遗传算法初始化初始解集
 
-    // 运行 旅行推销员问题（TSP）的遗传算法进化过程
+    // 运行 旅行推销员问题(TSP)的遗传算法进化过程
     TspEvolution(pGraph);			// 遗传算法
 
     delete(pGraph);
@@ -41,7 +41,7 @@ int main()
 }
 
 //创建图的函数
-//这个函数从文件中读取图的信息，包括顶点数、顶点信息、邻接矩阵等，并将其存储在 Graph 结构体对象中。
+//这个函数从文件中读取图的信息,包括顶点数、顶点信息、邻接矩阵等,并将其存储在 Graph 结构体对象中.
 void CreateGraph(Graph* pGraph)
 {
     std::ifstream fReadIn;
@@ -79,7 +79,7 @@ void CreateGraph(Graph* pGraph)
     }
 
     // 输出图的信息
-    std::cout << "无向图创建完毕，相关信息如下：" << std::endl;
+    std::cout << "无向图创建完毕,相关信息如下:" << std::endl;
     std::cout << "[顶点数] pGraph->vexNum = " << pGraph->vexNum << std::endl;
     std::cout << "[边数] pGraph->arcNum = " << pGraph->arcNum << std::endl;
     std::cout << "[顶点向量] vexs[max_vexNum] = ";
@@ -90,7 +90,7 @@ void CreateGraph(Graph* pGraph)
     }
 
     /*
-    std::cout << std::endl << "[邻接矩阵] arcs[max_vexNum][max_vexNum] 如下：" << std::endl;
+    std::cout << std::endl << "[邻接矩阵] arcs[max_vexNum][max_vexNum] 如下:" << std::endl;
     for (int i = 0; i < pGraph->vexNum; i++)
     {
         for (int j = 0; j < pGraph->vexNum; j++)
@@ -103,8 +103,8 @@ void CreateGraph(Graph* pGraph)
 }
 
 // 初始化遗传算法的个体群体
-// 函数随机生成群体中每个个体的初始路径，然后检查路径的合法性，并计算路径长度。
-// 接着，计算群体的概率，并评估每个个体。
+// 函数随机生成群体中每个个体的初始路径,然后检查路径的合法性,并计算路径长度.
+// 接着,计算群体的概率,并评估每个个体.
 
 void InitialGroup(Graph* pGraph)
 {
@@ -128,7 +128,7 @@ void InitialGroup(Graph* pGraph)
         // 随机打乱路径
         std::random_shuffle(g_tspGroups[i].pathArray + 1, g_tspGroups[i].pathArray + pGraph->vexNum);
 
-        //检查路径是否合法，即是否存在重复的城市。
+        //检查路径是否合法,即是否存在重复的城市.
         if (CheckPath(pGraph, g_tspGroups[i]))
         {
             // 计算路径长度
@@ -150,10 +150,10 @@ void InitialGroup(Graph* pGraph)
     TspEvaluate(pGraph);
 }
 
-// 处理对象：每次新产生的群体, 计算每个个体的概率
-// 问题：解决TSP问题, 路径越短概率应该越高
-// 方案：对于当前总群, 将所有个体路径取倒数, 然后乘以该总群的总路径得到大于1的值, 然后进行归一化, 取得概率
-// 归一化：累加当前所有大于1的个体的伪概率, 得到nTempTotalP, 每个概率再分别除以 nTempTotalP 进行归一化
+// 处理对象:每次新产生的群体, 计算每个个体的概率
+// 问题:解决TSP问题, 路径越短概率应该越高
+// 方案:对于当前总群, 将所有个体路径取倒数, 然后乘以该总群的总路径得到大于1的值, 然后进行归一化, 取得概率
+// 归一化:累加当前所有大于1的个体的伪概率, 得到nTempTotalP, 每个概率再分别除以 nTempTotalP 进行归一化
 void CalcProbablity(Graph* pGraph, double dTotalLength)
 {
     double dTempTotalP = 0.0;
@@ -170,9 +170,9 @@ void CalcProbablity(Graph* pGraph, double dTotalLength)
     }
 }
 
-// 遗传算法的演化过程,遗传算法的演化过程的核心。
-// 在每一次迭代中，首先通过选择操作选择父代个体，然后进行交叉操作生成子代个体，接着进行变异操作。
-// 最后，评估每个个体的适应度，更新最优解，并进入下一轮迭代。
+// 遗传算法的演化过程,遗传算法的演化过程的核心.
+// 在每一次迭代中,首先通过选择操作选择父代个体,然后进行交叉操作生成子代个体,接着进行变异操作.
+// 最后,评估每个个体的适应度,更新最优解,并进入下一轮迭代.
 void TspEvolution(Graph* pGraph)
 {
     int nIter = 0;
@@ -210,7 +210,7 @@ void TspEvolution(Graph* pGraph)
             //else// std::cout<<"[ 这两个染色体不进行杂交 ]dIsCopulation = "<<dIsCopulation<<std::endl;
         }
 
-        // 3. 变异Variation：针对 g_tspSonSolution[]
+        // 3. 变异Variation:针对 g_tspSonSolution[]
         double dTotalLength = 0.0;	// 更新新个体的概率
 
         for (int nVariation = 0; nVariation < g_nSonSolutionLen; nVariation++)
@@ -243,7 +243,7 @@ void TspEvolution(Graph* pGraph)
         */
 
         // 4. 更新群体
-        // 参与对象：父代 + 遗传的子代
+        // 参与对象:父代 + 遗传的子代
         EvoUpdateGroup(pGraph);
 
         nIter++;
@@ -253,13 +253,13 @@ void TspEvolution(Graph* pGraph)
 
 // 选择
 /*
-    输入：当前总群
-    输出：按照一个评价, 随机从当前总群筛选出杂交对象, 本程序每次返回一个个体
-    选择方案：比例选择规则, [轮盘赌选择]
-    机制：反映在对父代种群中每一个体所赋予的允许繁殖概率及其从2M个中间个体中如何选择子代种群的机制上！
+    输入:当前总群
+    输出:按照一个评价, 随机从当前总群筛选出杂交对象, 本程序每次返回一个个体
+    选择方案:比例选择规则, [轮盘赌选择]
+    机制:反映在对父代种群中每一个体所赋予的允许繁殖概率及其从2M个中间个体中如何选择子代种群的机制上！
 */
 /*
-    [轮盘赌选择] -  轮盘赌选择是从染色体群体中选择一些成员的方法，被选中的机率和它们的适应性分数成比例，染色体的适应性分数愈高，被选中的概率也愈多.
+    [轮盘赌选择] -  轮盘赌选择是从染色体群体中选择一些成员的方法,被选中的机率和它们的适应性分数成比例,染色体的适应性分数愈高,被选中的概率也愈多.
     1. 随机产生一个概率 dSelectP
     2. [概率分布函数]声明变量 dDistributionP = 0, 对于每个个体, 依次累加个体的概率到dDistributionP上, 判断当前随机概率dSelectP是否小于dDistributionP, 若是则中该染色体, 结束循环
 
@@ -281,31 +281,31 @@ int EvoSelect(Graph* pGraph)
         }
     }
 
-    // 如果遍历完数组还没有选择个体，可能是概率计算有误
+    // 如果遍历完数组还没有选择个体,可能是概率计算有误
     std::cout << "[ERROR!]EvoSelect() 轮盘赌选择有误..." << std::endl;
     return 0;
 }
 
-// 交叉  使用中间杂交方式，在两个个体的交叉点之间互换基因段，处理交叉后的冲突。
+// 交叉  使用中间杂交方式,在两个个体的交叉点之间互换基因段,处理交叉后的冲突.
 /*
-    输入：[TSP_Father , TSP_Mother]两个个体作为父母, 进行杂交
-    输出：通过杂交产生新个体(遗传算法产生2个新个体, 演化算法产生1个新个体)
-    杂交方案：[父子混合选择][自然选择 - 父母不参与竞争]
+    输入:[TSP_Father , TSP_Mother]两个个体作为父母, 进行杂交
+    输出:通过杂交产生新个体(遗传算法产生2个新个体, 演化算法产生1个新个体)
+    杂交方案:[父子混合选择][自然选择 - 父母不参与竞争]
     -- [演化策略]所使用的杂交算子是从两个个体生成一个个体的操作
-    -- [遗传算法]生成两个新个体。常见的“中间杂交”（intermediate crossover）及“随机杂交”（random crossover）等!
+    -- [遗传算法]生成两个新个体.常见的“中间杂交”(intermediate crossover)及“随机杂交”(random crossover)等!
 */
 /*
-    TSP_杂交具体方法：
+    TSP_杂交具体方法:
     1. 随机选取两个交叉点i和j,记为 nFatherCrossArray 和 nMotherCrossArray
     2. 将两交叉点中间的基因段互换
-    3. 分别对tspFather和tspMother的路径进行冲突处理：
+    3. 分别对tspFather和tspMother的路径进行冲突处理:
         -- 以tspFather为例, 保持nFatherCrossArray基因段不变, 基因段以外的部分与nFatherCrossArray基因段冲突的城市,
             用nFatherCrossArray和nMotherCrossArray对应的位置去互换, 直到没有冲突.
         -- 冲突城市的确定: nFatherCrossArray 和 nMotherCrossArray去补集,存放于数组 nConflictArray[] 中.
 */
 void EvoCross(Graph* pGraph, TSPSolution TSP_Father, TSPSolution TSP_Mother)
 {
-    // 杂交过程：随机产生杂交的位置, 保证 g_nCrossI < g_nCrossJ[全局变量]
+    // 杂交过程:随机产生杂交的位置, 保证 g_nCrossI < g_nCrossJ[全局变量]
     g_nCrossI = rand() % (CITY_150NUM - 1) + 1;	// 不能取到起始城市
     g_nCrossJ = rand() % (CITY_150NUM - 1) + 1;	//
 
@@ -331,7 +331,7 @@ void EvoCross(Graph* pGraph, TSPSolution TSP_Father, TSPSolution TSP_Mother)
         nCrossLength++;
     }
 
-    // 开始杂交 - 处理 TSP_Father：找到nFatherCrossArray[]中会产生冲突的城市
+    // 开始杂交 - 处理 TSP_Father:找到nFatherCrossArray[]中会产生冲突的城市
     int nLengthConflict = 0;	// 冲突的个数
 
     // 获取可能产生冲突的城市位置,即 在A 中,但不在 B 中的元素,赋给 nConflictArray
@@ -351,7 +351,7 @@ void EvoCross(Graph* pGraph, TSPSolution TSP_Father, TSPSolution TSP_Mother)
     TSPSolution descendantA = HandleConflict(pGraph, TSP_Father, nFatherConflictArray, nMotherConflictArray, nLengthConflict);	// 解决 TSP_Father 的冲突
     TSPSolution descendantB = HandleConflict(pGraph, TSP_Mother, nMotherConflictArray, nFatherConflictArray, nLengthConflict);	// 解决 TSP_Mother 的冲突
 
-    //存储子代个体：
+    //存储子代个体:
     g_tspSonSolution[g_nSonSolutionLen++] = descendantA;
     g_tspSonSolution[g_nSonSolutionLen++] = descendantB;
 
@@ -359,8 +359,8 @@ void EvoCross(Graph* pGraph, TSPSolution TSP_Father, TSPSolution TSP_Mother)
     delete(nMotherConflictArray);
 }
 
-//HandleConflict 函数用于解决基因交叉时可能发生的冲突。
-//在遗传算法中，基因交叉可能导致基因中包含重复的城市，而这是不允许的。该函数通过检测冲突并进行合适的调整，确保每个城市在基因中只出现一次。
+//HandleConflict 函数用于解决基因交叉时可能发生的冲突.
+//在遗传算法中,基因交叉可能导致基因中包含重复的城市,而这是不允许的.该函数通过检测冲突并进行合适的调整,确保每个城市在基因中只出现一次.
 TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDetectionConflictArray, int* nModelConflictArray, int nLengthConflict)
 {
     /*
@@ -376,7 +376,7 @@ TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDe
     }
     std::cout<<std::endl;
 
-    std::cout<<"[存在冲突]基因组为：";
+    std::cout<<"[存在冲突]基因组为:";
     for (int i = 0;i < pGraph->vexNum;i++)
     {
         std::cout<<conflictSolution.pathArray[i]<<" -> ";
@@ -420,7 +420,7 @@ TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDe
     }
 
     /*
-    std::cout<<std::endl<<"[解决冲突]基因组为：";
+    std::cout<<std::endl<<"[解决冲突]基因组为:";
     for (int i = 0;i < pGraph->vexNum;i++)
     {
         std::cout<<conflictSolution.pathArray[i]<<" -> ";
@@ -441,7 +441,7 @@ TSPSolution HandleConflict(Graph* pGraph, TSPSolution conflictSolution, int* nDe
 }
 
 // 用于找出在进行基因交叉时可能导致冲突的城市位置
-// 找到两个数组中不相同的元素，用于解决遗传算法中基因交叉产生的冲突
+// 找到两个数组中不相同的元素,用于解决遗传算法中基因交叉产生的冲突
 // 同时存在于 nFatherCrossArray 和 nMotherCrossArray 为不冲突的城市, 反之是冲突的城市.
 // nDetectionCross[]:表示当前搜索的个体, 即找冲突的对象
 // nModelCross[]:
@@ -483,13 +483,13 @@ int* GetConflict(int nDetectionCross[], int nModelCross[], int nCrossLength, int
 
 // 变异 Variation
 /*
-    输入：杂交得到的所有个体（大于总群规模）
-    输出：通过变异策略, 以一定的变异概率（确定变异个数）随机选择个体进行变异
-    变异策略：随机交换染色体的片段, TSP - 随机交换两个城市的位置
+    输入:杂交得到的所有个体(大于总群规模)
+    输出:通过变异策略, 以一定的变异概率(确定变异个数)随机选择个体进行变异
+    变异策略:随机交换染色体的片段, TSP - 随机交换两个城市的位置
 
-    变异过程：随机产生一个变异的位置
+    变异过程:随机产生一个变异的位置
     随机产生两个随机数表示两个城市的位置, 并进行位置交换
-    变异是为了增加种群的多样性，防止陷入局部最优解。
+    变异是为了增加种群的多样性,防止陷入局部最优解.
 */
 void EvoVariation(Graph* pGraph, int nVariation)
 {
@@ -512,7 +512,7 @@ void EvoVariation(Graph* pGraph, int nVariation)
     g_tspSonSolution[nVariation].pathArray[nCityJ] = nTempCity;
 }
 
-// 根据新生成的子代替换群体中路径长度较长的个体。
+// 根据新生成的子代替换群体中路径长度较长的个体.
 // 父代 - g_tspGroups[]
 // 子代 - g_tspSonSolution[]
 void EvoUpdateGroup(Graph* pGraph)
@@ -605,9 +605,9 @@ bool CheckPath(Graph* pGraph, TSPSolution& curSolution)
 }
 
 // TSP - 评价函数 遗传算法的演化过程函数: 包含选择、交叉、变异、更新群体等操作的循环过程
-// 输入：当前总群 g_tspGroups[] - 包括 每个个体的路径和所需的长度
-// 输出：当前总群中, 最优的个体：bestSolution
-// 评价方法：路径最短的为最优
+// 输入:当前总群 g_tspGroups[] - 包括 每个个体的路径和所需的长度
+// 输出:当前总群中, 最优的个体:bestSolution
+// 评价方法:路径最短的为最优
 void TspEvaluate(Graph* pGraph)
 {
     TSPSolution& bestSolution = g_tspGroups[0];
@@ -622,7 +622,7 @@ void TspEvaluate(Graph* pGraph)
     // std::cout<<"---------------- [当前总群] ----------------"<<std::endl;
     //for (int i = 0; i < GROUP_30NUM; i++)
     //{
-    //	std::cout << "\n[第 " << i + 1 << " 号染色体]：";
+    //	std::cout << "\n[第 " << i + 1 << " 号染色体]:";
     //	for (int j = 0; j < pGraph->vexNum; j++)
     //	{
     //		std::cout << g_tspGroups[i].pathArray[j] << " -> ";
@@ -646,7 +646,7 @@ void TspEvaluate(Graph* pGraph)
 
             outputFile << bestSolution.pathArray[i];
 
-            // 如果不是最后一个元素，则添加逗号
+            // 如果不是最后一个元素,则添加逗号
             if (i < pGraph->vexNum - 1)
             {
                 outputFile << ",";
@@ -662,7 +662,7 @@ void Display(Graph pGraph){
     std::cout<<"---------------- [遗传算法 - 当前总群] ----------------"<<std::endl;
     for (int i = 0;i < GROUP_30NUM;i++)
     {
-        std::cout<<"[第 "<<i + 1<<" 号染色体]：";
+        std::cout<<"[第 "<<i + 1<<" 号染色体]:";
         for (int j = 0; j < pGraph->vexNum; j++)
         {
             std::cout<<g_tspGroups[i].pathArray[j]<<" -> ";
