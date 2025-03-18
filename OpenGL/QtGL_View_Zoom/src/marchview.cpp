@@ -194,10 +194,19 @@ void MarchView::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        float x = (float(event->x()) / width() * 2.0f - 1.0f) * 1000.0f / m_scale - m_translation.x();
-        float y = -(float(event->y()) / height() * 2.0f - 1.0f) * 1000.0f / m_scale - m_translation.y();
+        float aspect = float(width()) / height();
+        float orthoSize = 1000.0f;
 
-        m_linePoints.push_back({x, y});
+        // 1. 将鼠标屏幕坐标转换为 NDC 坐标 ([-1, 1])
+        float ndcX = (float(event->x()) / width()) * 2.0f - 1.0f;
+        float ndcY = -((float(event->y()) / height()) * 2.0f - 1.0f); // Y 轴翻转
+
+        // 2. 从 NDC 转换到世界坐标
+        // 逆投影：world = (ndc * orthoSize * [aspect, 1] - translation) / scale
+        float worldX = (ndcX * orthoSize * aspect - m_translation.x()) / m_scale;
+        float worldY = (ndcY * orthoSize - m_translation.y()) / m_scale;
+
+        m_linePoints.push_back({worldX, worldY});
         updateLineBuffer();
         update();
     }
