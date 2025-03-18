@@ -2,12 +2,12 @@
 #define MARCHVIEW_H
 
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions_4_0_Core>  // 修改这里
+#include <QOpenGLFunctions_4_0_Core>
 #include <QOpenGLShaderProgram>
 #include <QVector2D>
 #include <vector>
 
-class MarchView : public QOpenGLWidget, protected QOpenGLFunctions_4_0_Core  // 修改这里
+class MarchView : public QOpenGLWidget, protected QOpenGLFunctions_4_0_Core
 {
     Q_OBJECT
 public:
@@ -23,9 +23,10 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-protected:
+private:
     void updateLineBuffer();
-    void updateRulerBuffer();
+    void updateCrossBuffer();
+    void updateRuler();
 
 private:
     QOpenGLShaderProgram *m_lineProgram = nullptr;
@@ -39,13 +40,19 @@ private:
     struct Point {
         float x, y;
     };
-    std::vector<Point> m_points;
-    
+    std::vector<Point> m_linePoints; // 普通线条顶点
 
-private:
-    std::vector<Point> m_crossPoints; // 标尺线条顶点
-    GLuint m_rulerVao, m_rulerVbo;    // 标尺的 VAO 和 VBO
-    QOpenGLShaderProgram* m_rulerProgram; // 标尺的着色器程序
+    std::vector<Point> m_crossPoints; // 固定十字线顶点
+    GLuint m_crossVao, m_crossVbo;
+    QOpenGLShaderProgram* m_crossProgram;
+
+    struct RulerLine {
+        Point start;
+        Point end;
+    };
+    std::vector<RulerLine> m_rulerLines; // 动态标尺线条（屏幕坐标）
+    GLuint m_rulerVao, m_rulerVbo;
+    QOpenGLShaderProgram* m_rulerProgram;
 };
 
 #endif // MARCHVIEW_H
