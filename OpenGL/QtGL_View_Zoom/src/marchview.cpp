@@ -15,8 +15,8 @@ MarchView::MarchView(QWidget *parent)
     setFormat(format);
 
     m_crossPoints = {
-        {-0.9f, 0.0f}, {0.9f, 0.0f}, // 水平线
-        {0.0f, -0.9f}, {0.0f, 0.9f}  // 垂直线
+        {-0.9f, 0.0f}, {0.9f, 0.0f},
+        {0.0f, -0.9f}, {0.0f, 0.9f}
     };
 }
 
@@ -45,7 +45,6 @@ void MarchView::initializeGL()
         qFatal("Could not initialize OpenGL 4.0 functions");
     }
 
-    // 普通线条
     const char *vertexShaderSource = R"(
         #version 400
         layout(location = 0) in vec2 position;
@@ -79,7 +78,6 @@ void MarchView::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    // 固定十字线
     const char *crossVS = R"(
         #version 400
         layout(location = 0) in vec2 position;
@@ -111,7 +109,6 @@ void MarchView::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    // 动态标尺
     const char *rulerVS = R"(
         #version 400
         layout(location = 0) in vec2 position;
@@ -190,6 +187,39 @@ void MarchView::paintGL()
     }
 }
 
+void MarchView::paintEvent(QPaintEvent *event)
+{
+    // 先调用基类的 paintEvent，执行 OpenGL 绘制
+    QOpenGLWidget::paintEvent(event);
+
+    // 使用 QPainter 在 OpenGL 渲染后绘制文本
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QFont font("Arial", 8);
+    painter.setFont(font);
+    painter.setPen(Qt::black);
+
+    // 绘制标尺文本
+    for (const auto &line : m_rulerLines)
+    {
+        // 将 NDC 坐标转换为屏幕像素坐标
+        float screenX = (line.start.x + 1.0f) / 2.0f * width();
+        float screenY = (1.0f - line.start.y) / 2.0f * height();
+
+        // 根据标尺是水平还是垂直调整文本位置
+        if (line.start.y == line.end.y) // 垂直标尺
+        {
+            painter.drawText(screenX + 5, screenY, QString::number(line.worldValue, 'f', 1));
+        }
+        else // 水平标尺
+        {
+            painter.drawText(screenX - 10, screenY - 5, QString::number(line.worldValue, 'f', 1));
+        }
+    }
+
+    painter.end();
+}
+
 void MarchView::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
@@ -197,12 +227,9 @@ void MarchView::mousePressEvent(QMouseEvent *event)
         float aspect = float(width()) / height();
         float orthoSize = 1000.0f;
 
-        // 1. 将鼠标屏幕坐标转换为 NDC 坐标 ([-1, 1])
         float ndcX = (float(event->x()) / width()) * 2.0f - 1.0f;
-        float ndcY = -((float(event->y()) / height()) * 2.0f - 1.0f); // Y 轴翻转
+        float ndcY = -((float(event->y()) / height()) * 2.0f - 1.0f);
 
-        // 2. 从 NDC 转换到世界坐标
-        // 逆投影：world = (ndc * orthoSize * [aspect, 1] - translation) / scale
         float worldX = (ndcX * orthoSize * aspect - m_translation.x()) / m_scale;
         float worldY = (ndcY * orthoSize - m_translation.y()) / m_scale;
 
@@ -305,7 +332,7 @@ void MarchView::updateRuler()
         Point end = start;
         end.y += rulerHeight;
         if (start.x >= -1.0f && start.x <= 1.0f)
-            m_rulerLines.push_back({start, end});
+            m_rulerLines.push_back({start, end, x}); // 存储世界坐标值
     }
 
     float rulerWidth = 0.1f;
@@ -316,7 +343,7 @@ void MarchView::updateRuler()
         Point end = start;
         end.x += rulerWidth;
         if (start.y >= -1.0f && start.y <= 1.0f)
-            m_rulerLines.push_back({start, end});
+            m_rulerLines.push_back({start, end, y}); // 存储世界坐标值
     }
 
     std::vector<Point> rulerPoints;
@@ -325,8 +352,6 @@ void MarchView::updateRuler()
         rulerPoints.push_back(line.start);
         rulerPoints.push_back(line.end);
     }
-
-    qDebug() << "Ruler lines:" << m_rulerLines.size() << "points:" << rulerPoints.size();
 
     glBindVertexArray(m_rulerVao);
     glBindBuffer(GL_ARRAY_BUFFER, m_rulerVbo);
