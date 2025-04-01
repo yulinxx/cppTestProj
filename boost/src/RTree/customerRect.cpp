@@ -1,11 +1,11 @@
 //  ChatGPT  V3.5
 //  2023-05-20
-// 要在Boost中的RTree中使用自定义的Box和Point数据类，你需要为它们定义相应的Traits.Traits为Boost.Geometry提供了与你的数据类交互的方式.
+// 要在Boost中的RTree中使用自定义的Box和Point数据类，
+// 需要为它们定义相应的 Traits.Traits为Boost.Geometry提供了与你的数据类交互的方式.
 
 // 首先，我们定义自定义的Box和Point数据类：
 
-// cpp
-// Copy code
+
 // class MyBox {
 // public:
 //     // 定义你的Box类的成员变量和方法
@@ -17,13 +17,13 @@
 //     // 定义你的Point类的成员变量和方法
 //     // ...
 // };
-// 接下来，我们为这两个数据类定义Traits.对于Point类型，我们需要定义一个PointTraits类，告诉Boost.Geometry如何访问和操作Point对象.
+
+// 接下来，我们为这两个数据类定义Traits.对于Point类型，我们需要定义一个PointTraits类，
+// 告诉Boost.Geometry如何访问和操作Point对象.
 // 对于Box类型，我们需要定义一个BoxTraits类，告诉Boost.Geometry如何访问和操作Box对象.
 
-// cpp
-// Copy code
-// #include <boost/geometry.hpp>
 
+// #include <boost/geometry.hpp>
 // namespace bg = boost::geometry;
 
 // // PointTraits 定义
@@ -93,18 +93,18 @@
 // };
 
 // }}} // namespace boost::geometry::traits
+
 // 在上述代码中，我们在boost::geometry::traits命名空间下定义了PointTraits和BoxTraits.
 // 对于PointTraits，我们定义了tag、coordinate_type、coordinate_system、dimension和access等特征.
 // 对于BoxTraits，我们定义了tag、point_type和indexed_access特征.
 
-// 注意，在access特征中，我们提供了get和set函数，用于访问和设置自定义Point对象的坐标值.你需要根据你的自定义Point类的实现，在这些函数中正确地访问和操作坐标值.
+// 注意，在access特征中，我们提供了get和set函数，用于访问和设置自定义Point对象的坐标值.
+// 需要根据你的自定义Point类的实现，在这些函数中正确地访问和操作坐标值.
 
 // 完成了Traits的定义后，你就可以在Boost的RTree中使用自定义的Box和Point数据类了.
 
-// cpp
-// Copy code
-// #include <boost/geometry/index/rtree.hpp>
 
+// #include <boost/geometry/index/rtree.hpp>
 // namespace bgi = boost::geometry::index;
 
 // int main() {
@@ -127,8 +127,8 @@
 // 在上述示例中，我们创建了一个RTree对象（RTree类型为bgi::rtree，使用quadratic<16>作为分割策略).
 // 然后，我们创建自定义的Box对象（box1和box2)并将它们插入到RTree中，使用rtree.insert函数进行插入操作.
 
-// 请确保根据你的自定义数据类的实现，适当地实现Traits中的函数，以便能够正确地访问和操作自定义的Box和Point对象.
-
+// 请确保根据你的自定义数据类的实现，适当地实现Traits中的函数，
+// 以便能够正确地访问和操作自定义的Box和Point对象.
 
 
 // 要为自定义的XPoint和XRect类编写Boost.Geometry的traits，你需要实现以下几个特性：
@@ -144,7 +144,8 @@
 
 // tag特性指定为box_tag，表示这是一个框类型.
 // point_type特性指定为XPoint<T>，表示框的角点类型为XPoint<T>.
-// indexed_access特性用于访问框的最小角点和最大角点的坐标.你需要为XRect类的最小角点和最大角点分别实现indexed_access特性.
+// indexed_access特性用于访问框的最小角点和最大角点的坐标.
+// 需要为XRect类的最小角点和最大角点分别实现indexed_access特性.
 
 
 #include <iostream>

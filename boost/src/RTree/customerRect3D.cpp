@@ -4,10 +4,6 @@
 #include <boost/geometry.hpp>
 // 引入 Boost.Geometry 的 RTree 索引库，用于高效的空间索引
 #include <boost/geometry/index/rtree.hpp>
-// 引入自定义的向量类头文件
-#include "vec.hpp"
-// 引入自定义的矩形类头文件
-#include "rect.hpp"
 
 // 定义 Boost.Geometry 特性的命名空间别名，方便后续使用
 namespace bg = boost::geometry;

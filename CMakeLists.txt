@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 # 使用vcpkg进行包管理
 if(WIN32)
-    set(VCPKG_PATH C:/vcpkg/scripts/buildsystems/vcpkg.cmake)
+    set(VCPKG_PATH D:/Install/vcpkg/scripts/buildsystems/vcpkg.cmake)
 elseif(UNIX AND NOT APPLE)
     set(VCPKG_PATH /home/x/install/vcpkg/scripts/buildsystems/vcpkg.cmake)
 elseif(APPLE)
@@ -31,7 +31,7 @@ message("--------- subdir ----- ")
 # 定义要排除的目录列表
 set(EXCLUDE_DIRS ".vs" ".vscode" ".git" "out")
 
-# 自定义宏，用于查找当前目录下的所有子目录
+# 自定义宏,用于查找当前目录下的所有子目录
 macro(SUBDIRLIST result curdir)
     file(GLOB children RELATIVE ${curdir} ${curdir}/*)
     set(dirlist "")
@@ -52,7 +52,7 @@ SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 # 设置要排除的子目录
 set(ExclusionList ".git" ".vscode" "build")
 
-# 遍历子目录，将排除的子目剔除后，添加至cmake中
+# 遍历子目录,将排除的子目剔除后,添加至cmake中
 foreach(SUBDIR ${SUBDIRS})
     message("\n----------------------------" ${SUBDIR})
     set(ADD_DIR TRUE)
