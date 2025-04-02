@@ -6,12 +6,15 @@
 #include <cstddef>
 #include <type_traits>
 
+namespace Ut
+{
+
 template<size_t N, typename T = double>
 class UTILITY_API Rect
 {
 public:
     Rect();
-    Rect(const Vector<N, T>& min, const Vector<N, T>& max);
+    Rect(const Vec<N, T>& min, const Vec<N, T>& max);
 
     Rect(const Rect& other);
     Rect& operator=(const Rect& other);
@@ -21,8 +24,8 @@ public:
 
     ~Rect();
 
-    const Vector<N, T>& GetMin() const;
-    const Vector<N, T>& GetMax() const;
+    const Vec<N, T>& GetMin() const;
+    const Vec<N, T>& GetMax() const;
 
     T Width() const;
     T Height() const;
@@ -49,3 +52,5 @@ using Rect2f = Rect<2, float>;
 using Rect2d = Rect<2, double>;
 using Rect3f = Rect<3, float>;
 using Rect3d = Rect<3, double>;
+
+}

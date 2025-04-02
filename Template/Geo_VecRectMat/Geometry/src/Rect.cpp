@@ -4,17 +4,20 @@
 #include <cmath>
 #include <algorithm>
 
+namespace Ut
+{
+
 template<size_t N, typename T>
 class Rect<N, T>::Impl
 {
 public:
-    Vector<N, T> min;
-    Vector<N, T> max;
+    Vec<N, T> min;
+    Vec<N, T> max;
 
     Impl() : min(), max()
     {
     }
-    Impl(const Vector<N, T>& min, const Vector<N, T>& max)
+    Impl(const Vec<N, T>& min, const Vec<N, T>& max)
         : min(min), max(max)
     {
     }
@@ -26,7 +29,7 @@ Rect<N, T>::Rect() : pImpl(new Impl())
 }
 
 template<size_t N, typename T>
-Rect<N, T>::Rect(const Vector<N, T>& min, const Vector<N, T>& max)
+Rect<N, T>::Rect(const Vec<N, T>& min, const Vec<N, T>& max)
     : pImpl(new Impl(min, max))
 {
 }
@@ -74,13 +77,13 @@ Rect<N, T>::~Rect()
 }
 
 template<size_t N, typename T>
-const Vector<N, T>& Rect<N, T>::GetMin() const
+const Vec<N, T>& Rect<N, T>::GetMin() const
 {
     return pImpl->min;
 }
 
 template<size_t N, typename T>
-const Vector<N, T>& Rect<N, T>::GetMax() const
+const Vec<N, T>& Rect<N, T>::GetMax() const
 {
     return pImpl->max;
 }
@@ -127,3 +130,5 @@ template class Rect<3, double>;
 template UTILITY_API double Rect<3, double>::Depth<3, void>() const;
 template UTILITY_API double Rect<3, double>::Volume<3, void>() const;
 #endif
+
+}
