@@ -7,25 +7,28 @@
 #include <cstddef>
 #include <type_traits>
 
+namespace Ut
+{
+
 template<size_t N, typename T = double>
-class UTILITY_API Vector
+class UTILITY_API Vec
 {
 public:
-    Vector();
+    Vec();
 
     template<typename = std::enable_if_t<N == 2>>
-    Vector(T x, T y);
+    Vec(T x, T y);
 
     template<typename = std::enable_if_t<N == 3>>
-    Vector(T x, T y, T z);
+    Vec(T x, T y, T z);
 
     // 添加拷贝和移动构造函数/赋值操作符
-    Vector(const Vector& other);
-    Vector& operator=(const Vector& other);
-    Vector(Vector&& other) noexcept;
-    Vector& operator=(Vector&& other) noexcept;
+    Vec(const Vec& other);
+    Vec& operator=(const Vec& other);
+    Vec(Vec&& other) noexcept;
+    Vec& operator=(Vec&& other) noexcept;
 
-    ~Vector();
+    ~Vec();
 
     T operator[](size_t index) const;
     T& operator[](size_t index);
@@ -36,12 +39,32 @@ public:
     template<size_t M = N, typename = std::enable_if_t<M >= 3>>
     T z() const;
 
+    // 重载运算符
+    Vec operator+(const Vec& other) const;
+    Vec operator-(const Vec& other) const;
+
+    // 点积函数
+    T dot(const Vec& other) const;
+
+    // 叉积函数
+    template<size_t M = N, typename = std::enable_if_t<M == 2>>
+    T cross(const Vec& other) const;  // 2D 返回标量
+
+    template<size_t M = N, typename = std::enable_if_t<M == 3>>
+    Vec cross(const Vec& other) const;  // 3D 返回向量
+
+    // 旋转方法声明
+    template<typename = std::enable_if_t<N == 2>>
+    Vec rotate(float angle) const;
+
 private:
     class Impl;
     Impl* pImpl;
 };
 
-using Vector2f = Vector<2, float>;
-using Vector2d = Vector<2, double>;
-using Vector3f = Vector<3, float>;
-using Vector3d = Vector<3, double>;
+using Vec2f = Vec<2, float>;
+using Vec2d = Vec<2, double>;
+using Vec3f = Vec<3, float>;
+using Vec3d = Vec<3, double>;
+
+} // namespace Ut
