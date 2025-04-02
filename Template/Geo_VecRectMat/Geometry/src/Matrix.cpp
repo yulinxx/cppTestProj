@@ -4,6 +4,9 @@
 #include <cmath>
 #include <stdexcept>
 
+namespace Ut
+{
+
 template<size_t N, typename T>
 class Matrix<N, T>::Impl {
 public:
@@ -143,6 +146,21 @@ T Matrix<N, T>::Determinant() const {
     return pImpl->Determinant();
 }
 
+// 矩阵和向量的乘法实现
+template<size_t N, typename T>
+template<size_t M, typename U>
+Vec<M, U> Matrix<N, T>::operator*(const Vec<M, U>& vec) const {
+    static_assert(N == M, "Matrix and vector dimensions must match for multiplication.");
+    Vec<M, U> result;
+    for (size_t i = 0; i < M; ++i) {
+        result[i] = U();
+        for (size_t j = 0; j < M; ++j) {
+            result[i] += (*this)(i, j) * vec[j];
+        }
+    }
+    return result;
+}
+
 // 显式实例化定义
 #ifdef UTILITY_EXPORTS
 template class Matrix<2, float>;
@@ -162,3 +180,5 @@ template UTILITY_API Matrix<4, float>::Matrix(float, float, float, float, float,
 template UTILITY_API Matrix<4, double>::Matrix(double, double, double, double, double, double, double, double,
                                                double, double, double, double, double, double, double, double);
 #endif
+
+}

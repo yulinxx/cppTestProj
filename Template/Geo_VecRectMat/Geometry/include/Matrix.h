@@ -1,9 +1,13 @@
 #pragma once
 
 #include "UtilityAPI.h"
+#include "Vec.h"
 
 #include <cstddef>
 #include <type_traits>
+
+namespace Ut
+{
 
 template<size_t N, typename T = double>
 class UTILITY_API Matrix {
@@ -37,6 +41,10 @@ public:
     // 矩阵属性
     T Determinant() const; // 行列式
 
+    // 矩阵和向量的乘法
+    template<size_t M, typename U>
+    Vec<M, U> operator*(const Vec<M, U>& vec) const;
+    
 private:
     class Impl;
     Impl* pImpl;
@@ -59,3 +67,5 @@ using Matrix3f = Matrix<3, float>;
 using Matrix3d = Matrix<3, double>;
 using Matrix4f = Matrix<4, float>;
 using Matrix4d = Matrix<4, double>;
+
+}
