@@ -18,29 +18,29 @@
 #include <codecvt> // 新增：用于UTF-8到UTF-32转换
 
 // 定义Character结构体，用于存储每个字符的位图信息
-// - Size: 字符位图的宽度和高度
-// - Bearing: 从基线到字符左上角的偏移量
-// - Advance: 到下一个字符的水平前进量（以像素为单位）
-// - Offset: 字符在纹理图集中的起始位置（x, y）
+// - sz: 字符位图的宽度和高度
+// - bearing: 从基线到字符左上角的偏移量
+// - advance: 到下一个字符的水平前进量（以像素为单位）
+// - offset: 字符在纹理图集中的起始位置（x, y）
 struct Character
 {
-    glm::ivec2 Size;    // glyph 大小
-    glm::ivec2 Bearing; // 从基线到 glyph 左上角的偏移
-    GLuint Advance;     // 到下一个 glyph 的水平偏移
-    glm::ivec2 Offset;  // 在图集中的 x0, y0
+    glm::ivec2 sz;    // glyph 大小
+    glm::ivec2 bearing; // 从基线到 glyph 左上角的偏移
+    GLuint advance;     // 到下一个 glyph 的水平偏移
+    glm::ivec2 offset;  // 在图集中的 x0, y0
 };
 
 // 全局变量：
 // - Characters: 映射Unicode code point到其对应Character结构体的std::map（使用unsigned long作为键）
-std::map<unsigned long, Character> Characters;
-GLuint atlasTexture = 0;
-int atlasWidth = 0, atlasHeight = 0;
+std::map<unsigned long, Character> mapCharacters;
+GLuint nAtlasTexture = 0;
+int nAtlasWidth = 0, nAtlasHeight = 0;
 
 // 顶点着色器源代码：
 // - 输入：vec4 vertex (前两个分量为位置，后两个为纹理坐标)
 // - 输出：纹理坐标TexCoords
 // - 使用投影矩阵转换位置
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
 out vec2 TexCoords;
@@ -58,7 +58,7 @@ void main()
 // - 输入：纹理坐标TexCoords
 // - 输出：最终颜色color
 // - 从纹理采样红色通道作为alpha，乘以指定的文本颜色
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 in vec2 TexCoords;
 out vec4 color;
@@ -78,12 +78,12 @@ GLuint CompileShader()
 {
     // 创建并编译顶点着色器
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertex, 1, &vs, NULL);
     glCompileShader(vertex);
 
     // 创建并编译片段着色器
     GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragment, 1, &fs, NULL);
     glCompileShader(fragment);
 
     // 创建程序对象，附加着色器并链接
@@ -98,22 +98,27 @@ GLuint CompileShader()
     return program;
 }
 
-// CollectUniqueCodePoints
 // 从UTF-8字符串中收集独特的Unicode code points
 // 使用std::codecvt将UTF-8转换为UTF-32
+// 将输入的std::string（通常包含UTF - 8编码的文本）转换为其包含的唯一Unicode码点（code points）
+// 并将这些码点存储在一个std::set<unsigned long>集合中
+
 std::set<unsigned long> CollectUniqueCodePoints(const std::string& text)
 {
     std::set<unsigned long> codePoints;
+
+    //std::wstring_convert是C++标准库中的工具，用于在不同字符编码之间转换。
+    //std::codecvt_utf8<char32_t>，表示将UTF-8编码的字符串转换为UTF-32编码。
+
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+
     std::u32string u32text = converter.from_bytes(text);
     for (char32_t c : u32text)
-    {
         codePoints.insert(static_cast<unsigned long>(c));
-    }
+
     return codePoints;
 }
 
-// 函数：LoadFont
 // 加载指定字体文件，生成包含ASCII字符 + 指定文本中独特Unicode字符（支持中文）的纹理图集
 // - fontPath: 字体文件路径（如TTF文件，支持中文字体如simsun.ttc）
 // - fontSize: 字体大小（像素）
@@ -143,28 +148,44 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // 收集需要加载的字符：ASCII 0-127 + 文本中的独特Unicode
-    std::set<unsigned long> charsToLoad;
+    std::set<unsigned long> charsToLoad; // 存储需要渲染的字符的Unicode码点
+
     for (unsigned long c = 0; c < 128; ++c)
-    {
         charsToLoad.insert(c);
-    }
+
     std::set<unsigned long> unicodeChars = CollectUniqueCodePoints(text);
     charsToLoad.insert(unicodeChars.begin(), unicodeChars.end());
 
-    // 计算纹理图集初始大小（基于字符数和字体大小）
-    int numGlyphs = static_cast<int>(charsToLoad.size());
-    int max_dim = (1 + fontSize) * static_cast<int>(std::ceil(std::sqrt(numGlyphs)));
-    atlasWidth = 1;
-    while (atlasWidth < max_dim) atlasWidth <<= 1;
-    atlasHeight = atlasWidth;
+    // 计算纹理图集初始大小（基于字符数和字体大小）,将多个字符的字形（glyphs）打包到一个纹理中
 
-    // 分配图集像素缓冲区，并初始化为0
-    unsigned char* pixels = new unsigned char[atlasWidth * atlasHeight];
-    std::memset(pixels, 0, atlasWidth * atlasHeight);
+    int nNumGlyphs = static_cast<int>(charsToLoad.size()); // 加载的字符（字形）数量
 
-    // 打包位置：pen_x, pen_y 为当前放置位置；row_height 为当前行最大高度
-    int pen_x = 0, pen_y = 0;
-    int row_height = 0;
+    // 向上取整计算最大纹理尺寸，比如16个字符，可以排列在一个 4×4 的网格中，并为每个字形增加 1 像素的间距，避免混合，
+    // 将网格边长（以字形为单位）乘以每个字形的像素大小，得到图集的最大尺寸（以像素为单位）。
+    // 如果 nNumGlyphs = 16，fontSize = 32：sqrt(16) = 4，ceil(4) = 4（4×4 网格）。
+    // 则 (1 + 32) * 4 = 33 * 4 = 132。  nMaxDim = 132 像素。
+
+
+    int nMaxDim = (1 + fontSize) * static_cast<int>(std::ceil(std::sqrt(nNumGlyphs)));
+
+    nAtlasWidth = 1; // 将纹理图集的宽度初始化为 1 像素
+
+
+    // <<= 1：位左移操作，相当于将 nAtlasWidth 乘以 2。例如，1 变成 2，2 变成 4，4 变成 8，依此类推，直到它大于或等于 nMaxDim
+    // 理尺寸通常需要是 2 的幂,便于纹理坐标计算和内存对齐,更高效且兼容性更好,缺点是会浪费空间
+    while (nAtlasWidth < nMaxDim) // 通过位运算将 nAtlasWidth 调整为最接近 nMaxDim 的 2 的幂（power of two）
+        nAtlasWidth <<= 1;
+
+    nAtlasHeight = nAtlasWidth;
+
+    // 分配图集像素缓冲区，并初始化为0，表示纹理图集的像素缓冲区
+    unsigned char* chPixels = new unsigned char[nAtlasWidth * nAtlasHeight];
+    std::memset(chPixels, 0, nAtlasWidth * nAtlasHeight);
+
+    // 打包位置：nPenX, nPenY 为当前放置位置；nCurRowHeight 为当前行最大高度
+    int nPenX = 0;
+    int nPenY = 0;
+    int nCurRowHeight = 0;
 
     // 循环处理每个需要加载的字符
     for (unsigned long c : charsToLoad)
@@ -175,37 +196,44 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
             std::cerr << "WARNING::FREETYTPE: Failed to load Glyph U+" << std::hex << c << std::endl;
             continue;
         }
+
         FT_Bitmap* bmp = &face->glyph->bitmap;
 
         // 如果当前行放不下，换行
-        if (pen_x + bmp->width + 1 >= atlasWidth)
+        if (nPenX + bmp->width + 1 >= nAtlasWidth)
         {
-            pen_x = 0;
-            pen_y += row_height + 1; // 移动到下一行，使用当前行最大高度 + 间距
-            row_height = 0;
+            nPenX = 0;
+            nPenY += nCurRowHeight + 1; // 移动到下一行，使用当前行最大高度 + 间距
+            nCurRowHeight = 0;
+
             // 如果高度不足，动态扩展图集高度
-            if (pen_y + fontSize + 1 >= atlasHeight)
+            if (nPenY + fontSize + 1 >= nAtlasHeight)
             {
-                atlasHeight *= 2;
-                unsigned char* new_pixels = new unsigned char[atlasWidth * atlasHeight];
-                std::memset(new_pixels, 0, atlasWidth * atlasHeight);
-                std::memcpy(new_pixels, pixels, atlasWidth * (atlasHeight / 2));
-                delete[] pixels;
-                pixels = new_pixels;
+                nAtlasHeight *= 2;
+                unsigned char* cNewPixels = new unsigned char[nAtlasWidth * nAtlasHeight];
+                if (!cNewPixels)
+                {
+                    std::cerr << "ERROR: Failed to allocate memory for atlas" << std::endl;
+                    return;
+                }
+                std::memset(cNewPixels, 0, nAtlasWidth * nAtlasHeight);
+                std::memcpy(cNewPixels, chPixels, nAtlasWidth * (nAtlasHeight / 2));
+                delete[] chPixels;
+                chPixels = cNewPixels;
             }
         }
 
         // 更新当前行高度
-        row_height = std::max(row_height, static_cast<int>(bmp->rows));
+        nCurRowHeight = std::max(nCurRowHeight, static_cast<int>(bmp->rows));
 
         // 将位图数据拷贝到图集缓冲区
-        for (int row = 0; row < bmp->rows; ++row)
+        for (int nRow = 0; nRow < bmp->rows; ++nRow)
         {
-            for (int col = 0; col < bmp->width; ++col)
+            for (int nCol = 0; nCol < bmp->width; ++nCol)
             {
-                int x = pen_x + col;
-                int y = pen_y + row;
-                pixels[y * atlasWidth + x] = bmp->buffer[row * bmp->pitch + col];
+                int x = nPenX + nCol;
+                int y = nPenY + nRow;
+                chPixels[y * nAtlasWidth + x] = bmp->buffer[nRow * bmp->pitch + nCol];
             }
         }
 
@@ -214,18 +242,20 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
             glm::ivec2(bmp->width, bmp->rows),
             glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
             static_cast<GLuint>(face->glyph->advance.x >> 6),
-            glm::ivec2(pen_x, pen_y)
+            glm::ivec2(nPenX, nPenY)
         };
-        Characters[c] = character;
+
+        mapCharacters[c] = character;
 
         // 移动到下一个放置位置（添加间距）
-        pen_x += bmp->width + 1;
+        nPenX += bmp->width + 1;
     }
 
     // 生成OpenGL纹理对象，并上传像素数据（GL_RED通道）
-    glGenTextures(1, &atlasTexture);
-    glBindTexture(GL_TEXTURE_2D, atlasTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
+    glGenTextures(1, &nAtlasTexture);
+    glBindTexture(GL_TEXTURE_2D, nAtlasTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, nAtlasWidth, nAtlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, chPixels);
+
     // 设置纹理参数：边缘clamp，线性过滤
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -234,7 +264,7 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // 释放缓冲区和FreeType资源
-    delete[] pixels;
+    delete[] chPixels;
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 }
@@ -248,7 +278,6 @@ struct TextBatch
     GLsizei vertexCount; // 顶点数
 };
 
-// 函数：CreateStaticTextBatch
 // 为给定的静态文本生成批处理VBO
 // - text: 要渲染的UTF-8字符串（支持中文）
 // - x, y: 起始位置
@@ -257,6 +286,7 @@ struct TextBatch
 TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, GLfloat scale)
 {
     TextBatch batch;
+
     // 生成VAO和VBO
     glGenVertexArrays(1, &batch.VAO);
     glGenBuffers(1, &batch.VBO);
@@ -274,28 +304,30 @@ TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, G
     for (char32_t ch : u32text)
     {
         unsigned long c = static_cast<unsigned long>(ch);
+
         // 查找字符信息
-        auto it = Characters.find(c);
-        if (it == Characters.end())
+        auto it = mapCharacters.find(c);
+        if (it == mapCharacters.end())
         {
             std::cerr << "WARNING: Character U+" << std::hex << c << " not found in atlas!" << std::endl;
             continue;
         }
+
         Character charInfo = it->second;
 
         // 计算字符在屏幕上的位置（考虑bearing偏移）
-        GLfloat xpos = x + charInfo.Bearing.x * scale;
-        GLfloat ypos = y - (charInfo.Size.y - charInfo.Bearing.y) * scale;
+        GLfloat xpos = x + charInfo.bearing.x * scale;
+        GLfloat ypos = y - (charInfo.sz.y - charInfo.bearing.y) * scale;
 
         // 计算字符四边形的宽度和高度
-        GLfloat w = charInfo.Size.x * scale;
-        GLfloat h = charInfo.Size.y * scale;
+        GLfloat w = charInfo.sz.x * scale;
+        GLfloat h = charInfo.sz.y * scale;
 
         // 计算纹理UV坐标（u0,v0 为左上，u1,v1 为右下）
-        GLfloat u0 = static_cast<GLfloat>(charInfo.Offset.x) / atlasWidth;
-        GLfloat v0 = static_cast<GLfloat>(charInfo.Offset.y) / atlasHeight;
-        GLfloat u1 = static_cast<GLfloat>(charInfo.Offset.x + charInfo.Size.x) / atlasWidth;
-        GLfloat v1 = static_cast<GLfloat>(charInfo.Offset.y + charInfo.Size.y) / atlasHeight;
+        GLfloat u0 = static_cast<GLfloat>(charInfo.offset.x) / nAtlasWidth;
+        GLfloat v0 = static_cast<GLfloat>(charInfo.offset.y) / nAtlasHeight;
+        GLfloat u1 = static_cast<GLfloat>(charInfo.offset.x + charInfo.sz.x) / nAtlasWidth;
+        GLfloat v1 = static_cast<GLfloat>(charInfo.offset.y + charInfo.sz.y) / nAtlasHeight;
 
         // 定义6个顶点（两个三角形组成四边形）
         GLfloat quadVertices[6][4] = {
@@ -307,7 +339,8 @@ TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, G
             { xpos + w, ypos,       u1, v1 },
             { xpos + w, ypos + h,   u1, v0 }
         };
-        // 添加到vertices vector
+
+        // 添加到 vertices vector
         for (int i = 0; i < 6; ++i)
         {
             vertices.push_back(quadVertices[i][0]);
@@ -317,11 +350,12 @@ TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, G
         }
 
         // 更新下一个字符的起始x位置
-        x += charInfo.Advance * scale;
+        x += charInfo.advance * scale;
     }
 
     // 上传顶点数据到VBO（静态绘制）
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+
     // 配置顶点属性（位置0: 4 floats，位置+UV）
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
@@ -334,7 +368,6 @@ TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, G
     return batch;
 }
 
-// 函数：RenderStaticText
 // 渲染静态文本批次
 // - batch: TextBatch对象
 // - shader: 着色器程序ID
@@ -350,7 +383,7 @@ void RenderStaticText(const TextBatch& batch, GLuint shader, glm::mat4 projectio
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     // 激活纹理单元0，并绑定图集纹理
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlasTexture);
+    glBindTexture(GL_TEXTURE_2D, nAtlasTexture);
     // 绑定VAO
     glBindVertexArray(batch.VAO);
 
@@ -384,7 +417,8 @@ int main()
     GLuint shader = CompileShader();
 
     // 要渲染的中文文本（UTF-8编码）
-    std::string chineseText = "你好，世界！\nイベント体験~한국말韓國말-Hello World~";
+    //std::string chineseText = "你好，世界！。！イベント体験~한국말韓國말-Hello World~！";
+    std::string chineseText = "你好，世界！。！イベント体験~한국말韓國말-Hello World~";
 
     // 加载字体并生成纹理图集（使用支持中文的字体，如simsun.ttc或arialuni.ttf）
     LoadFont("C:/Windows/Fonts/STCAIYUN.TTF", 68, chineseText);
@@ -411,7 +445,7 @@ int main()
     }
 
     // 清理资源
-    glDeleteTextures(1, &atlasTexture);
+    glDeleteTextures(1, &nAtlasTexture);
     glfwTerminate();
     return 0;
 }
