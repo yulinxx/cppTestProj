@@ -1,21 +1,18 @@
-// 包含必要的头文件：OpenGL加载器、窗口管理、数学库、FreeType字体库等
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
 #include <iostream>
 #include <map>
 #include <vector>
 #include <string>
 #include <cmath>
-#include <set> // 新增：用于收集独特字符
-#include <locale> // 新增：用于wchar转换
-#include <codecvt> // 新增：用于UTF-8到UTF-32转换
+#include <set>
+#include <locale>
+#include <codecvt>
 
 // 定义Character结构体，用于存储每个字符的位图信息
 // - sz: 字符位图的宽度和高度
@@ -35,6 +32,7 @@ struct Character
 std::map<unsigned long, Character> mapCharacters;
 GLuint nAtlasTexture = 0;
 int nAtlasWidth = 0, nAtlasHeight = 0;
+glm::vec3 currentTextColor = glm::vec3(1.0f, 1.0f, 0.0f); // 默认色
 
 // 顶点着色器源代码：
 // - 输入：vec4 vertex (前两个分量为位置，后两个为纹理坐标)
@@ -44,7 +42,6 @@ const char* vs = R"(
 #version 330 core
 layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
 out vec2 TexCoords;
-
 uniform mat4 projection;
 
 void main()
@@ -54,71 +51,68 @@ void main()
 }
 )";
 
-// 片段着色器源代码：
-// - 输入：纹理坐标TexCoords
-// - 输出：最终颜色color
-// - 从纹理采样红色通道作为alpha，乘以指定的文本颜色
+// 片段着色器
 const char* fs = R"(
 #version 330 core
-in vec2 TexCoords;
-out vec4 color;
-
-uniform sampler2D text;
+in vec2 TexCoords;  // 纹理坐标（UV），用于指定在纹理图集（text）中采样的位置。
+out vec4 color;  
+uniform sampler2D text; // text 绑定的字形纹理
 uniform vec3 textColor;
 
 void main()
 {    
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
-    color = vec4(textColor, 1.0) * sampled;
+    float a = texture(text, TexCoords).r; // 使用texture函数在text纹理上根据TexCoords采样。取出单通道纹理的红色分量
+    vec4 sampled = vec4(1.0, 1.0, 1.0, a); // 创建一个vec4变量sampled，表示一个白色基底颜色（RGB全为1.0），Alpha通道来自纹理的灰度值a。
+    color = vec4(textColor, 1.0) * sampled; // 构造最终输出颜色color。
+
+    //color.r = textColor.r * sampled.r = textColor.r * 1.0 = textColor.r
+    //color.g = textColor.g * sampled.g = textColor.g * 1.0 = textColor.g
+    //color.b = textColor.b * sampled.b = textColor.b * 1.0 = textColor.b
+    //color.a = 1.0 * sampled.a = a
 }
 )";
 
 // 编译并链接顶点和片段着色器，返回着色器程序ID
-GLuint CompileShader()
+GLuint CompileShader() 
 {
-    // 创建并编译顶点着色器
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vs, NULL);
     glCompileShader(vertex);
 
-    // 创建并编译片段着色器
     GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fs, NULL);
     glCompileShader(fragment);
 
-    // 创建程序对象，附加着色器并链接
     GLuint program = glCreateProgram();
     glAttachShader(program, vertex);
     glAttachShader(program, fragment);
     glLinkProgram(program);
-
-    // 删除不再需要的着色器对象
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+
     return program;
 }
 
+// 收集唯一Unicode码点
 // 从UTF-8字符串中收集独特的Unicode code points
 // 使用std::codecvt将UTF-8转换为UTF-32
 // 将输入的std::string（通常包含UTF - 8编码的文本）转换为其包含的唯一Unicode码点（code points）
 // 并将这些码点存储在一个std::set<unsigned long>集合中
 
-std::set<unsigned long> CollectUniqueCodePoints(const std::string& text)
+std::set<unsigned long> CollectUniqueCodePoints(const std::string& text) 
 {
     std::set<unsigned long> codePoints;
-
     //std::wstring_convert是C++标准库中的工具，用于在不同字符编码之间转换。
     //std::codecvt_utf8<char32_t>，表示将UTF-8编码的字符串转换为UTF-32编码。
-
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-
     std::u32string u32text = converter.from_bytes(text);
     for (char32_t c : u32text)
         codePoints.insert(static_cast<unsigned long>(c));
-
+        
     return codePoints;
 }
 
+// 加载字体
 // 加载指定字体文件，生成包含ASCII字符 + 指定文本中独特Unicode字符（支持中文）的纹理图集
 // - fontPath: 字体文件路径（如TTF文件，支持中文字体如simsun.ttc）
 // - fontSize: 字体大小（像素）
@@ -269,31 +263,27 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
     FT_Done_FreeType(ft);
 }
 
-// 定义TextBatch结构体，用于存储静态文本的批处理数据
+// TextBatch结构体
 // - VAO, VBO: 顶点数组和缓冲对象
 // - vertexCount: 顶点总数（用于绘制）
-struct TextBatch
-{
+struct TextBatch {
     GLuint VAO, VBO;
-    GLsizei vertexCount; // 顶点数
+    GLsizei vertexCount;
 };
 
+// 创建静态文本批次
 // 为给定的静态文本生成批处理VBO
 // - text: 要渲染的UTF-8字符串（支持中文）
 // - x, y: 起始位置
 // - scale: 缩放因子
 // 从图集索引每个字符的UV，生成四边形顶点数据（位置 + UV）
-TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, GLfloat scale)
-{
+TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, GLfloat scale) {
     TextBatch batch;
-
-    // 生成VAO和VBO
     glGenVertexArrays(1, &batch.VAO);
     glGenBuffers(1, &batch.VBO);
     glBindVertexArray(batch.VAO);
     glBindBuffer(GL_ARRAY_BUFFER, batch.VBO);
 
-    // 收集顶点数据的vector
     std::vector<GLfloat> vertices;
 
     // 将UTF-8转换为UTF-32以处理每个code point
@@ -334,7 +324,6 @@ TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, G
             { xpos,     ypos + h,   u0, v0 },
             { xpos,     ypos,       u0, v1 },
             { xpos + w, ypos,       u1, v1 },
-
             { xpos,     ypos + h,   u0, v0 },
             { xpos + w, ypos,       u1, v1 },
             { xpos + w, ypos + h,   u1, v0 }
@@ -375,58 +364,71 @@ TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, G
 // - color: 文本颜色
 // 绑定纹理和VAO，通过一次绘制调用渲染所有字符
 void RenderStaticText(const TextBatch& batch, GLuint shader, glm::mat4 projection, glm::vec3 color)
-{
-    // 使用着色器程序
+ {
     glUseProgram(shader);
-    // 设置统一变量：文本颜色和投影矩阵
     glUniform3f(glGetUniformLocation(shader, "textColor"), color.x, color.y, color.z);
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    // 激活纹理单元0，并绑定图集纹理
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, nAtlasTexture);
-    // 绑定VAO
     glBindVertexArray(batch.VAO);
-
-    // 绘制所有顶点（三角形模式）
     glDrawArrays(GL_TRIANGLES, 0, batch.vertexCount);
-
-    // 解绑VAO和纹理
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// 主函数：程序入口
-// 初始化OpenGL窗口，加载字体，创建文本批次，并进入渲染循环
-int main()
-{
+// 键盘回调函数：处理颜色切换
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS) {
+        switch (key) {
+            case GLFW_KEY_R: // 红色
+                currentTextColor = glm::vec3(1.0f, 0.0f, 0.0f);
+                break;
+            case GLFW_KEY_G: // 绿色
+                currentTextColor = glm::vec3(0.0f, 1.0f, 0.0f);
+                break;
+            case GLFW_KEY_B: // 蓝色
+                currentTextColor = glm::vec3(0.0f, 0.0f, 1.0f);
+                break;
+            case GLFW_KEY_W: // 白色
+                currentTextColor = glm::vec3(1.0f, 1.0f, 1.0f);
+                break;
+        }
+    }
+}
+
+int main() {
     glfwInit();
-    // 设置OpenGL上下文版本（3.3核心配置文件）
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Text Atlas Rendering with Chinese", NULL, NULL);
+    if (!window) 
+    {
+        std::cerr << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
     glfwMakeContextCurrent(window);
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
 
     // 启用混合模式（用于透明文本）
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // 编译着色器
+    // 设置键盘回调
+    glfwSetKeyCallback(window, key_callback);
+
     GLuint shader = CompileShader();
-
-    // 要渲染的中文文本（UTF-8编码）
-    //std::string chineseText = "你好，世界！。！イベント体験~한국말韓國말-Hello World~！";
     std::string chineseText = "你好，世界！。！イベント体験~한국말韓國말-Hello World~";
-
-    // 加载字体并生成纹理图集（使用支持中文的字体，如simsun.ttc或arialuni.ttf）
     LoadFont("C:/Windows/Fonts/STCAIYUN.TTF", 68, chineseText);
 
     // 设置正交投影矩阵（2D渲染）
     glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
-
-    // 创建静态文本批次（渲染中文文本）
     TextBatch helloBatch = CreateStaticTextBatch(chineseText, 25.0f, 500.0f, 0.5f);
 
     // 进入主循环
@@ -436,8 +438,8 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // 渲染文本
-        RenderStaticText(helloBatch, shader, projection, glm::vec3(1.0f, 1.0f, 1.0f));
+        // 使用当前颜色渲染文本
+        RenderStaticText(helloBatch, shader, projection, currentTextColor);
 
         // 交换缓冲区并处理事件
         glfwSwapBuffers(window);
@@ -446,6 +448,9 @@ int main()
 
     // 清理资源
     glDeleteTextures(1, &nAtlasTexture);
+    glDeleteVertexArrays(1, &helloBatch.VAO);
+    glDeleteBuffers(1, &helloBatch.VBO);
+    glDeleteProgram(shader);
     glfwTerminate();
     return 0;
 }
