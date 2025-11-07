@@ -262,7 +262,7 @@ void renderScene(bool bPicking)
         checkGLError("glBufferData");
 
         glDrawArrays(GL_TRIANGLES, 0, 3);  // 绘制三角形
-        
+
         checkGLError("glDrawArrays");
     }
 }
