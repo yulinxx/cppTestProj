@@ -102,7 +102,6 @@ int main()
         return -1;
     }
 
-
     // 修改顶点着色器代码
     const char* vertexShaderSource = R"(
         #version 330 core
@@ -189,7 +188,6 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-
     int shapeType = 0; // 默认为贝塞尔曲线
 
     // 主循环
@@ -197,7 +195,7 @@ int main()
     {
         // 处理输入
         glfwPollEvents();
-    
+
         // 新增：处理键盘输入
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
         {

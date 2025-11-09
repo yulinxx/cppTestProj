@@ -55,12 +55,12 @@ void main()
 const char* fs = R"(
 #version 330 core
 in vec2 TexCoords;  // 纹理坐标（UV），用于指定在纹理图集（text）中采样的位置。
-out vec4 color;  
+out vec4 color;
 uniform sampler2D text; // text 绑定的字形纹理
 uniform vec3 textColor;
 
 void main()
-{    
+{
     float a = texture(text, TexCoords).r; // 使用texture函数在text纹理上根据TexCoords采样。取出单通道纹理的红色分量
     vec4 sampled = vec4(1.0, 1.0, 1.0, a); // 创建一个vec4变量sampled，表示一个白色基底颜色（RGB全为1.0），Alpha通道来自纹理的灰度值a。
     color = vec4(textColor, 1.0) * sampled; // 构造最终输出颜色color。
@@ -73,7 +73,7 @@ void main()
 )";
 
 // 编译并链接顶点和片段着色器，返回着色器程序ID
-GLuint CompileShader() 
+GLuint CompileShader()
 {
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vs, NULL);
@@ -99,7 +99,7 @@ GLuint CompileShader()
 // 将输入的std::string（通常包含UTF - 8编码的文本）转换为其包含的唯一Unicode码点（code points）
 // 并将这些码点存储在一个std::set<unsigned long>集合中
 
-std::set<unsigned long> CollectUniqueCodePoints(const std::string& text) 
+std::set<unsigned long> CollectUniqueCodePoints(const std::string& text)
 {
     std::set<unsigned long> codePoints;
     //std::wstring_convert是C++标准库中的工具，用于在不同字符编码之间转换。
@@ -108,7 +108,7 @@ std::set<unsigned long> CollectUniqueCodePoints(const std::string& text)
     std::u32string u32text = converter.from_bytes(text);
     for (char32_t c : u32text)
         codePoints.insert(static_cast<unsigned long>(c));
-        
+
     return codePoints;
 }
 
@@ -159,11 +159,9 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
     // 如果 nNumGlyphs = 16，fontSize = 32：sqrt(16) = 4，ceil(4) = 4（4×4 网格）。
     // 则 (1 + 32) * 4 = 33 * 4 = 132。  nMaxDim = 132 像素。
 
-
     int nMaxDim = (1 + fontSize) * static_cast<int>(std::ceil(std::sqrt(nNumGlyphs)));
 
     nAtlasWidth = 1; // 将纹理图集的宽度初始化为 1 像素
-
 
     // <<= 1：位左移操作，相当于将 nAtlasWidth 乘以 2。例如，1 变成 2，2 变成 4，4 变成 8，依此类推，直到它大于或等于 nMaxDim
     // 理尺寸通常需要是 2 的幂,便于纹理坐标计算和内存对齐,更高效且兼容性更好,缺点是会浪费空间
@@ -266,7 +264,8 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
 // TextBatch结构体
 // - VAO, VBO: 顶点数组和缓冲对象
 // - vertexCount: 顶点总数（用于绘制）
-struct TextBatch {
+struct TextBatch
+{
     GLuint VAO, VBO;
     GLsizei vertexCount;
 };
@@ -277,7 +276,8 @@ struct TextBatch {
 // - x, y: 起始位置
 // - scale: 缩放因子
 // 从图集索引每个字符的UV，生成四边形顶点数据（位置 + UV）
-TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, GLfloat scale) {
+TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, GLfloat scale)
+{
     TextBatch batch;
     glGenVertexArrays(1, &batch.VAO);
     glGenBuffers(1, &batch.VBO);
@@ -364,7 +364,7 @@ TextBatch CreateStaticTextBatch(const std::string& text, GLfloat x, GLfloat y, G
 // - color: 文本颜色
 // 绑定纹理和VAO，通过一次绘制调用渲染所有字符
 void RenderStaticText(const TextBatch& batch, GLuint shader, glm::mat4 projection, glm::vec3 color)
- {
+{
     glUseProgram(shader);
     glUniform3f(glGetUniformLocation(shader, "textColor"), color.x, color.y, color.z);
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -378,40 +378,45 @@ void RenderStaticText(const TextBatch& batch, GLuint shader, glm::mat4 projectio
 }
 
 // 键盘回调函数：处理颜色切换
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (action == GLFW_PRESS) {
-        switch (key) {
-            case GLFW_KEY_R: // 红色
-                currentTextColor = glm::vec3(1.0f, 0.0f, 0.0f);
-                break;
-            case GLFW_KEY_G: // 绿色
-                currentTextColor = glm::vec3(0.0f, 1.0f, 0.0f);
-                break;
-            case GLFW_KEY_B: // 蓝色
-                currentTextColor = glm::vec3(0.0f, 0.0f, 1.0f);
-                break;
-            case GLFW_KEY_W: // 白色
-                currentTextColor = glm::vec3(1.0f, 1.0f, 1.0f);
-                break;
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_PRESS)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_R: // 红色
+            currentTextColor = glm::vec3(1.0f, 0.0f, 0.0f);
+            break;
+        case GLFW_KEY_G: // 绿色
+            currentTextColor = glm::vec3(0.0f, 1.0f, 0.0f);
+            break;
+        case GLFW_KEY_B: // 蓝色
+            currentTextColor = glm::vec3(0.0f, 0.0f, 1.0f);
+            break;
+        case GLFW_KEY_W: // 白色
+            currentTextColor = glm::vec3(1.0f, 1.0f, 1.0f);
+            break;
         }
     }
 }
 
-int main() {
+int main()
+{
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Text Atlas Rendering with Chinese", NULL, NULL);
-    if (!window) 
+    if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }

@@ -1,7 +1,7 @@
 // 运行程序后，显示随机生成的三阶贝塞尔曲线，
 // 同时会在曲线上标记出转折点（红色矩形）、最大曲率点（紫色 X 形状）、
 // 与起点近似共线的最近点（绿色 X 形状）和最远拐角点（较大的绿色 X 形状）。
- 
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "bezier/bezier.h"
@@ -12,7 +12,7 @@
 #include <cmath>
 
 // 顶点着色器源码
-const char *vertexShaderSource = R"(
+const char* vertexShaderSource = R"(
 #version 330 core
 layout (location = 0) in vec2 aPos;
 void main() {
@@ -21,7 +21,7 @@ void main() {
 )";
 
 // 片段着色器源码，添加一个 uniform 变量来控制颜色
-const char *fragmentShaderSource = R"(
+const char* fragmentShaderSource = R"(
 #version 330 core
 out vec4 FragColor;
 uniform vec4 u_Color;
@@ -32,15 +32,15 @@ void main() {
 
 /**
  * @brief 创建并编译着色器
- * 
+ *
  * 该函数接受着色器源代码和着色器类型作为参数，创建并编译着色器。
  * 如果编译失败，会输出错误信息。
- * 
+ *
  * @param source 着色器源代码
  * @param type 着色器类型，如 GL_VERTEX_SHADER 或 GL_FRAGMENT_SHADER
  * @return unsigned int 编译好的着色器对象的 ID
  */
-unsigned int createShader(const char *source, GLenum type)
+unsigned int createShader(const char* source, GLenum type)
 {
     unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, NULL);
@@ -60,16 +60,16 @@ unsigned int createShader(const char *source, GLenum type)
 
 /**
  * @brief 创建并链接着色器程序
- * 
+ *
  * 该函数接受顶点着色器和片段着色器的源代码作为参数，创建并链接着色器程序。
  * 链接完成后，会删除不再需要的着色器对象。
  * 如果链接失败，会输出错误信息。
- * 
+ *
  * @param vertexSource 顶点着色器源代码
  * @param fragmentSource 片段着色器源代码
  * @return unsigned int 链接着色器程序的 ID
  */
-unsigned int createShaderProgram(const char *vertexSource, const char *fragmentSource)
+unsigned int createShaderProgram(const char* vertexSource, const char* fragmentSource)
 {
     unsigned int vertexShader = createShader(vertexSource, GL_VERTEX_SHADER);
     unsigned int fragmentShader = createShader(fragmentSource, GL_FRAGMENT_SHADER);
@@ -96,15 +96,15 @@ unsigned int createShaderProgram(const char *vertexSource, const char *fragmentS
 
 /**
  * @brief 创建并初始化 VAO 和 VBO
- * 
+ *
  * 该函数接受顶点数据、VAO 和 VBO 的引用作为参数，创建并初始化 VAO 和 VBO。
  * 将顶点数据存储到 VBO 中，并设置顶点属性指针。
- * 
+ *
  * @param vertices 顶点数据
  * @param VAO 顶点数组对象的引用
  * @param VBO 顶点缓冲对象的引用
  */
-void createVAOAndVBO(const std::vector<float> &vertices, unsigned int &VAO, unsigned int &VBO)
+void createVAOAndVBO(const std::vector<float>& vertices, unsigned int& VAO, unsigned int& VBO)
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -113,7 +113,7 @@ void createVAOAndVBO(const std::vector<float> &vertices, unsigned int &VAO, unsi
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -132,15 +132,15 @@ void cleanupOpenGLResources(unsigned int VAO, unsigned int VBO, unsigned int sha
 
 /**
  * @brief 计算二阶导数为零的点
- * 
+ *
  * 该函数接受一个三阶贝塞尔曲线对象和一个误差范围作为参数，计算曲线上二阶导数为零的点。
  * 通过遍历曲线上的点，判断二阶导数的 x 和 y 分量是否小于误差范围。
- * 
+ *
  * @param curve 三阶贝塞尔曲线对象
  * @param epsilon 误差范围，默认为 0.03
  * @return std::vector<double> 包含二阶导数为零的点的参数 t 的向量
  */
-std::vector<double> findTurningPoints(const bezier::Bezier<3> &curve, double epsilon = 0.03)
+std::vector<double> findTurningPoints(const bezier::Bezier<3>& curve, double epsilon = 0.03)
 {
     bezier::Bezier<1> secondDerivative = curve.derivative().derivative();
     std::vector<double> turningPoints;
@@ -159,47 +159,47 @@ std::vector<double> findTurningPoints(const bezier::Bezier<3> &curve, double eps
 
 /**
  * @brief 在指定点处，生成小矩形的顶点数据
- * 
+ *
  * 该函数接受一个点和矩形的大小作为参数，生成以该点为中心的小矩形的顶点数据。
- * 
+ *
  * @param pt 矩形的中心点
  * @param size 矩形的边长
  * @return std::vector<float> 包含矩形顶点数据的向量
  */
-std::vector<float> genRectangle(const bezier::Point &pt, float size)
+std::vector<float> genRectangle(const bezier::Point& pt, float size)
 {
     return {
         static_cast<float>(pt.x - size / 2), static_cast<float>(pt.y - size / 2),
         static_cast<float>(pt.x + size / 2), static_cast<float>(pt.y - size / 2),
         static_cast<float>(pt.x + size / 2), static_cast<float>(pt.y + size / 2),
-        static_cast<float>(pt.x - size / 2), static_cast<float>(pt.y + size / 2)};
+        static_cast<float>(pt.x - size / 2), static_cast<float>(pt.y + size / 2) };
 }
 
 /**
  * @brief 在指定点处，生成以此点为中心的 X 形状的顶点数据
- * 
+ *
  * 该函数接受一个点和 X 形状的大小作为参数，生成以该点为中心的 X 形状的顶点数据。
- * 
+ *
  * @param pt X 形状的中心点
  * @param size X 形状的大小
  * @return std::vector<float> 包含 X 形状顶点数据的向量
  */
-std::vector<float> genX(const bezier::Point &pt, float size)
+std::vector<float> genX(const bezier::Point& pt, float size)
 {
     return {
         static_cast<float>(pt.x - size / 2), static_cast<float>(pt.y - size / 2),
         static_cast<float>(pt.x + size / 2), static_cast<float>(pt.y + size / 2),
         static_cast<float>(pt.x - size / 2), static_cast<float>(pt.y + size / 2),
-        static_cast<float>(pt.x + size / 2), static_cast<float>(pt.y - size / 2)};
+        static_cast<float>(pt.x + size / 2), static_cast<float>(pt.y - size / 2) };
 }
 
-
-
-bezier::Point findNearestLinePt(const bezier::Bezier<3>& curve, double threshold = 0.0174533) {
+bezier::Point findNearestLinePt(const bezier::Bezier<3>& curve, double threshold = 0.0174533)
+{
     bezier::Point startPoint = curve.valueAt(0);
     bezier::Point prevPoint = startPoint;
 
-    for (float t = 0.02f; t <= 1.0f; t += 0.01f) {
+    for (float t = 0.02f; t <= 1.0f; t += 0.01f)
+    {
         bezier::Point currentPoint = curve.valueAt(t);
 
         // 计算向量
@@ -218,7 +218,8 @@ bezier::Point findNearestLinePt(const bezier::Bezier<3>& curve, double threshold
         double sinAngle = std::abs(crossProduct) / magnitudeProduct;
 
         // 如果夹角的正弦值小于阈值，则认为近似共线
-        if (sinAngle < std::sin(threshold)) {
+        if (sinAngle < std::sin(threshold))
+        {
             return currentPoint;
         }
 
@@ -227,7 +228,6 @@ bezier::Point findNearestLinePt(const bezier::Bezier<3>& curve, double threshold
 
     return bezier::Point(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
 }
-
 
 // bezier::Point findFarthestLinePt(const bezier::Bezier<3>& curve, double threshold = 0.0174533) {
 //     bezier::Point startPoint = curve.valueAt(0);
@@ -267,23 +267,19 @@ bezier::Point findNearestLinePt(const bezier::Bezier<3>& curve, double threshold
 //     return farthestPoint;
 // }
 
-
 // ... existing code ...
-
-
-
 
 /**
  * @brief 计算曲率
- * 
+ *
  * 该函数接受一个三阶贝塞尔曲线对象和一个参数 t 作为参数，计算曲线上 t 位置的曲率。
  * 通过计算一阶导数和二阶导数，然后使用曲率公式计算曲率。
- * 
+ *
  * @param curve 三阶贝塞尔曲线对象
  * @param t 参数 t，范围为 [0, 1]
  * @return double 曲线上 t 位置的曲率
  */
-double calculateCurvature(const bezier::Bezier<3> &curve, double t)
+double calculateCurvature(const bezier::Bezier<3>& curve, double t)
 {
     // 计算曲线的一阶导数
     bezier::Bezier<2> firstDerivative = curve.derivative();
@@ -306,13 +302,13 @@ double calculateCurvature(const bezier::Bezier<3> &curve, double t)
 
 /**
  * @brief 找到最大曲率点
- * 
+ *
  * 该函数接受一个三阶贝塞尔曲线对象作为参数，遍历曲线上的点，找到曲率最大的点。
- * 
+ *
  * @param curve 三阶贝塞尔曲线对象
  * @return bezier::Point 曲线上曲率最大的点
  */
-bezier::Point findMaxCurvaturePoint(const bezier::Bezier<3> &curve)
+bezier::Point findMaxCurvaturePoint(const bezier::Bezier<3>& curve)
 {
     // 初始化最大曲率为 0
     double maxCurvature = 0;
@@ -338,33 +334,34 @@ bezier::Point findMaxCurvaturePoint(const bezier::Bezier<3> &curve)
     return curve.valueAt(maxT);
 }
 
-
-
 /**
  * @brief 找到最远的拐角点
- * 
+ *
  * 该函数接受一个三阶贝塞尔曲线对象、曲率阈值和直线性阈值作为参数，
  * 找到曲线上满足曲率大于曲率阈值且从起点到该点近似直线的最远点。
- * 
+ *
  * @param curve 三阶贝塞尔曲线对象
  * @param curvatureThreshold 曲率阈值，用于判断是否为拐角点
  * @param linearityThreshold 直线性阈值，用于判断从起点到当前点是否近似直线
  * @return bezier::Point 满足条件的最远点，如果没有找到则返回无效点
  */
-bezier::Point findFarthestCornerPoint(const bezier::Bezier<3>& curve, double curvatureThreshold = 0.1, double linearityThreshold = 0.01) {
+bezier::Point findFarthestCornerPoint(const bezier::Bezier<3>& curve, double curvatureThreshold = 0.1, double linearityThreshold = 0.01)
+{
     bezier::Point startPoint = curve.valueAt(0);
     bezier::Point farthestPoint = startPoint;
     double farthestDistance = 0;
 
     // 遍历曲线上的点
-    for (float t = 0.01f; t <= 1.0f; t += 0.01f) {
+    for (float t = 0.01f; t <= 1.0f; t += 0.01f)
+    {
         bezier::Point currentPoint = curve.valueAt(t);
 
         // 计算曲率
         double curvature = calculateCurvature(curve, t);
 
         // 检查是否为局部最大曲率点
-        if (curvature > curvatureThreshold) {
+        if (curvature > curvatureThreshold)
+        {
             // 验证从起点到当前点的直线性
             double dx = currentPoint.x - startPoint.x;
             double dy = currentPoint.y - startPoint.y;
@@ -383,7 +380,8 @@ bezier::Point findFarthestCornerPoint(const bezier::Bezier<3>& curve, double cur
             double crossProduct = std::abs(vx * pvy - vy * pvx);
 
             // 如果当前点满足直线性且距离更远，则更新最远点
-            if (distance > farthestDistance && crossProduct < linearityThreshold) {
+            if (distance > farthestDistance && crossProduct < linearityThreshold)
+            {
                 farthestPoint = currentPoint;
                 farthestDistance = distance;
             }
@@ -391,20 +389,20 @@ bezier::Point findFarthestCornerPoint(const bezier::Bezier<3>& curve, double cur
     }
 
     // 如果没有找到满足条件的点，返回无效点
-    if (farthestDistance == 0) {
+    if (farthestDistance == 0)
+    {
         return bezier::Point(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
     }
 
     return farthestPoint;
 }
 
-
 /**
  * @brief 主函数，程序入口
- * 
+ *
  * 该函数是程序的入口，负责初始化 GLFW 和 GLAD，创建窗口和着色器程序，生成贝塞尔曲线和相关数据，
  * 创建 VAO 和 VBO，进入渲染循环，最后清理资源。
- * 
+ *
  * @return int 程序退出状态码
  */
 int main()
@@ -421,7 +419,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建窗口
-    GLFWwindow *window = glfwCreateWindow(1800, 1600, "Cubic Bezier Curve", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1800, 1600, "Cubic Bezier Curve", NULL, NULL);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -453,7 +451,7 @@ int main()
         {static_cast<float>(dis(gen)), static_cast<float>(dis(gen))},
         {static_cast<float>(dis(gen)), static_cast<float>(dis(gen))},
         {static_cast<float>(dis(gen)), static_cast<float>(dis(gen))},
-        {static_cast<float>(dis(gen)), static_cast<float>(dis(gen))}};
+        {static_cast<float>(dis(gen)), static_cast<float>(dis(gen))} };
 
     bezier::Bezier<3> curve(controlPoints);
 
@@ -488,11 +486,11 @@ int main()
     // 60 度对应的弧度值是: 1.0472
     // 90 度对应的弧度值是: 1.5708
     bezier::Point nearestPt = findNearestLinePt(curve, 0.5);
-    std::cout<<"nearestPt: "<<nearestPt.x<<" "<<nearestPt.y<<std::endl;
+    std::cout << "nearestPt: " << nearestPt.x << " " << nearestPt.y << std::endl;
     std::vector<float> vecXPts = genX(nearestPt, 0.02f);
 
     bezier::Point farestPt = findFarthestCornerPoint(curve, 0.1, 0.05);
-    std::cout<<"farestPt: "<<farestPt.x<<" "<<farestPt.y<<std::endl;
+    std::cout << "farestPt: " << farestPt.x << " " << farestPt.y << std::endl;
     std::vector<float> farXPts = genX(farestPt, 0.05f);
 
     vecXPts.insert(vecXPts.end(), farXPts.begin(), farXPts.end());
@@ -571,16 +569,6 @@ int main()
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
 
 // #include <glad/glad.h>
 // #include <GLFW/glfw3.h>

@@ -1,8 +1,5 @@
-
 // 使用OpenGL、GLAD和GLSL，生成一个由线段和三阶贝塞尔曲线构成的随机闭合图形
 // 找到贝塞尔曲线的“向外凸”点（定义为距离图形中心最远的点），并在该点绘制一个“X”标记。
-
-
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -137,7 +134,7 @@ std::vector<Edge> generateRandomShape()
     for (int i = 0; i < numSegments - 1; ++i)
     {
         Point nextPoint{ dist(gen), dist(gen) };
-        //if (i % 2 == 0) 
+        //if (i % 2 == 0)
         if (i == 0)
         { // 线段
             edges.push_back(Line{ lastPoint, nextPoint });

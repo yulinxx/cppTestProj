@@ -31,13 +31,16 @@ const char* fragmentShaderSource = R"(
     }
 )";
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
     glViewport(0, 0, width, height);
 }
 
-int main() {
+int main()
+{
     // 初始化 GLFW
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -48,7 +51,8 @@ int main() {
 
     // 创建窗口
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Texture", NULL, NULL);
-    if (!window) {
+    if (!window)
+    {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -57,7 +61,8 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // 初始化 GLEW
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -134,23 +139,31 @@ int main() {
     // 第二、三个参数分别用于存储图片的宽度和高度
     // 第四个参数用于存储图片的通道数，如 RGB 为 3，RGBA 为 4
     // 最后一个参数为要求的通道数，设为 0 表示使用图片原始的通道数
-    unsigned char* data = stbi_load("D:/xx/Pictures/34.png", &width, &height, &nrChannels, 0); 
+    unsigned char* data = stbi_load("D:/xx/Pictures/34.png", &width, &height, &nrChannels, 0);
     // 检查图片是否成功加载
-    if (data) {
+    if (data)
+    {
         // 根据图片的通道数，选择合适的纹理格式进行加载
-        if (nrChannels == 3) {
+        if (nrChannels == 3)
+        {
             // 如果是 RGB 格式（3 通道），使用 GL_RGB 格式加载纹理
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        } else if (nrChannels == 4) {
+        }
+        else if (nrChannels == 4)
+        {
             // 如果是 RGBA 格式（4 通道），使用 GL_RGBA 格式加载纹理
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        } else {
+        }
+        else
+        {
             // 如果通道数不是 3 或 4，输出错误信息，提示不支持该通道数
             std::cerr << "Unsupported number of channels: " << nrChannels << std::endl;
         }
         // 生成纹理的多级渐远纹理（Mipmap），提高纹理在不同距离下的显示效果
         glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
+    }
+    else
+    {
         // 如果图片加载失败，输出错误信息
         std::cerr << "Failed to load texture" << std::endl;
     }
@@ -158,7 +171,8 @@ int main() {
     stbi_image_free(data);
 
     // 主循环
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
 
@@ -173,8 +187,8 @@ int main() {
         float bottom = -height / 200.0f;
         float top = height / 200.0f;
         float ortho[16] = {
-            2.0f/(right-left), 0, 0, -(right+left)/(right-left),
-            0, 2.0f/(top-bottom), 0, -(top+bottom)/(top-bottom),
+            2.0f / (right - left), 0, 0, -(right + left) / (right - left),
+            0, 2.0f / (top - bottom), 0, -(top + bottom) / (top - bottom),
             0, 0, -1, 0,
             0, 0, 0, 1
         };
@@ -184,8 +198,8 @@ int main() {
 
         // 固定大小的矩形
         float fixedModel[16] = {
-            200.0f/width, 0, 0, 0,
-            0, 200.0f/height, 0, 0,
+            200.0f / width, 0, 0, 0,
+            0, 200.0f / height, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1
         };

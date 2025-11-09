@@ -6,9 +6,11 @@ class ObjTest
 {
 public:
     ObjTest(int a) : m_nMemberA(a), m_nCount_Edit(0)
-    {}
+    {
+    }
     ~ObjTest()
-    {}
+    {
+    }
 
     // c++类中 引入 const关键字 在成员函数尾部,使函数成为 常成员函数.
     // 在常成员函数内部,不允许修改调用它的对象的内部状态(即不许修改对象的成员变量的值)

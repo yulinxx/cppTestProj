@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <cmath>
 
-MarchView::MarchView(QWidget *parent)
+MarchView::MarchView(QWidget* parent)
     : QOpenGLWidget(parent)
 {
     setMouseTracking(true);
@@ -45,7 +45,7 @@ void MarchView::initializeGL()
         qFatal("Could not initialize OpenGL 4.0 functions");
     }
 
-    const char *vertexShaderSource = R"(
+    const char* vertexShaderSource = R"(
         #version 400
         layout(location = 0) in vec2 position;
         uniform mat4 projection;
@@ -57,7 +57,7 @@ void MarchView::initializeGL()
             gl_Position = projection * vec4(scaledPos, 0.0, 1.0);
         }
     )";
-    const char *fragmentShaderSource = R"(
+    const char* fragmentShaderSource = R"(
         #version 400
         out vec4 fragColor;
         void main()
@@ -78,7 +78,7 @@ void MarchView::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    const char *crossVS = R"(
+    const char* crossVS = R"(
         #version 400
         layout(location = 0) in vec2 position;
         void main()
@@ -86,7 +86,7 @@ void MarchView::initializeGL()
             gl_Position = vec4(position, 0.0, 1.0);
         }
     )";
-    const char *crossFS = R"(
+    const char* crossFS = R"(
         #version 400
         out vec4 fragColor;
         void main()
@@ -103,13 +103,13 @@ void MarchView::initializeGL()
     glBindVertexArray(m_crossVao);
     glBindBuffer(GL_ARRAY_BUFFER, m_crossVbo);
     glBufferData(GL_ARRAY_BUFFER, m_crossPoints.size() * sizeof(Point),
-                 m_crossPoints.data(), GL_STATIC_DRAW);
+        m_crossPoints.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    const char *rulerVS = R"(
+    const char* rulerVS = R"(
         #version 400
         layout(location = 0) in vec2 position;
         void main()
@@ -117,7 +117,7 @@ void MarchView::initializeGL()
             gl_Position = vec4(position, 0.0, 1.0);
         }
     )";
-    const char *rulerFS = R"(
+    const char* rulerFS = R"(
         #version 400
         out vec4 fragColor;
         void main()
@@ -155,8 +155,8 @@ void MarchView::paintGL()
     float orthoSize = 1000.0f;
     QMatrix4x4 projection;
     projection.ortho(-orthoSize * aspect, orthoSize * aspect,
-                     -orthoSize, orthoSize,
-                     -1.0f, 1.0f);
+        -orthoSize, orthoSize,
+        -1.0f, 1.0f);
 
     if (m_linePoints.size() >= 2 && m_lineProgram->bind())
     {
@@ -187,7 +187,7 @@ void MarchView::paintGL()
     }
 }
 
-void MarchView::paintEvent(QPaintEvent *event)
+void MarchView::paintEvent(QPaintEvent* event)
 {
     // 先调用基类的 paintEvent，执行 OpenGL 绘制
     QOpenGLWidget::paintEvent(event);
@@ -200,7 +200,7 @@ void MarchView::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::black);
 
     // 绘制标尺文本
-    for (const auto &line : m_rulerLines)
+    for (const auto& line : m_rulerLines)
     {
         // 将 NDC 坐标转换为屏幕像素坐标
         float screenX = (line.start.x + 1.0f) / 2.0f * width();
@@ -220,7 +220,7 @@ void MarchView::paintEvent(QPaintEvent *event)
     painter.end();
 }
 
-void MarchView::mousePressEvent(QMouseEvent *event)
+void MarchView::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton)
     {
@@ -233,7 +233,6 @@ void MarchView::mousePressEvent(QMouseEvent *event)
         float worldX = (ndcX * orthoSize * aspect - m_translation.x()) / m_scale;
         float worldY = (ndcY * orthoSize - m_translation.y()) / m_scale;
 
-        m_linePoints.push_back({worldX, worldY});
         updateLineBuffer();
         update();
     }
@@ -243,7 +242,7 @@ void MarchView::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void MarchView::wheelEvent(QWheelEvent *event)
+void MarchView::wheelEvent(QWheelEvent* event)
 {
     float delta = event->angleDelta().y() > 0 ? 1.1f : 0.9f;
     QPointF pos = event->position();
@@ -259,7 +258,7 @@ void MarchView::wheelEvent(QWheelEvent *event)
     update();
 }
 
-void MarchView::mouseMoveEvent(QMouseEvent *event)
+void MarchView::mouseMoveEvent(QMouseEvent* event)
 {
     if (event->buttons() & Qt::MiddleButton)
     {
@@ -282,7 +281,7 @@ void MarchView::updateLineBuffer()
     glBindVertexArray(m_lineVao);
     glBindBuffer(GL_ARRAY_BUFFER, m_lineVbo);
     glBufferData(GL_ARRAY_BUFFER, m_linePoints.size() * sizeof(Point),
-                 m_linePoints.data(), GL_STATIC_DRAW);
+        m_linePoints.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Point), nullptr);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -294,10 +293,10 @@ void MarchView::updateCrossBuffer()
     glBindVertexArray(m_crossVao);
     glBindBuffer(GL_ARRAY_BUFFER, m_crossVbo);
     glBufferData(GL_ARRAY_BUFFER, m_crossPoints.size() * sizeof(Point),
-                 m_crossPoints.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Point), nullptr);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+        m_crossPoints.data(), GL_STATIC_DRAW);
+    GLvERTEXaTTRIBpOINTER(0, 2, gl_float, gl_false, SIZEOF(pOINT), NULLPTR);
+    GLeNABLEvERTEXaTTRIBaRRAY(0);
+    GLbINDbUFFER(gl_array_buffer, 0);
     glBindVertexArray(0);
 }
 
@@ -321,8 +320,8 @@ void MarchView::updateRuler()
     auto worldToNDC = [&](float worldX, float worldY) -> Point {
         float ndcX = (worldX - left) / (right - left) * 2.0f - 1.0f;
         float ndcY = (worldY - bottom) / (top - bottom) * 2.0f - 1.0f;
-        return {ndcX, ndcY};
-    };
+        return { ndcX, ndcY };
+        };
 
     float rulerHeight = 0.1f;
     for (float x = floor(left / step) * step; x <= right; x += step)
@@ -332,7 +331,7 @@ void MarchView::updateRuler()
         Point end = start;
         end.y += rulerHeight;
         if (start.x >= -1.0f && start.x <= 1.0f)
-            m_rulerLines.push_back({start, end, x}); // 存储世界坐标值
+            m_rulerLines.push_back({ start, end, x }); // 存储世界坐标值
     }
 
     float rulerWidth = 0.1f;
@@ -343,11 +342,11 @@ void MarchView::updateRuler()
         Point end = start;
         end.x += rulerWidth;
         if (start.y >= -1.0f && start.y <= 1.0f)
-            m_rulerLines.push_back({start, end, y}); // 存储世界坐标值
+            m_rulerLines.push_back({ start, end, y }); // 存储世界坐标值
     }
 
     std::vector<Point> rulerPoints;
-    for (const auto &line : m_rulerLines)
+    for (const auto& line : m_rulerLines)
     {
         rulerPoints.push_back(line.start);
         rulerPoints.push_back(line.end);
@@ -356,7 +355,7 @@ void MarchView::updateRuler()
     glBindVertexArray(m_rulerVao);
     glBindBuffer(GL_ARRAY_BUFFER, m_rulerVbo);
     glBufferData(GL_ARRAY_BUFFER, rulerPoints.size() * sizeof(Point),
-                 rulerPoints.data(), GL_STATIC_DRAW);
+        rulerPoints.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }

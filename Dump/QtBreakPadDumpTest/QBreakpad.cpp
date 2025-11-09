@@ -2,7 +2,8 @@
 #include "QBreakpadPrivate.h"
 
 QBreakpad::QBreakpad() : d_ptr(new QBreakpadPrivate(this))
-{}
+{
+}
 
 QBreakpad::~QBreakpad()
 {

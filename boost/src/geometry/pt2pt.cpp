@@ -17,7 +17,8 @@ namespace bg = boost::geometry;
 struct MyPoint // 自定义的点
 {
     MyPoint(double x, double y, int id) : m_x(x), m_y(y), m_id(id)
-    {}
+    {
+    }
     double m_x;
     double m_y;
     int m_id; // 标识id

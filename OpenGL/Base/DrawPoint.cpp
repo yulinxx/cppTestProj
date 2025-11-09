@@ -23,9 +23,11 @@ const char* fragmentShaderSource = R"(
     }
 )";
 
-int main() {
+int main()
+{
     // 初始化 GLFW
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         std::cout << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -37,7 +39,8 @@ int main() {
 
     // 创建窗口
     GLFWwindow* window = glfwCreateWindow(800, 600, "Draw Point", nullptr, nullptr);
-    if (!window) {
+    if (!window)
+    {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -45,7 +48,8 @@ int main() {
     glfwMakeContextCurrent(window);
 
     // 初始化 GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -85,7 +89,8 @@ int main() {
     glEnableVertexAttribArray(0);
 
     // 渲染循环
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         // 清屏
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);

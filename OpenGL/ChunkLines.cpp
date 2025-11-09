@@ -9,7 +9,6 @@
 #include <memory>
 #include <random>
 
-
 // 线类型枚举
 enum class LineType
 {
@@ -35,13 +34,13 @@ public:
 
     Line(LineType t, glm::vec3 c = glm::vec3(1.0f), bool dashed = false,
         float dash = 5.0f, float gap = 5.0f)
-        :
-        m_lineType(t), m_color(c), m_bDashed(dashed), m_dDashSize(dash), m_dGapSize(gap),
+        :m_lineType(t), m_color(c), m_bDashed(dashed), m_dDashSize(dash), m_dGapSize(gap),
         m_nVboOffset(0), m_nPtsCount(0), m_nChunkIndex(0)
     {
     }
 
     virtual ~Line() = default;
+    
     virtual void addVertex(const glm::vec2& vertex)
     {
         m_vecPts.push_back(vertex);

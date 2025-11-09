@@ -4,7 +4,8 @@
 using namespace ImgSpace;
 
 imgProcess::imgProcess()
-{}
+{
+}
 
 imgProcess::imgProcess(std::string& strPath)
 {
@@ -12,7 +13,8 @@ imgProcess::imgProcess(std::string& strPath)
 }
 
 imgProcess::~imgProcess()
-{}
+{
+}
 
 cv::Mat imgProcess::readImg(std::string& strPath, int nType /*=1*/)
 {

@@ -60,7 +60,7 @@ uniform sampler2D text;
 uniform vec3 textColor;
 
 void main()
-{    
+{
     vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
     color = vec4(textColor, 1.0) * sampled;
 }
@@ -134,7 +134,7 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
     int nMaxDim = (1 + fontSize) * static_cast<int>(std::ceil(std::sqrt(nNumGlyphs)));
 
     nAtlasWidth = 1;
-    while (nAtlasWidth < nMaxDim) 
+    while (nAtlasWidth < nMaxDim)
         nAtlasWidth <<= 1;
 
     nAtlasHeight = nAtlasWidth;
@@ -184,7 +184,7 @@ void LoadFont(const std::string& fontPath, int fontSize, const std::string& text
     for (const auto& rect : rects)
     {
         unsigned long c = static_cast<unsigned long>(rect.id);
-        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) 
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
             continue;
 
         FT_Bitmap* bmp = &face->glyph->bitmap;

@@ -52,7 +52,8 @@ namespace
         cd_detected(std::string name, DiskTypeEnum diskType)
             : name(name),
             disc_type(diskType)
-        {}
+        {
+        }
 
         std::string name;
         DiskTypeEnum disc_type;

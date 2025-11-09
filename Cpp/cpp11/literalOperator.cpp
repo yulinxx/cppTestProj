@@ -16,7 +16,8 @@ using namespace std;
 struct Distance
 {
     explicit Distance(double val) :meters(val)
-    {}
+    {
+    }
     long double meters{ 0 };
 };
 
@@ -47,7 +48,8 @@ Distance operator""m(unsigned long long val)
 struct Time
 {
     explicit Time(double val) :seconds(val)
-    {}
+    {
+    }
     long double seconds{ 0 };
 };
 
@@ -73,7 +75,8 @@ Time operator""hour(unsigned long long val)
 struct Speed
 {
     explicit Speed(double val) :speed(val)
-    {}
+    {
+    }
     long double speed;
 };
 Speed operator /(Distance d, Time t)

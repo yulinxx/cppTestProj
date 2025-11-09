@@ -21,7 +21,8 @@ class student
 {
 public:
     student(int id, string name, int score, string remark) :id(id), name(name), score(score), remark(remark)
-    {}
+    {
+    }
 
     void print() const
     {

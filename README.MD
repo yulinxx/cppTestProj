@@ -1,5 +1,12 @@
 # C++ 测试项目
 
+### vcpkg 要安装的库
+
+install glm:x84-windows log4cplus:x84-windows glog:x84-windows
+freetype-gl glad  glfw3 libwebp  stb:x64-windows stb  triangle utfcpp soil2 tinyxml  glog glfw3 glew  nlohmann-json sqlite3 libspatialindex octomap cgal opencascade osg vtk
+freetype:x86-windows curl:x86-windows  protobuf:x86-windows freeimage:x86-windows  civetweb:x86-windows gtest:x86-windows  minizip:x86-windows  jasper:x86-windows eigen3:x86-windows fontconfig:x86-windows breakpad:x86-windows  opencv:x86-windows
+ffmpeg   freetype curl  protobuf  civetweb gtest  minizip  jasper eigen3 fontconfig breakpad  opencv
+
 ## 项目概述
 本项目包含基础的C++测试代码，用于学习和验证各种C++库的使用.
 
@@ -80,6 +87,15 @@ vcpkg install boost eigen3 stb opencv vtk osg pybind11 glm glfw glad breakpad pr
   - Proj
   - GDAL
 
+  - CDT
+  “Constrained Delaunay Triangulation library”——一套专门做二维约束 Delaunay 三角剖分与平面网格生成的 C++ 模板库。
+它体积很小、无第三方依赖，只要 C++11 即可编译
+
+  - libspatialindex
+  空间索引库实现：R*-Tree、MVR-Tree、TPR-Tree（支持时序）
+  特点：纯 C++，磁盘/内存双模式；被 GDAL、MongoDB 用作底层。
+
+  
 ## 贝塞尔曲线处理库推荐
 
 1. [GameFusion/Bezier](https://github.com/GameFusion/Bezier)

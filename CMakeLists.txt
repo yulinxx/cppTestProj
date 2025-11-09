@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 # 使用vcpkg进行包管理
 if(WIN32)
     set(VCPKG_PATH D:/Install/vcpkg/scripts/buildsystems/vcpkg.cmake)
-elseif(UNIX AND NOT APPLE)
+    elseif(UNIX AND NOT APPLE)
     set(VCPKG_PATH /home/x/install/vcpkg/scripts/buildsystems/vcpkg.cmake)
 elseif(APPLE)
     set(VCPKG_PATH /home/x/install/vcpkg/scripts/buildsystems/vcpkg.cmake)
@@ -14,6 +14,7 @@ set(CMAKE_TOOLCHAIN_FILE ${VCPKG_PATH})
 # set(VCPKG_TARGET_TRIPLET x64-windows-static)
 
 project(cppTest VERSION 0.1.0)
+
 set(CMAKE_CXX_STANDARD 17)
 
 # 根据不同操作系统设置Qt的CMake前缀路径

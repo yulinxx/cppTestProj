@@ -17,11 +17,14 @@ private:
 
 public:
     SafeQueue()
-    {}
+    {
+    }
     SafeQueue(SafeQueue&& other)
-    {}
+    {
+    }
     ~SafeQueue()
-    {}
+    {
+    }
 
     bool empty() // 返回队列是否为空
     {
@@ -67,7 +70,8 @@ private:
     public:
         // 构造函数
         ThreadWorker(ThreadPool* pool, const int id) : m_pool(pool), m_id(id)
-        {}
+        {
+        }
 
         // 重载()操作
         void operator()()
@@ -105,7 +109,8 @@ public:
     // 线程池构造函数
     ThreadPool(const int n_threads = 4)
         : m_threads(std::vector<std::thread>(n_threads)), m_shutdown(false)
-    {}
+    {
+    }
     ThreadPool(const ThreadPool&) = delete;
     ThreadPool(ThreadPool&&) = delete;
 

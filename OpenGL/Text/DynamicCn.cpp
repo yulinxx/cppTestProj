@@ -1,5 +1,5 @@
 // g++ main.cpp -std=c++17 -lfreetype -lglfw -lGL -ldl
-// MSVC：vcpkg 已装 freetype glfw3 glad glm，直接 F5
+// MSVC：vcpkg 装 freetype glfw3 glad glm
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -73,6 +73,7 @@ struct CharInfo
     GLuint advance;
     glm::ivec2 offset;
 };
+
 std::unordered_map<unsigned int, CharInfo> gGlyphs;
 GLuint gAtlas;
 int gW = 0, gH = 0;
@@ -116,13 +117,11 @@ void initTextSystem(const std::string& fontPath, int fontH)
 {
     gFontH = fontH;
     if (FT_Init_FreeType(&gFt))
-    {
         throw std::runtime_error("Could not init FreeType Library");
-    }
+
     if (FT_New_Face(gFt, fontPath.c_str(), 0, &gFace))
-    {
         throw std::runtime_error("Failed to load font");
-    }
+
     FT_Set_Pixel_Sizes(gFace, 0, gFontH);
 
     // 创建初始的空纹理图集
@@ -139,12 +138,12 @@ void initTextSystem(const std::string& fontPath, int fontH)
 // 动态载入单个字符并打包到纹理图集
 void loadAndPackGlyph(unsigned int cp)
 {
-    if (gGlyphs.count(cp) > 0) return; // 如果字符已经存在，则直接返回
+    if (gGlyphs.count(cp) > 0)
+        return; // 如果字符已经存在，则直接返回
 
     if (FT_Load_Char(gFace, cp, FT_LOAD_RENDER))
-    {
         return; // 加载失败则跳过
-    }
+
     FT_Bitmap& bmp = gFace->glyph->bitmap;
 
     // 检查当前行是否还有空间，或者是否需要扩大纹理
@@ -153,6 +152,7 @@ void loadAndPackGlyph(unsigned int cp)
         gPenX = 0;
         gPenY += gRowH + 1;
         gRowH = 0;
+
         if (gPenY + gFontH >= gH)
         {
             // 纹理图集空间不足，扩大一倍
@@ -163,6 +163,7 @@ void loadAndPackGlyph(unsigned int cp)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, gW, gH, 0, GL_RED, GL_UNSIGNED_BYTE, newAtlas.data());
         }
     }
+
     gRowH = std::max(gRowH, static_cast<int>(bmp.rows));
 
     // 将字形数据拷贝到纹理图集
@@ -176,6 +177,7 @@ void loadAndPackGlyph(unsigned int cp)
                     { gFace->glyph->bitmap_left, gFace->glyph->bitmap_top },
                     static_cast<GLuint>(gFace->glyph->advance.x >> 6),
                     { gPenX, gPenY } };
+
     gPenX += bmp.width + 1;
 }
 
@@ -219,6 +221,7 @@ Batch makeBatch(const std::string& text, float scale)
             xpos + w, ypos,    u1, v1,
             xpos + w, ypos + h, u1, v0
         };
+
         verts.insert(verts.end(), std::begin(quad), std::end(quad));
         x += ch.advance * scale;
     }

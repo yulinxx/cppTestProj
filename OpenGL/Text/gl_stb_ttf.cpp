@@ -17,7 +17,7 @@ struct Character
     GLuint advance;     // 字符间距
 };
 
-std::map<wchar_t, Character> Characters;
+std::map<wchar_t, Character> mapCharacters;
 GLuint VAO, VBO, shaderProgram;
 
 const char* vertexShaderSource = R"glsl(
@@ -151,7 +151,7 @@ void loadFont(const char* fontPath)
             glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
             static_cast<GLuint>(face->glyph->advance.x)
         };
-        Characters[c] = character;
+        mapCharacters[c] = character;
     }
 
     FT_Done_Face(face);
@@ -170,9 +170,9 @@ void renderText(GLuint shader, std::wstring text, GLfloat x, GLfloat y, GLfloat 
 
     for (std::wstring::const_iterator c = text.begin(); c != text.end(); ++c)
     {
-        if (Characters.find(*c) == Characters.end()) continue; // 跳过未加载的字符
+        if (mapCharacters.find(*c) == mapCharacters.end()) continue; // 跳过未加载的字符
 
-        Character ch = Characters[*c];
+        Character ch = mapCharacters[*c];
         GLfloat xpos = x + ch.bearing.x * scale;
         GLfloat ypos = y - (ch.size.y - ch.bearing.y) * scale;
         GLfloat w = ch.size.x * scale;

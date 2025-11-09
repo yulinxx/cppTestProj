@@ -76,16 +76,16 @@ public:
         imgData.width = image.getWidth();
         imgData.height = image.getHeight();
         imgData.channels = image.getChannels();
-        images.push_back(imgData);
+        vecImgDatas.push_back(imgData);
     }
 
     const std::vector<ImageData>& getImageDatas() const
     {
-        return images;
+        return vecImgDatas;
     }
 
 private:
-    std::vector<ImageData> images;
+    std::vector<ImageData> vecImgDatas;
 };
 
 //////////////////////////////////////////////////
@@ -148,6 +148,7 @@ public:
             -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
             -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
         };
+
         unsigned int indices[] = {
             0, 1, 3,
             1, 2, 3
@@ -180,15 +181,14 @@ public:
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
         glDeleteProgram(shaderProgram);
-        for (unsigned int texture : textures)
-        {
+
+        for (unsigned int texture : vecTextures)
             glDeleteTextures(1, &texture);
-        }
     }
 
     void loadImages(const ImageDatas& imageDatas)
     {
-        textures.clear();
+        vecTextures.clear();
         for (const auto& imgData : imageDatas.getImageDatas())
         {
             unsigned int texture;
@@ -204,7 +204,7 @@ public:
             glTexImage2D(GL_TEXTURE_2D, 0, format, imgData.width, imgData.height, 0, format, GL_UNSIGNED_BYTE, imgData.data);
             glGenerateMipmap(GL_TEXTURE_2D);
 
-            textures.push_back(texture);
+            vecTextures.push_back(texture);
         }
     }
 
@@ -213,7 +213,7 @@ public:
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
 
-        for (unsigned int texture : textures)
+        for (unsigned int texture : vecTextures)
         {
             glBindTexture(GL_TEXTURE_2D, texture);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -225,9 +225,8 @@ public:
 private:
     unsigned int VBO, VAO, EBO;
     unsigned int shaderProgram;
-    std::vector<unsigned int> textures;
+    std::vector<unsigned int> vecTextures;
 };
-
 
 //////////////////////////////////////////////////
 // Main function
@@ -268,8 +267,8 @@ int main()
     try
     {
         // Load images
-        Image image1("D:/rbt.png");
-        Image image2("D:/ss.png");
+        Image image1("D:/xx/Pictures/34.png");
+        Image image2("D:/xx/Pictures/40w.jpg");
 
         ImageDatas imageDatas;
         imageDatas.addImage(image2);

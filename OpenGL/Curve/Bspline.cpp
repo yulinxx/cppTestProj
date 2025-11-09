@@ -7,7 +7,6 @@
 运行此程序前，请确保已经正确安装并配置了 GLFW 和 GLAD 库。
 */
 
-
 // 引入 GLAD 库，用于加载 OpenGL 函数
 #include <glad/glad.h>
 // 引入 GLFW 库，用于创建窗口和处理输入事件
@@ -86,7 +85,7 @@ std::vector<VecPt> computeBSplinePoints(const Bspline& spline, int numPoints)
 {
     std::vector<VecPt> curvePoints;
     // 控制点数量 - 1
-    int n = spline.controlPts.size() - 1; 
+    int n = spline.controlPts.size() - 1;
     // B 样条曲线的阶数
     int k = spline.degree;
 
@@ -350,7 +349,7 @@ int main()
 
     // 主渲染循环
     // 设置背景色
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f); 
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     while (!glfwWindowShouldClose(window))
     {
         // 清除颜色缓冲区
@@ -363,7 +362,7 @@ int main()
 
         // 绘制曲线（红色）
         // 设置颜色为红色
-        glUniform3f(colorLoc, 1.0f, 0.0f, 0.0f); 
+        glUniform3f(colorLoc, 1.0f, 0.0f, 0.0f);
         // 绑定曲线的顶点数组对象
         glBindVertexArray(curveVAO);
         // 绘制曲线
@@ -373,7 +372,7 @@ int main()
 
         // 绘制控制多边形（绿色）
         // 设置颜色为绿色
-        glUniform3f(colorLoc, 0.0f, 1.0f, 0.0f); 
+        glUniform3f(colorLoc, 0.0f, 1.0f, 0.0f);
         // 绑定控制多边形的顶点数组对象
         glBindVertexArray(polylineVAO);
         // 绘制控制多边形
@@ -383,11 +382,11 @@ int main()
 
         // 绘制控制点（黄色）
         // 设置颜色为黄色
-        glUniform3f(colorLoc, 1.0f, 1.0f, 0.0f); 
+        glUniform3f(colorLoc, 1.0f, 1.0f, 0.0f);
         // 绑定控制点的顶点数组对象
         glBindVertexArray(controlVAO);
         // 设置点的大小
-        glPointSize(5.0f); 
+        glPointSize(5.0f);
         // 绘制控制点
         glDrawArrays(GL_POINTS, 0, spline.controlPts.size());
         // 解绑顶点数组对象

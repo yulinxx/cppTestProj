@@ -28,7 +28,8 @@ const char* fragmentShaderSource = R"(
 )";
 
 // 创建着色器程序
-unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
+unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource)
+{
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -72,7 +73,8 @@ std::vector<std::vector<float>> digitVertices = {
     {-0.5, 0.0, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.0, -0.5, 0.0, 0.0, 0.5, 0.0}
 };
 
-void drawDigit(int digit, float x, float y, float scale, unsigned int shaderProgram) {
+void drawDigit(int digit, float x, float y, float scale, unsigned int shaderProgram)
+{
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -96,7 +98,8 @@ void drawDigit(int digit, float x, float y, float scale, unsigned int shaderProg
     glDeleteBuffers(1, &VBO);
 }
 
-int main() {
+int main()
+{
     glfwInit();
     GLFWwindow* window = glfwCreateWindow(800, 600, "GLSL Ruler", NULL, NULL);
     glfwMakeContextCurrent(window);
@@ -106,11 +109,13 @@ int main() {
     unsigned int shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
     glUseProgram(shaderProgram);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // 绘制标尺
-        for (float i = 0; i <= 10; i++) {
+        for (float i = 0; i <= 10; i++)
+        {
             // 绘制刻度
             glBegin(GL_LINES);
             glVertex2f(i, 0);
