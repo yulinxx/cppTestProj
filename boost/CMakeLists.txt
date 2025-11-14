@@ -47,7 +47,7 @@ if(Boost_FOUND)
     
     include_directories(${Boost_INCLUDE_DIRS})
     link_directories(${Boost_LIBRARY_DIRS})
-elseif(Boost_FOUND)
+else()
     MESSAGE(FATAL_ERROR "------Boost Not Found")
 endif(Boost_FOUND)
 

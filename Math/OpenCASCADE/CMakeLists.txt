@@ -3,13 +3,17 @@
 # note: 45 additional targets are not displayed.
 # target_link_libraries(main PRIVATE TKBO TKBin TKCAF TKCDF)
 
-# find_package(VTK REQUIRED)
+# # 对于VTK，避免一些内部警告，使用组件化方法
+find_package(VTK REQUIRED COMPONENTS CommonCore RenderingCore)
 # include("${VTK_USE_FILE}")
 # target_link_libraries(main PRIVATE ${VTK_LIBRARIES})
 
 ######################################################
 
 MESSAGE(" --------- OpenCASCADE TestProj----- \n")
+
+# 解决CMP0167政策警告 - FindBoost模块已移除的问题
+cmake_policy(SET CMP0167 NEW)
 
 set(CPP_DIR
     ./
@@ -25,7 +29,7 @@ if(OpenCASCADE_FOUND)
     include_directories(${OpenCASCADE_INCLUDE_DIRS})
     link_directories(${OpenCASCADE_LIBRARY_DIRS})
 
-elseif(OpenCASCADE_FOUND)
+else()
     MESSAGE(FATAL_ERROR "------OpenCASCADE Not Found")
 endif(OpenCASCADE_FOUND)
 
@@ -41,7 +45,7 @@ if(VTK_FOUND)
     include_directories(${VTK_INCLUDE_DIRS})
     link_directories(${VTK_LIBRARY_DIRS})
 
-elseif(VTK_FOUND)
+else()
     MESSAGE(FATAL_ERROR "------VTK Not Found")
 endif(VTK_FOUND)
 
@@ -71,7 +75,7 @@ endif(freetype_FOUND)
 find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 if(Qt5_FOUND)
 
-elseif()
+else()
     MESSAGE(FATAL_ERROR "------Qt5 Not Found")
 endif()
 
@@ -85,7 +89,7 @@ foreach(SUB_DIR ${CPP_DIR})
         add_executable(OpenCASCADE_${FILE_NAME} ${CPP})
 
         # target_link_libraries(OpenCASCADE_${FILE_NAME} PRIVATE OpenCASCADE::OpenCASCADE)
-        target_link_libraries(OpenCASCADE_${FILE_NAME} PRIVATE TKBO TKBin TKCAF TKCDF ${OpenCASCADE_LIBRARIES} ${FREETYPE_LIBRARIES} ${VTK_LIBRARIES})
+        target_link_libraries(OpenCASCADE_${FILE_NAME} PRIVATE TKBO TKBin TKCAF TKCDF ${OpenCASCADE_LIBRARIES} ${FREETYPE_LIBRARIES})
         # target_link_libraries(main PRIVATE ${VTK_LIBRARIES})
     endforeach(CPP)
 

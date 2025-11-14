@@ -7,7 +7,7 @@ if(glog_FOUND)
     # target_link_libraries(${APP_NAME} PRIVATE glog::glog)
     # target_link_libraries(${APP_NAME} PRIVATE ${glog_LIBRARIES})
     target_link_libraries(${APP_NAME}  glog::glog)
-elseif()
+else()
     MESSAGE(FATAL_ERROR "------glog Not Found")
 endif()
 

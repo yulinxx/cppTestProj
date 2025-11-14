@@ -7,8 +7,8 @@ set(CPP_DIR
 )
 
 
-# 查找 VTK 包
-find_package(VTK REQUIRED)
+# 查找 VTK 包，指定所需组件以减少不必要的依赖加载
+find_package(VTK REQUIRED COMPONENTS CommonCore RenderingCore)
 if (NOT VTK_FOUND)
     message(FATAL_ERROR "VTK not found!")
 endif()
@@ -21,8 +21,7 @@ message(STATUS "VTK Library Dirs: ${VTK_LIBRARY_DIRS}")
 # 包含 VTK 头文件
 include_directories(${VTK_INCLUDE_DIRS})
 
-# 如果使用 VTK 的 CMake 模块
-include(${VTK_USE_FILE})
+# 现代VTK版本推荐直接通过target_link_libraries链接所需组件
 
 #################### EXE ##################################
 

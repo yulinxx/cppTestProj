@@ -1,22 +1,7 @@
-MESSAGE(" ---------  OpenCV ----- \n")
-
-find_package(OpenCV REQUIRED)
-
-if(OpenCV_FOUND)
-    MESSAGE( "------Opencv Found")
-    MESSAGE( "${OpenCV_INCLUDE_DIRS}")
-    MESSAGE( "${OpenCV_LIBRARY_DIRS}")
-    MESSAGE( "${OpenCV_LIBS}")
-    
-    include_directories(${OpenCV_INCLUDE_DIRS})
-    link_directories(${OpenCV_LIBRARY_DIRS})
-else()
-    MESSAGE(FATAL_ERROR "------Opencv Not Found")
-endif()
-
+MESSAGE(" --------- TemplateProj----- \n")
 
 # 查找当前文件夹下的子目录
-SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR}) 
+SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
 # 设置要排除的子目录
 SET(ExclusionList

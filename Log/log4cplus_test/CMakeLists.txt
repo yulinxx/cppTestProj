@@ -3,7 +3,7 @@ MESSAGE(" --------- log4cplus_test ----- \n")
 find_package(log4cplus CONFIG REQUIRED)
 if(log4cplus_FOUND)
 
-elseif()
+else()
     MESSAGE(FATAL_ERROR "------log4cplus Not Found")
 endif()
 

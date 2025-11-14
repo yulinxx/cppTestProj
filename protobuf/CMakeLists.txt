@@ -5,9 +5,9 @@ MESSAGE(" --------- protobuf ----- \n")
 find_package(Protobuf REQUIRED)
 if(Protobuf_FOUND)
 
-elseif()
+else()
     MESSAGE(FATAL_ERROR "------Protobuf Not Found")
-endif()
+endif(Protobuf_FOUND)
 
 add_definitions(-DPROTOBUF_USE_DLLS)
 

@@ -20,7 +20,7 @@ if(CGAL_FOUND)
     include_directories(${CGAL_INCLUDE_DIRS})
     link_directories(${CGAL_LIBRARY_DIRS})
 
-elseif(CGAL_FOUND)
+else()
 
     MESSAGE(FATAL_ERROR "------CGAL Not Found")
 

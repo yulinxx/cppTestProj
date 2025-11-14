@@ -18,7 +18,7 @@ find_package(Qt5 COMPONENTS  Core Gui Widgets REQUIRED)
 
 if(Qt5_FOUND)
 
-elseif()
+else()
     MESSAGE(FATAL_ERROR "------Qt5 Not Found")
 endif()
 
@@ -37,20 +37,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # find_package(skia CONFIG REQUIRED)
 find_package(unofficial-skia CONFIG REQUIRED)
 
-if(skia_FOUND)
-    MESSAGE( "--------------skia_FOUND Found")
-    MESSAGE( " ---skia_FOUND Include: ${skia_INCLUDE_DIRS}")
-    MESSAGE( " ---skia_FOUND Library: ${skia_LIBRARY_DIRS}")
+if(unofficial-skia_FOUND)
+    MESSAGE( "--------------unofficial-skia_FOUND Found")
+    MESSAGE( " ---unofficial-skia_FOUND Include: ${unofficial-skia_INCLUDE_DIRS}")
+    MESSAGE( " ---unofficial-skia_FOUND Library: ${unofficial-skia_LIBRARY_DIRS}")
 
-    foreach(lib ${skia_LIBS})
-       MESSAGE(" ${lib}")
-    endforeach(lib )
-    
-    include_directories(${skia_INCLUDE_DIRS})
-    link_directories(${skia_LIBRARY_DIRS})
-elseif(skia_FOUND)
-    MESSAGE(FATAL_ERROR "------skia Not Found")
-endif(skia_FOUND)
+    include_directories(${unofficial-skia_INCLUDE_DIRS})
+    link_directories(${unofficial-skia_LIBRARY_DIRS})
+else()
+    MESSAGE(FATAL_ERROR "------unofficial-skia Not Found")
+endif(unofficial-skia_FOUND)
 
 ######################################################
 
