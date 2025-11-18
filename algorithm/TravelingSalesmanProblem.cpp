@@ -122,16 +122,14 @@ void createNew()
     {
         r1 = ((double)rand()) / (RAND_MAX + 1.0);
         pos1 = (int)(N * r1);
-    }
-    while (pos1 == 0);
+    } while (pos1 == 0);
 
     // Ensure pos2 is not equal to 1 or equal to pos1
     do
     {
         r2 = ((double)rand()) / (RAND_MAX + 1.0);
         pos2 = (int)(N * r2);
-    }
-    while (pos2 == 0 || pos2 == pos1);
+    } while (pos2 == 0 || pos2 == pos1);
 
     int temp = cityList[pos1];
     cityList[pos1] = cityList[pos2];

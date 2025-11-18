@@ -42,7 +42,6 @@ namespace Ut
         pImpl->data[1] = y;
     }
 
-
     template<size_t N, typename T>
     template<typename>
     Vec<N, T>::Vec(T x, T y, T z) : pImpl(new Impl())
@@ -205,30 +204,26 @@ namespace Ut
     template UTILITY_API Vec<3, float> Vec<3, float>::cross<3, void>(const Vec<3, float>&) const;
     template UTILITY_API Vec<3, double> Vec<3, double>::cross<3, void>(const Vec<3, double>&) const;
 
+    template<size_t N, typename T>
+    template<typename>
+    Vec<N, T> Vec<N, T>::rotate(float angle) const
+    {
+        static_assert(N == 2, "rotate method is only available for 2D vectors.");
 
+        // 将角度转换为弧度
+        float rad = angle * (PI / 180.0f);
+        float cosAngle = std::cos(rad);
+        float sinAngle = std::sin(rad);
 
-template<size_t N, typename T>
-template<typename>
-Vec<N, T> Vec<N, T>::rotate(float angle) const
-{
-    static_assert(N == 2, "rotate method is only available for 2D vectors.");
+        // 获取当前向量的 x 和 y 分量
+        T x = (*this)[0];
+        T y = (*this)[1];
 
-    // 将角度转换为弧度
-    float rad = angle * (PI / 180.0f);
-    float cosAngle = std::cos(rad);
-    float sinAngle = std::sin(rad);
+        // 应用旋转公式
+        T newX = x * cosAngle - y * sinAngle;
+        T newY = x * sinAngle + y * cosAngle;
 
-    // 获取当前向量的 x 和 y 分量
-    T x = (*this)[0];
-    T y = (*this)[1];
-
-    // 应用旋转公式
-    T newX = x * cosAngle - y * sinAngle;
-    T newY = x * sinAngle + y * cosAngle;
-
-    // 创建并返回旋转后的向量
-    return Vec<N, T>(newX, newY);
-}
-
-
+        // 创建并返回旋转后的向量
+        return Vec<N, T>(newX, newY);
+    }
 } // namespace Ut

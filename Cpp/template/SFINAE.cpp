@@ -29,7 +29,8 @@ namespace SpaceA
         // 这个函数没有具体的实现,只是用于类型检查.
         template <typename U>
         static void check(decltype(&U::id))
-        {}
+        {
+        }
 
         // 仅当触发SFINAE时,编译器才会“被迫”选择这个版本
         // 定义了另一个静态成员函数 check,接受任意参数类型,并返回整数值 0.
@@ -109,7 +110,8 @@ namespace SpaceB
 
         template <typename U>
         static void check_class(int U::*)
-        {}
+        {
+        }
 
         // 定义了另一个静态成员函数 check_class,接受任意参数类型,并返回整数值 0.
         // 这个函数是一个通用版本,用于处理无法匹配 int U::* 类型的情况.

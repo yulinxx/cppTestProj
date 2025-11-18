@@ -39,8 +39,7 @@ void fun(int a, ...)
     {
         printf("第 %d 个参数 =%d\n", n++, a);
         a = va_arg(pp, int);
-    }
-    while (a != 0);
+    } while (a != 0);
     va_end(pp);
 }
 

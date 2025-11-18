@@ -62,7 +62,8 @@ class Array
 {
 public:
     Array()
-    {}
+    {
+    }
     T& at(int n)
     {
         return data_[n];
