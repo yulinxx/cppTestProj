@@ -1,5 +1,5 @@
 # OpenGL/Base目录配置
-MESSAGE(" --------- OpenGL  Base ----- \n")
+MESSAGE(" --------- OpenGL  DynamicLines ----- \n")
 set(CPP_DIR ./)
 
 foreach(sub_dir ${CPP_DIR})
