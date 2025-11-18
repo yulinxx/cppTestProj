@@ -9,21 +9,19 @@ set(CPP_DIR
 find_package(CGAL CONFIG REQUIRED) 
 
 if(CGAL_FOUND)
-    MESSAGE( "--------------CGAL_FOUND Found")
-    MESSAGE( " ---CGAL_FOUND Include: ${CGAL_INCLUDE_DIRS}")
-    MESSAGE( " ---CGAL_FOUND Library: ${CGAL_LIBRARY_DIRS}")
+    # MESSAGE( "--------------CGAL_FOUND Found")
+    # MESSAGE( " ---CGAL_FOUND Include: ${CGAL_INCLUDE_DIRS}")
+    # MESSAGE( " ---CGAL_FOUND Library: ${CGAL_LIBRARY_DIRS}")
 
-    foreach(lib ${CGAL_LIBS})
-       MESSAGE(" ${lib}")
-    endforeach(lib )
+    # foreach(lib ${CGAL_LIBS})
+    #    MESSAGE(" ${lib}")
+    # endforeach(lib )
     
     include_directories(${CGAL_INCLUDE_DIRS})
     link_directories(${CGAL_LIBRARY_DIRS})
 
 else()
-
     MESSAGE(FATAL_ERROR "------CGAL Not Found")
-
 endif(CGAL_FOUND)
 
 foreach(SUB_DIR ${CPP_DIR})

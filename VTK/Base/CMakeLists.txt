@@ -17,9 +17,9 @@ if (NOT VTK_FOUND)
 endif()
 
 # 输出 VTK 信息以供调试
-message(STATUS "VTK Version: ${VTK_VERSION}")
-message(STATUS "VTK Include Dirs: ${VTK_INCLUDE_DIRS}")
-message(STATUS "VTK Library Dirs: ${VTK_LIBRARY_DIRS}")
+# message(STATUS "VTK Version: ${VTK_VERSION}")
+# message(STATUS "VTK Include Dirs: ${VTK_INCLUDE_DIRS}")
+# message(STATUS "VTK Library Dirs: ${VTK_LIBRARY_DIRS}")
 
 # 包含 VTK 头文件
 include_directories(${VTK_INCLUDE_DIRS})

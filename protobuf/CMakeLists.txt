@@ -27,7 +27,7 @@ foreach(sub_dir ${CPP_DIR})
     foreach(cpp_file ${src_files})
         string(REGEX REPLACE ".+/(.+)\\..*" "\\1" file_name ${cpp_file})
         set(exe_name protobuf_${file_name})
-        message(STATUS "Building Protobuf executable: ${exe_name}")
+        # message(STATUS "Building Protobuf executable: ${exe_name}")
         
         add_executable(${exe_name} ${cpp_file} ${PROTO_SRCS})
         target_include_directories(${exe_name} PRIVATE ./)

@@ -11,7 +11,7 @@ if(NOT Boost_FOUND)
     message(FATAL_ERROR "Boost not found")
 endif()
 
-message(STATUS "Boost found. Include dirs: ${Boost_INCLUDE_DIRS}")
+# message(STATUS "Boost found. Include dirs: ${Boost_INCLUDE_DIRS}")
 
 # 设置包含目录
 include_directories(${Boost_INCLUDE_DIRS})
@@ -34,7 +34,7 @@ foreach(sub_dir ${CPP_DIR})
     foreach(cpp_file ${src_files})
         string(REGEX REPLACE ".+/(.+)\\..*" "\\1" file_name ${cpp_file})
         set(exe_name BOOST_${file_name})
-        message(STATUS "Building Boost executable: ${exe_name}")
+        # message(STATUS "Building Boost executable: ${exe_name}")
         
         add_executable(${exe_name} ${cpp_file})
     endforeach()

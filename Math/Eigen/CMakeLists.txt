@@ -10,13 +10,13 @@ find_package(Eigen3 CONFIG REQUIRED)
 
 
 if(Eigen3_FOUND)
-    MESSAGE( "--------------Eigen3_FOUND Found")
-    MESSAGE( " ---Eigen3_FOUND Include: ${Eigen3_INCLUDE_DIRS}")
-    MESSAGE( " ---Eigen3_FOUND Library: ${Eigen3_LIBRARY_DIRS}")
+    # MESSAGE( "--------------Eigen3_FOUND Found")
+    # MESSAGE( " ---Eigen3_FOUND Include: ${Eigen3_INCLUDE_DIRS}")
+    # MESSAGE( " ---Eigen3_FOUND Library: ${Eigen3_LIBRARY_DIRS}")
 
-    foreach(lib ${Eigen3_LIBS})
-       MESSAGE(" ${lib}")
-    endforeach(lib )
+    # foreach(lib ${Eigen3_LIBS})
+    #    MESSAGE(" ${lib}")
+    # endforeach(lib )
     
     include_directories(${Eigen3_INCLUDE_DIRS})
     link_directories(${Eigen3_LIBRARY_DIRS})

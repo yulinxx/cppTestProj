@@ -23,8 +23,8 @@ find_package(OpenCASCADE CONFIG REQUIRED)
 
 if(OpenCASCADE_FOUND)
     # MESSAGE( "--------------OpenCASCADE_FOUND Found")
-    MESSAGE( " ---OpenCASCADE_FOUND Include: ${OpenCASCADE_INCLUDE_DIRS}")
-    MESSAGE( " ---OpenCASCADE_FOUND Library: ${OpenCASCADE_LIBRARY_DIRS}")
+    # MESSAGE( " ---OpenCASCADE_FOUND Include: ${OpenCASCADE_INCLUDE_DIRS}")
+    # MESSAGE( " ---OpenCASCADE_FOUND Library: ${OpenCASCADE_LIBRARY_DIRS}")
 
     include_directories(${OpenCASCADE_INCLUDE_DIRS})
     link_directories(${OpenCASCADE_LIBRARY_DIRS})
@@ -37,8 +37,8 @@ endif(OpenCASCADE_FOUND)
 find_package(VTK REQUIRED)
 if(VTK_FOUND)
     # MESSAGE( "--------------VTK_FOUND Found")
-    MESSAGE( " ---VTK_FOUND Include: ${VTK_INCLUDE_DIRS}")
-    MESSAGE( " ---VTK_FOUND Library: ${VTK_LIBRARY_DIRS}")
+    # MESSAGE( " ---VTK_FOUND Include: ${VTK_INCLUDE_DIRS}")
+    # MESSAGE( " ---VTK_FOUND Library: ${VTK_LIBRARY_DIRS}")
 
     # include("${VTK_USE_FILE}")
 

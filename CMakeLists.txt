@@ -45,7 +45,7 @@ set(EXCLUDE_DIRS ".vs" ".vscode" ".git" "out" "build")
 # 查找并添加子目录
 subdirlist(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 foreach(subdir ${SUBDIRS})
-    message(STATUS "Adding subdirectory: ${subdir}")
+    # message(STATUS "Adding subdirectory: ${subdir}")
     add_subdirectory(${subdir})
 endforeach()
 

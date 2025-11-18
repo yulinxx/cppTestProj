@@ -46,7 +46,7 @@ set(PROJECT_SOURCES
 
 # 创建可执行文件
 set(APP_NAME SkiaTestProj)
-message(STATUS "Building Skia executable: ${APP_NAME}")
+# message(STATUS "Building Skia executable: ${APP_NAME}")
 
 add_executable(${APP_NAME} ${PROJECT_SOURCES})
 

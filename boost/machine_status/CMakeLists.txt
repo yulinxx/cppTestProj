@@ -1,6 +1,6 @@
 MESSAGE(" --------- machine_status ----- \n")
 aux_source_directory(./ SM_SRC)
-MESSAGE(${PROJECT_BINARY_DIR})
+# MESSAGE(${PROJECT_BINARY_DIR})
 
 add_executable(StateMachine ${SM_SRC})
 
