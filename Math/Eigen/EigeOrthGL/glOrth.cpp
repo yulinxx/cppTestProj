@@ -418,7 +418,7 @@ int main()
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Bezier Curve with Orthogonal Projection", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Bezier Curve with Orthogonal Projection", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;

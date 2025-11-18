@@ -81,7 +81,7 @@ int main()
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    GLFWwindow* w = glfwCreateWindow(800, 600, "Instanced 1M", nullptr, nullptr);
+    GLFWwindow* w = glfwCreateWindow(1280, 720, "Instanced 1M", nullptr, nullptr);
     glfwMakeContextCurrent(w);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSetFramebufferSizeCallback(w, resize);

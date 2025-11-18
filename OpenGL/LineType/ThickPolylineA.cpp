@@ -144,7 +144,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Thick Polyline", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Thick Polyline", NULL, NULL);
     if (!window)
     {
         // 打印错误信息

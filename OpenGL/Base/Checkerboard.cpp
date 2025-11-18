@@ -100,7 +100,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* win = glfwCreateWindow(800, 600, "Fixed-size Chessboard", nullptr, nullptr);
+    GLFWwindow* win = glfwCreateWindow(1280, 720, "Fixed-size Chessboard", nullptr, nullptr);
     if (!win)
     {
         std::cerr << "Create window failed\n"; glfwTerminate(); return -1;

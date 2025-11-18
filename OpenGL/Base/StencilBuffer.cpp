@@ -94,7 +94,7 @@ int main()
     glfwWindowHint(GLFW_STENCIL_BITS, 8); // 确保模板缓冲区有8位
 
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Enhanced Stencil Buffer Example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Enhanced Stencil Buffer Example", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;

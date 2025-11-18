@@ -50,7 +50,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Texture", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenGL Texture", NULL, NULL);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;

@@ -166,7 +166,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Thick Polyline with Adjacency", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Thick Polyline with Adjacency", NULL, NULL);
     if (!window)
     {
         printf("Window creation failed\n");

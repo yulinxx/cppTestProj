@@ -101,7 +101,7 @@ void drawDigit(int digit, float x, float y, float scale, unsigned int shaderProg
 int main()
 {
     glfwInit();
-    GLFWwindow* window = glfwCreateWindow(800, 600, "GLSL Ruler", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "GLSL Ruler", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     glewInit();

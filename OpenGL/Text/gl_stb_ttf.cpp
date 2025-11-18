@@ -207,7 +207,7 @@ int main()
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "FreeType OpenGL 中文示例", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "FreeType OpenGL 中文示例", NULL, NULL);
     if (!window)
     {
         glfwTerminate();

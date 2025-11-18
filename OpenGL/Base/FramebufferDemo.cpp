@@ -348,7 +348,7 @@ int main()
     }
     
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Framebuffer Demo - Press SPACE to toggle grayscale", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Framebuffer Demo - Press SPACE to toggle grayscale", nullptr, nullptr);
     if (!window)
     {
         std::cout << "Window creation failed" << std::endl;

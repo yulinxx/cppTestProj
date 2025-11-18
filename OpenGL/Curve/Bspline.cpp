@@ -243,7 +243,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建 GLFW 窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "B-Spline Curve", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "B-Spline Curve", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;

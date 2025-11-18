@@ -139,7 +139,7 @@ int main()
 #endif
 
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Simple Cube", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Simple Cube", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create window" << std::endl;

@@ -69,7 +69,7 @@ int main()
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    GLFWwindow* win = glfwCreateWindow(800, 600, "Boost+GLM OK!", nullptr, nullptr);
+    GLFWwindow* win = glfwCreateWindow(1280, 720, "Boost+GLM OK!", nullptr, nullptr);
     glfwMakeContextCurrent(win);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     

@@ -120,7 +120,7 @@ int main()
     }
 
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Stencil Buffer Demo", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Stencil Buffer Demo", nullptr, nullptr);
     if (!window)
     {
         std::cout << "Window creation failed" << std::endl;

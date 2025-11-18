@@ -85,7 +85,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建窗口
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Bezier Curve", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Bezier Curve", nullptr, nullptr);
     if (window == nullptr)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
