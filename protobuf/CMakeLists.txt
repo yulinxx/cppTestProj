@@ -1,59 +1,36 @@
 
-############################# Protobuf #############################
-MESSAGE(" --------- protobuf ----- \n")
+# Protobuf目录配置
 
+message(STATUS "---------Configuring Protobuf project---------")
+
+# 查找Protobuf库
 find_package(Protobuf REQUIRED)
-if(Protobuf_FOUND)
-
-else()
-    MESSAGE(FATAL_ERROR "------Protobuf Not Found")
-endif(Protobuf_FOUND)
+if(NOT Protobuf_FOUND)
+    message(FATAL_ERROR "Protobuf not found")
+endif()
 
 add_definitions(-DPROTOBUF_USE_DLLS)
 
-if (Protobuf_FOUND)
-    MESSAGE("1 PROTOBUF FOUNED")
-    # C:/Install/vcpkg/installed/x86-windows/include
-    MESSAGE("2 PROTOBUF_INCLUDE_DIR: ${PROTOBUF_INCLUDE_DIR}\n")
-    # optimized;C:/Install/vcpkg/installed/x86-windows/lib/libprotobuf.lib;
-    #     debug;C:/Install/vcpkg/installed/x86-windows/debug/lib/libprotobufd.lib
-    MESSAGE("3 PROTOBUF_LIBRARIES: ${PROTOBUF_LIBRARIES}\n")
-    # C:/Install/vcpkg/installed/x86-windows/debug/lib/libprotobufd.lib
-    MESSAGE("4 PROTOBUF_LIBRARY_DEBUG: ${PROTOBUF_LIBRARY_DEBUG}\n")
-
-    INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
-else (Protobuf_FOUND)
-    MESSAGE(FATAL_ERROR "------PROTOBUF NOT FOUNED")
-endif (Protobuf_FOUND)
-
-
-include_directories(${Protobuf_INCLUDE_DIRS})
+# 设置包含目录
+include_directories(${PROTOBUF_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-# protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS MESSAGE.proto)
-# protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ./proto/MESSAGE.proto)
 
-file(GLOB ProtoFiles "${CMAKE_CURRENT_SOURCE_DIR}/proto/*.proto")
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${ProtoFiles})
+# 生成proto文件
+file(GLOB proto_files "${CMAKE_CURRENT_SOURCE_DIR}/proto/*.proto")
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${proto_files})
 
-MESSAGE("5 " ${PROTO_SRCS} ${PROTO_HDRS} "\n")
-MESSAGE("6 " ${Protobuf_LIBRARIES} "\n")
+# 构建可执行文件
+set(CPP_DIR ./)
 
-####################################################################
-
-set(CPP_DIR
-    ./
-)
-
-foreach(SUB_DIR ${CPP_DIR})
-    file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/${SUB_DIR}/*.cpp")
-    foreach(CPP ${SRC})
-        STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
-
-        set(EXE_NAME protobuf_${FILE_NAME})
-        add_executable(${EXE_NAME} ${CPP} ${PROTO_SRCS})
-
-        target_include_directories(${EXE_NAME} PRIVATE ./)
-        target_link_libraries(${EXE_NAME} ${PROTOBUF_LIBRARY_DEBUG}) 
-    endforeach(CPP)    
-
-endforeach(SUB_DIR)
+foreach(sub_dir ${CPP_DIR})
+    file(GLOB src_files "${CMAKE_CURRENT_SOURCE_DIR}/${sub_dir}/*.cpp")
+    foreach(cpp_file ${src_files})
+        string(REGEX REPLACE ".+/(.+)\\..*" "\\1" file_name ${cpp_file})
+        set(exe_name protobuf_${file_name})
+        message(STATUS "Building Protobuf executable: ${exe_name}")
+        
+        add_executable(${exe_name} ${cpp_file} ${PROTO_SRCS})
+        target_include_directories(${exe_name} PRIVATE ./)
+        target_link_libraries(${exe_name} ${PROTOBUF_LIBRARY_DEBUG})
+    endforeach()
+endforeach()

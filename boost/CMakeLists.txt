@@ -1,5 +1,24 @@
-MESSAGE(" --------- boostTestProj----- \n")
+# Boost目录配置
 
+message(STATUS "---------Configuring Boost projects---------")
+
+# 设置CMP0167策略以避免Boost模块警告
+cmake_policy(SET CMP0167 NEW)
+
+# 查找Boost库
+find_package(Boost REQUIRED)
+if(NOT Boost_FOUND)
+    message(FATAL_ERROR "Boost not found")
+endif()
+
+message(STATUS "Boost found. Include dirs: ${Boost_INCLUDE_DIRS}")
+
+# 设置包含目录
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+link_directories(${Boost_LIBRARY_DIRS})
+
+# 定义源目录
 set(CPP_DIR
     ./src
     ./src/other
@@ -9,47 +28,15 @@ set(CPP_DIR
     ./src/geometry
 )
 
-MESSAGE("__CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
-MESSAGE("__PROJECT_SOURCE_DIR " ${PROJECT_SOURCE_DIR})
-
-foreach(SUB_DIR ${CPP_DIR})
-    MESSAGE("---Sub Dir: ${SUB_DIR}")
-
-    file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/${SUB_DIR}/*.cpp")
-    MESSAGE("---all cpp: ${SRC}\n")
-
-    foreach(CPP ${SRC})
-    
-        STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
-        # MESSAGE("---Create Exe From: ${CPP}")
-        # MESSAGE("---file name: ${FILE_NAME} \n")
-
-        add_executable(BOOST_${FILE_NAME} ${CPP})
-
-    endforeach(CPP)    
-
-endforeach(SUB_DIR)
-
-MESSAGE(" --------- Files Test B----- \n")
-
-######################################################
-
-find_package(Boost REQUIRED)
-
-if(Boost_FOUND)
-    MESSAGE( "--------------BOOST Found")
-    MESSAGE( " ---BOOST Include: ${Boost_INCLUDE_DIRS}")
-    MESSAGE( " ---BOOST Library: ${Boost_LIBRARY_DIRS}")
-
-    foreach(lib ${Boost_LIBS})
-       MESSAGE(" ${lib}")
-    endforeach(lib )
-    
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_directories(${Boost_LIBRARY_DIRS})
-else()
-    MESSAGE(FATAL_ERROR "------Boost Not Found")
-endif(Boost_FOUND)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# 构建可执行文件
+foreach(sub_dir ${CPP_DIR})
+    file(GLOB src_files "${CMAKE_CURRENT_SOURCE_DIR}/${sub_dir}/*.cpp")
+    foreach(cpp_file ${src_files})
+        string(REGEX REPLACE ".+/(.+)\\..*" "\\1" file_name ${cpp_file})
+        set(exe_name BOOST_${file_name})
+        message(STATUS "Building Boost executable: ${exe_name}")
+        
+        add_executable(${exe_name} ${cpp_file})
+    endforeach()
+endforeach()
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 ##################################################################
 # set(VCPKG_DIR "D:/Install/vcpkg/scripts/buildsystems/vcpkg.cmake")

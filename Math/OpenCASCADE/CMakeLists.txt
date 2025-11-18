@@ -89,6 +89,8 @@ foreach(SUB_DIR ${CPP_DIR})
         add_executable(OpenCASCADE_${FILE_NAME} ${CPP})
 
         # target_link_libraries(OpenCASCADE_${FILE_NAME} PRIVATE OpenCASCADE::OpenCASCADE)
+        # 避免直接使用${VTK_LIBRARIES}中的弃用库Ioss和Ionit
+        # 改为直接链接到OpenCASCADE和freetype库，或根据需要明确指定VTK组件
         target_link_libraries(OpenCASCADE_${FILE_NAME} PRIVATE TKBO TKBin TKCAF TKCDF ${OpenCASCADE_LIBRARIES} ${FREETYPE_LIBRARIES})
         # target_link_libraries(main PRIVATE ${VTK_LIBRARIES})
     endforeach(CPP)

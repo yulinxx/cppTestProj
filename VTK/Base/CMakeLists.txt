@@ -1,5 +1,8 @@
 MESSAGE(" --------- VTK Base ----- \n")
 
+# 设置CMP0074政策，使find_package使用<PackageName>_ROOT变量
+cmake_policy(SET CMP0074 NEW)
+
 #################### Exe ##################################
 
 set(CPP_DIR
@@ -21,6 +24,7 @@ message(STATUS "VTK Library Dirs: ${VTK_LIBRARY_DIRS}")
 # 包含 VTK 头文件
 include_directories(${VTK_INCLUDE_DIRS})
 
+# 注意：在VTK 8.90及以上版本中，不再需要include(VTK_USE_FILE)
 # 现代VTK版本推荐直接通过target_link_libraries链接所需组件
 
 #################### EXE ##################################

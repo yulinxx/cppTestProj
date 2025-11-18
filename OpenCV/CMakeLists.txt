@@ -1,5 +1,8 @@
 MESSAGE(" ---------  OpenCV ----- \n")
 
+# 解决CMP0074政策警告 - 使find_package使用<PackageName>_ROOT变量
+cmake_policy(SET CMP0074 NEW)
+
 find_package(OpenCV REQUIRED)
 
 if(OpenCV_FOUND)

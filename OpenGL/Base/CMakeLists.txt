@@ -1,34 +1,27 @@
-######################################################
+# OpenGL/Base目录配置
 MESSAGE(" --------- OpenGL  Base ----- \n")
+set(CPP_DIR ./)
 
-#################### Exe ##################################
+foreach(sub_dir ${CPP_DIR})
+    file(GLOB src_files "${CMAKE_CURRENT_SOURCE_DIR}/${sub_dir}/*.cpp")
+    foreach(cpp_file ${src_files})
+        string(REGEX REPLACE ".+/(.+)\\..*" "\\1" file_name ${cpp_file})
+        set(app_name OpenGL_Base_${file_name})
+        message(STATUS "Building OpenGL executable: ${app_name}")
+        
+        add_executable(${app_name} ${cpp_file})
 
-set(CPP_DIR
-    ./
-)
-
-#################### EXE ##################################
-foreach(SUB_DIR ${CPP_DIR})
-    file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/${SUB_DIR}/*.cpp")
-    foreach(CPP ${SRC})
-        # message(${SRC})
-        # message(${CPP})
-        STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
-
-        set(APP_NAME OpenGL_Base_${FILE_NAME})
-        add_executable(${APP_NAME} ${CPP})
-
+        # 查找并链接必要的OpenGL库
         find_package(GLEW REQUIRED)
-        target_link_libraries(${APP_NAME} PRIVATE GLEW::GLEW)
+        target_link_libraries(${app_name} PRIVATE GLEW::GLEW)
 
         find_package(glfw3 CONFIG REQUIRED)
-        target_link_libraries(${APP_NAME} PRIVATE glfw)
+        target_link_libraries(${app_name} PRIVATE glfw)
 
         find_package(glad CONFIG REQUIRED)
-        target_link_libraries(${APP_NAME} PRIVATE glad::glad)
+        target_link_libraries(${app_name} PRIVATE glad::glad)
 
         find_package(Stb REQUIRED)
-        target_include_directories(${APP_NAME} PRIVATE ${Stb_INCLUDE_DIR})
-    endforeach(CPP)
-
-endforeach(SUB_DIR)
+        target_include_directories(${app_name} PRIVATE ${Stb_INCLUDE_DIR})
+    endforeach()
+endforeach()

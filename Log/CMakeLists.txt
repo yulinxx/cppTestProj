@@ -1,31 +1,26 @@
+# Log目录配置
 MESSAGE(" ---------  Log ----- \n")
-
-# 查找当前文件夹下的子目录
-SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
-
-# 设置要排除的子目录
-SET(ExclusionList
-    .git
-    .vscode
-    build
-)
-
-# 遍历子目录,将排除的子目剔除后,添加至cmake中
-FOREACH(SUBDIR ${SUBDIRS})
-MESSAGE("\n----------------------------" ${SUBDIR} )
-
-    SET(ADD_DIR TRUE)
-    foreach(exc ${ExclusionList})
-        if("${SUBDIR}" STREQUAL "${exc}" )
-            MESSAGE(" ${SUBDIR}   Equal  ${exc} Skip...")
-            SET(ADD_DIR FALSE)
-            BREAK()
+# 自定义宏，用于查找当前目录下的所有子目录
+macro(subdirlist result curdir)
+    file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+    set(dirlist "")
+    foreach(child ${children})
+        if(IS_DIRECTORY ${curdir}/${child})
+            list(FIND EXCLUDE_DIRS ${child} _index)
+            if(_index EQUAL -1)
+                list(APPEND dirlist ${child})
+            endif()
         endif()
     endforeach()
+    set(${result} ${dirlist})
+endmacro()
 
-    IF( ADD_DIR )
-        MESSAGE("add subdir: " ${SUBDIR})
-        ADD_SUBDIRECTORY(${SUBDIR})
-    ENDIF()
+# 定义要排除的目录列表
+set(EXCLUDE_DIRS ".git" ".vscode" "build")
 
-ENDFOREACH()
+# 查找并添加子目录
+subdirlist(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
+foreach(subdir ${SUBDIRS})
+    message(STATUS "Adding Log subdirectory: ${subdir}")
+    add_subdirectory(${subdir})
+endforeach()

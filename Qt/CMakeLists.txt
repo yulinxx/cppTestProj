@@ -1,19 +1,21 @@
-MESSAGE(" --------- QtTestProj----- \n")
+# Qt目录配置
 
-# 从 CMakeLists.txt 中查找所有一级子目录并将它们添加到 add_subdirectory 中
+message(STATUS "---------Configuring Qt projects---------")
 
-MESSAGE(" --------- --------------------------------------- ----- \n")
+# 定义要排除的目录列表
+set(EXCLUDE_DIRS ".git" ".vscode" "build")
 
 # 获取当前目录下的所有文件和子目录列表
 file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 
-# 遍历列表
+# 遍历列表并添加子目录
 foreach(child ${children})
-  # 检查是否为目录
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${child})
-    # 将子目录添加到 add_subdirectory 中
-    add_subdirectory(${child})
-    message(${child})
+    list(FIND EXCLUDE_DIRS ${child} _index)
+    if(_index EQUAL -1)
+      message(STATUS "Adding Qt subdirectory: ${child}")
+      add_subdirectory(${child})
+    endif()
   endif()
 endforeach()
 

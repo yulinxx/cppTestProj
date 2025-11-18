@@ -38,7 +38,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 if(Qt5_FOUND)
 
-elseif()
+else()
     MESSAGE(FATAL_ERROR "------Qt5 Not Found")
 endif()
 
