@@ -346,7 +346,7 @@ int main()
         {
             pts.push_back(p); p += vec2(dist(rng) * 0.1f, dist(rng) * 0.1f);
         }
-        add(new PolylinePrim(pts, vec4(col(rng), col(rng), 0.4f, 1), 2.5f));
+        add(new PolylinePrim(pts, vec4(col(rng), col(rng), col(rng), 1), 2.5f));
     }
     cout << "Generated " << g_primitives.size() << " primitives, RTree built.\n";
 

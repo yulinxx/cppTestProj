@@ -20,8 +20,17 @@ struct Polyline {
     size_t vertexCount = 0;   // number of vertices
     size_t indexOffset = 0;   // start index inside big EBO (index count units)
     size_t indexCount = 0;    // usually (vertexCount - 1) * 2 for lines
-    std::vector<float> verts; // cpu-side copy: x,y pairs: size == vertexCount*2
+    std::vector<float> verts; // cpu-side copy: x,y,r,g,b: size == vertexCount*5
+    float color[3];           // 线条颜色 (r, g, b)
 };
+
+// 生成随机颜色的函数
+void generateRandomColor(float* color) {
+    // 生成较鲜艳的颜色，避免太暗
+    color[0] = 0.2f + (rand() % 801) / 1000.0f;  // r: 0.2-1.0
+    color[1] = 0.2f + (rand() % 801) / 1000.0f;  // g: 0.2-1.0
+    color[2] = 0.2f + (rand() % 801) / 1000.0f;  // b: 0.2-1.0
+}
 
 struct FreeBlock {
     size_t offset;
@@ -65,12 +74,18 @@ void freeBlock(std::vector<FreeBlock>& freeList, size_t offset, size_t length) {
 static const char* vs_src = R"(
 #version 330 core
 layout(location = 0) in vec2 aPos;
-void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+layout(location = 1) in vec3 aColor;
+out vec3 ourColor;
+void main() { 
+    gl_Position = vec4(aPos, 0.0, 1.0); 
+    ourColor = aColor;
+}
 )";
 static const char* fs_src = R"(
 #version 330 core
+in vec3 ourColor;
 out vec4 FragColor;
-void main() { FragColor = vec4(1.0,1.0,1.0,1.0); }
+void main() { FragColor = vec4(ourColor, 1.0); }
 )";
 
 GLuint compileShader(GLenum t, const char* src) {
@@ -95,11 +110,25 @@ GLuint buildProgram() {
 // -----------------------------
 // Helpers: random polyline vertices
 // -----------------------------
-std::vector<float> randomPolylineVerts(int pts) {
-    std::vector<float> v(pts*2);
-    for (int i=0;i<pts;i++) {
-        v[i*2+0] = ((rand()%2000)/1000.0f) - 1.0f;
-        v[i*2+1] = ((rand()%2000)/1000.0f) - 1.0f;
+std::vector<float> randomPolylineVerts(int pts, const float* color = nullptr) {
+    std::vector<float> v(pts*5);  // x, y, r, g, b
+
+    // 如果没有提供颜色，使用默认白色
+    float lineColor[3] = { 1.0f, 1.0f, 1.0f };
+    if (color) {
+        lineColor[0] = color[0];
+        lineColor[1] = color[1];
+        lineColor[2] = color[2];
+    }
+
+    for (int i = 0; i < pts; i++) {
+        // 生成 -1.0 到 1.0 之间的随机坐标
+        v[i*5+0] = ((rand()%2000)/1000.0f) - 1.0f;
+        v[i*5+1] = ((rand()%2000)/1000.0f) - 1.0f;
+        // 设置颜色
+        v[i*5+2] = lineColor[0];
+        v[i*5+3] = lineColor[1];
+        v[i*5+4] = lineColor[2];
     }
     return v;
 }
@@ -129,7 +158,7 @@ void defragmentBuffers(GLuint VBO, GLuint EBO,
 
     // Map VBO entire range for write (invalidate)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    void* vptr = glMapBufferRange(GL_ARRAY_BUFFER, 0, MaxVertices * sizeof(float)*2,
+    void* vptr = glMapBufferRange(GL_ARRAY_BUFFER, 0, MaxVertices * sizeof(float)*5,
                                   GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
     if (!vptr) { std::cerr << "VBO map failed\n"; return; }
 
@@ -145,7 +174,7 @@ void defragmentBuffers(GLuint VBO, GLuint EBO,
 
     for (auto &p : polylines) {
         size_t vbytes = p.verts.size() * sizeof(float);
-        memcpy(vwrite + p.vboOffset * sizeof(float) * 2, p.verts.data(), vbytes);
+        memcpy(vwrite + p.vboOffset * sizeof(float) * 5, p.verts.data(), vbytes);
 
         // build indices for this polyline
         // each segment is two indices (u, u+1)
@@ -212,15 +241,19 @@ int main() {
 
     glGenBuffers(1,&VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // allocate entire buffer (float x,y) -> 2 floats per vertex
-    glBufferData(GL_ARRAY_BUFFER, MaxVertices * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
+    // allocate entire buffer (float x,y,r,g,b) -> 5 floats per vertex
+    glBufferData(GL_ARRAY_BUFFER, MaxVertices * sizeof(float) * 5, nullptr, GL_DYNAMIC_DRAW);
 
     glGenBuffers(1,&EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, MaxIndices * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
+    // 设置顶点属性：位置
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,2*sizeof(float),(void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // 设置顶点属性：颜色
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 
     // allocator free list (initially whole VBO free)
     std::vector<FreeBlock> freeList;
@@ -232,7 +265,11 @@ int main() {
     // create some initial polylines (CPU data + upload)
     for (int i=0;i<500;i++) {
         int pts = 4 + rand()%12;
-        auto verts = randomPolylineVerts(pts);
+        
+        // 生成随机颜色
+        float color[3];
+        generateRandomColor(color);
+        auto verts = randomPolylineVerts(pts, color);
 
         size_t vOffset;
         if (!allocateFreeBlock(freeList, pts, vOffset)) break;
@@ -243,11 +280,14 @@ int main() {
         P.indexOffset = eboUsedCount;
         P.indexCount = (pts>1) ? (pts-1)*2 : 0;
         P.verts = verts;
+        P.color[0] = color[0];
+        P.color[1] = color[1];
+        P.color[2] = color[2];
 
         // upload vertex bytes using glMapBufferRange for the small range
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         void* ptr = glMapBufferRange(GL_ARRAY_BUFFER,
-                                     P.vboOffset * sizeof(float) * 2,
+                                     P.vboOffset * sizeof(float) * 5,
                                      P.verts.size() * sizeof(float),
                                      GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
         if (ptr) {
@@ -255,7 +295,7 @@ int main() {
             glUnmapBuffer(GL_ARRAY_BUFFER);
         } else {
             // fallback
-            glBufferSubData(GL_ARRAY_BUFFER, P.vboOffset * sizeof(float)*2, P.verts.size()*sizeof(float), P.verts.data());
+            glBufferSubData(GL_ARRAY_BUFFER, P.vboOffset * sizeof(float)*5, P.verts.size()*sizeof(float), P.verts.data());
         }
 
         // build indices (on CPU) and upload
@@ -301,21 +341,22 @@ int main() {
             // change a few vertices
             for (int k=0;k< (int)P.vertexCount; ++k) {
                 if (rand()%4==0) { // ~25% of points jitter
-                    P.verts[k*2+0] = ((rand()%2000)/1000.0f) - 1.0f;
-                    P.verts[k*2+1] = ((rand()%2000)/1000.0f) - 1.0f;
+                    P.verts[k*5+0] = ((rand()%2000)/1000.0f) - 1.0f;
+                    P.verts[k*5+1] = ((rand()%2000)/1000.0f) - 1.0f;
+                    // 保持颜色不变
                 }
             }
             // upload just this polyline's vertex region
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             void* ptr = glMapBufferRange(GL_ARRAY_BUFFER,
-                                         P.vboOffset * sizeof(float) * 2,
+                                         P.vboOffset * sizeof(float) * 5,
                                          P.verts.size() * sizeof(float),
                                          GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
             if (ptr) {
                 memcpy(ptr, P.verts.data(), P.verts.size()*sizeof(float));
                 glUnmapBuffer(GL_ARRAY_BUFFER);
             } else {
-                glBufferSubData(GL_ARRAY_BUFFER, P.vboOffset * sizeof(float)*2, P.verts.size()*sizeof(float), P.verts.data());
+                glBufferSubData(GL_ARRAY_BUFFER, P.vboOffset * sizeof(float)*5, P.verts.size()*sizeof(float), P.verts.data());
             }
         }
 
@@ -326,7 +367,10 @@ int main() {
             if (rand()%2==0) {
                 // add
                 int pts = 4 + rand()%12;
-                auto verts = randomPolylineVerts(pts);
+                // 生成随机颜色
+                float color[3];
+                generateRandomColor(color);
+                auto verts = randomPolylineVerts(pts, color);
                 size_t vOffset;
                 if (allocateFreeBlock(freeList, pts, vOffset) && eboUsedCount + (pts-1)*2 < MaxIndices) {
                     Polyline P;
@@ -335,15 +379,18 @@ int main() {
                     P.indexOffset = eboUsedCount;
                     P.indexCount = (pts>1) ? (pts-1)*2 : 0;
                     P.verts = verts;
+                    P.color[0] = color[0];
+                    P.color[1] = color[1];
+                    P.color[2] = color[2];
 
                     // upload vertex region
                     glBindBuffer(GL_ARRAY_BUFFER, VBO);
                     void* ptr = glMapBufferRange(GL_ARRAY_BUFFER,
-                                                 P.vboOffset * sizeof(float) * 2,
+                                                 P.vboOffset * sizeof(float) * 5,
                                                  P.verts.size() * sizeof(float),
                                                  GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
                     if (ptr) { memcpy(ptr, P.verts.data(), P.verts.size()*sizeof(float)); glUnmapBuffer(GL_ARRAY_BUFFER); }
-                    else glBufferSubData(GL_ARRAY_BUFFER, P.vboOffset * sizeof(float)*2, P.verts.size()*sizeof(float), P.verts.data());
+                    else glBufferSubData(GL_ARRAY_BUFFER, P.vboOffset * sizeof(float)*5, P.verts.size()*sizeof(float), P.verts.data());
 
                     // indices
                     std::vector<unsigned int> idx(P.indexCount);

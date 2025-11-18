@@ -73,18 +73,22 @@ void freeBlock(std::vector<FreeBlock>& vFreeBlock, size_t offset, size_t length)
 static const char* vs_src = R"(
 #version 330 core
 layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec3 aColor;
+out vec3 ourColor;
 void main()
 {
     gl_Position = vec4(aPos, 0.0, 1.0);
+    ourColor = aColor;
 }
 )";
 
 static const char* fs_src = R"(
 #version 330 core
+in vec3 ourColor;
 out vec4 FragColor;
 void main()
 {
-    FragColor = vec4(1,1,1,1);
+    FragColor = vec4(ourColor, 1.0);
 }
 )";
 
@@ -111,16 +115,31 @@ GLuint buildProgram()
     return prog;
 }
 
+// 生成随机颜色的函数
+float randomColorComponent() {
+    // 生成0.2到1.0之间的值，确保颜色不会太暗
+    return 0.2f + ((rand() % 801) / 1000.0f);
+}
+
 //-------------------------------------------------------------
-// 随机 Polyline 生成
+// 随机 Polyline 生成（包含颜色）
 //-------------------------------------------------------------
 std::vector<float> randomPolylineVertices(int pointCount)
 {
-    std::vector<float> data(pointCount * 2);
+    std::vector<float> data(pointCount * 5); // x,y,r,g,b 每个顶点5个float
+    
+    // 为整个多段线生成一种随机颜色
+    float r = randomColorComponent();
+    float g = randomColorComponent();
+    float b = randomColorComponent();
+    
     for (int i = 0; i < pointCount; i++)
     {
-        data[i * 2 + 0] = ((rand() % 2000) / 1000.0f) - 1.0f;
-        data[i * 2 + 1] = ((rand() % 2000) / 1000.0f) - 1.0f;
+        data[i * 5 + 0] = ((rand() % 2000) / 1000.0f) - 1.0f;
+        data[i * 5 + 1] = ((rand() % 2000) / 1000.0f) - 1.0f;
+        data[i * 5 + 2] = r;
+        data[i * 5 + 3] = g;
+        data[i * 5 + 4] = b;
     }
     return data;
 }
@@ -173,7 +192,7 @@ int main()
     // 顶点池
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, MaxVertices * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, MaxVertices * sizeof(float) * 5, nullptr, GL_DYNAMIC_DRAW);
 
     // 索引池
     glGenBuffers(1, &EBO);
@@ -181,7 +200,9 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, MaxIndices * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
 
     //-------------------------------------------------------------------
     // Polyline 存储列表
@@ -200,7 +221,7 @@ int main()
         if (!allocateFreeBlock(vFreeBlocksVbo, nCount, nVboOffset))
             continue;
 
-        glBufferSubData(GL_ARRAY_BUFFER, nVboOffset * sizeof(float) * 2,
+        glBufferSubData(GL_ARRAY_BUFFER, nVboOffset * sizeof(float) * 5,
             vVerts.size() * sizeof(float), vVerts.data());
 
         Polyline pl{};
@@ -250,7 +271,7 @@ int main()
             auto vVerts = randomPolylineVertices(pl.vertexCount);
 
             glBufferSubData(GL_ARRAY_BUFFER,
-                pl.nVboOffset * sizeof(float) * 2,
+                pl.nVboOffset * sizeof(float) * 5,
                 vVerts.size() * sizeof(float),
                 vVerts.data());
         }
@@ -281,7 +302,7 @@ int main()
                     pl.indexCount = (nCount - 1) * 2;
 
                     glBufferSubData(GL_ARRAY_BUFFER,
-                        nVboOffset * sizeof(float) * 2,
+                        nVboOffset * sizeof(float) * 5,
                         vVerts.size() * sizeof(float), vVerts.data());
 
                     std::vector<unsigned int> vIdx(pl.indexCount);

@@ -11,29 +11,44 @@
 
 #include <iostream>
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
 
 // 简单的顶点着色器源码
 const char* vertexShaderSource = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+out vec3 ourColor;
 void main()
 {
     gl_Position = vec4(aPos, 1.0);
+    ourColor = aColor;
 }
 )";
 
 // 简单的片段着色器源码
 const char* fragmentShaderSource = R"(
 #version 330 core
+in vec3 ourColor;
 out vec4 FragColor;
 void main()
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = vec4(ourColor, 1.0f);
 }
 )";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+
+// 生成随机颜色的函数
+void generateRandomColor(float& r, float& g, float& b)
+{
+    // 生成较鲜艳的颜色，避免太暗
+    r = 0.2f + (rand() % 801) / 1000.0f;  // r: 0.2-1.0
+    g = 0.2f + (rand() % 801) / 1000.0f;  // g: 0.2-1.0
+    b = 0.2f + (rand() % 801) / 1000.0f;  // b: 0.2-1.0
+}
 
 int main()
 {
@@ -43,7 +58,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "glBufferSubData Example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "glBufferSubData Example", nullptr, nullptr);
     if (!window)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -59,8 +74,9 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
+    if (0)
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
         std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
@@ -86,12 +102,26 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // 初始顶点数据（三角形）
+
+
+    srand((unsigned)time(nullptr)); // 初始化随机种子
+
+    // 初始顶点数据（x, y, z, r, g, b）
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f
     };
+
+    // 为每个顶点生成随机颜色
+    for (int i = 0; i < 3; i++)
+    {
+        float r, g, b;
+        generateRandomColor(r, g, b);
+        vertices[i * 6 + 3] = r;
+        vertices[i * 6 + 4] = g;
+        vertices[i * 6 + 5] = b;
+    }
 
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -101,10 +131,14 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     // 注意：使用 GL_DYNAMIC_DRAW,申明这个缓冲区内容会频繁更新。
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // 设置顶点属性指针：位置
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // 设置顶点属性指针：颜色
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -127,10 +161,9 @@ int main()
         time += 0.016f; // 假设 ~60 FPS
         float newY = 0.5f + 0.3f * sin(time); // 在 0.2 ~ 0.8 之间跳动
 
-        // 使用 glBufferSubData 更新第三个顶点（索引为 2）的 Y 值  第7个float，即Y坐标
-        // 第三个顶点从字节偏移 2 * 3 * sizeof(float) 开始 
-        //glBufferSubData(target, offset, size, data)：
-        glBufferSubData(GL_ARRAY_BUFFER, 2 * 3 * sizeof(float) + 1 * sizeof(float), sizeof(float), &newY);
+        // 使用 glBufferSubData 更新第三个顶点（索引为 2）的 Y 值
+        // 第三个顶点从字节偏移 2 * 6 * sizeof(float) 开始，Y坐标是第1个分量
+        glBufferSubData(GL_ARRAY_BUFFER, 2 * 6 * sizeof(float) + 1 * sizeof(float), sizeof(float), &newY);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 

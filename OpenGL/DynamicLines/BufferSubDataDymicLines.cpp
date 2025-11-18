@@ -33,17 +33,33 @@
 struct Line
 {
     float x1, y1;
+    float r1, g1, b1; // 第一个点的颜色
     float x2, y2;
+    float r2, g2, b2; // 第二个点的颜色
 };
+
+// 生成随机颜色的函数
+void generateRandomColor(float& r, float& g, float& b) {
+    // 生成较鲜艳的颜色，避免太暗
+    r = 0.2f + (rand() % 801) / 1000.0f;  // r: 0.2-1.0
+    g = 0.2f + (rand() % 801) / 1000.0f;  // g: 0.2-1.0
+    b = 0.2f + (rand() % 801) / 1000.0f;  // b: 0.2-1.0
+}
 
 static const char* vs_src = R"(#version 330 core
 layout (location = 0) in vec2 aPos;
-void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+layout (location = 1) in vec3 aColor;
+out vec3 ourColor;
+void main() { 
+    gl_Position = vec4(aPos, 0.0, 1.0); 
+    ourColor = aColor;
+}
 )";
 
 static const char* fs_src = R"(#version 330 core
+in vec3 ourColor;
 out vec4 FragColor;
-void main() { FragColor = vec4(1,1,1,1); }
+void main() { FragColor = vec4(ourColor, 1.0); }
 )";
 
 GLuint compileShader(GLenum type, const char* src)
@@ -107,8 +123,10 @@ int main()
         Line line{};
         line.x1 = ((rand() % 2000) / 1000.0f) - 1.0f;
         line.y1 = ((rand() % 2000) / 1000.0f) - 1.0f;
+        generateRandomColor(line.r1, line.g1, line.b1);
         line.x2 = ((rand() % 2000) / 1000.0f) - 1.0f;
         line.y2 = ((rand() % 2000) / 1000.0f) - 1.0f;
+        generateRandomColor(line.r2, line.g2, line.b2);
         lines.push_back(line);
     }
 
@@ -125,14 +143,18 @@ int main()
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, maxVertices * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maxVertices * sizeof(float) * 5, nullptr, GL_DYNAMIC_DRAW); // x,y,r,g,b per vertex
 
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, maxIndices * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
+    // 设置顶点属性：位置
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // 设置顶点属性：颜色
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 
     //----------------
     // FPS 相关变量
@@ -159,8 +181,10 @@ int main()
             int nIdx = rand() % lines.size();
             lines[nIdx].x1 = ((rand() % 2000) / 1000.0f) - 1.0f;
             lines[nIdx].y1 = ((rand() % 2000) / 1000.0f) - 1.0f;
+            generateRandomColor(lines[nIdx].r1, lines[nIdx].g1, lines[nIdx].b1);
             lines[nIdx].x2 = ((rand() % 2000) / 1000.0f) - 1.0f;
             lines[nIdx].y2 = ((rand() % 2000) / 1000.0f) - 1.0f;
+            generateRandomColor(lines[nIdx].r2, lines[nIdx].g2, lines[nIdx].b2);
         }
 
         //------------------------------------------------------
@@ -178,8 +202,10 @@ int main()
                 Line line{};
                 line.x1 = ((rand() % 2000) / 1000.0f) - 1.0f;
                 line.y1 = ((rand() % 2000) / 1000.0f) - 1.0f;
+                generateRandomColor(line.r1, line.g1, line.b1);
                 line.x2 = ((rand() % 2000) / 1000.0f) - 1.0f;
                 line.y2 = ((rand() % 2000) / 1000.0f) - 1.0f;
+                generateRandomColor(line.r2, line.g2, line.b2);
                 lines.push_back(line);
             }
             else if (!lines.empty())
@@ -192,18 +218,27 @@ int main()
         //------------------------------------------------------
         // 上传当前所有线的数据（顶点 + 索引）
         //------------------------------------------------------
-        std::vector<float> vVertexData(lines.size() * 4);
+        std::vector<float> vVertexData(lines.size() * 10); // 2 vertices per line, 5 floats each (x,y,r,g,b)
         std::vector<unsigned int> vIndexData(lines.size() * 2);
 
         for (size_t i = 0; i < lines.size(); i++)
         {
-            vVertexData[i * 4 + 0] = lines[i].x1;
-            vVertexData[i * 4 + 1] = lines[i].y1;
-            vVertexData[i * 4 + 2] = lines[i].x2;
-            vVertexData[i * 4 + 3] = lines[i].y2;
+            // 第一个顶点 (x,y,r,g,b)
+            vVertexData[i * 10 + 0] = lines[i].x1;
+            vVertexData[i * 10 + 1] = lines[i].y1;
+            vVertexData[i * 10 + 2] = lines[i].r1;
+            vVertexData[i * 10 + 3] = lines[i].g1;
+            vVertexData[i * 10 + 4] = lines[i].b1;
+            
+            // 第二个顶点 (x,y,r,g,b)
+            vVertexData[i * 10 + 5] = lines[i].x2;
+            vVertexData[i * 10 + 6] = lines[i].y2;
+            vVertexData[i * 10 + 7] = lines[i].r2;
+            vVertexData[i * 10 + 8] = lines[i].g2;
+            vVertexData[i * 10 + 9] = lines[i].b2;
 
-            vIndexData[i * 2 + 0] = i * 2 + 0;
-            vIndexData[i * 2 + 1] = i * 2 + 1;
+            vIndexData[i * 2 + 0] = (unsigned int)(i * 2 + 0);
+            vIndexData[i * 2 + 1] = (unsigned int)(i * 2 + 1);
         }
 
         glBufferSubData(GL_ARRAY_BUFFER, 0, vVertexData.size() * sizeof(float), vVertexData.data());

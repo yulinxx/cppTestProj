@@ -1,6 +1,6 @@
-//GLFW + glad + OpenGL 3.3，在之前 polyline 示例的基础上增加：
+//GLFW + glad + OpenGL 3.3，
 //
-//顶点池 + 索引池 + first - fit 空闲块管理
+//使用 顶点池 + 索引池 + first - fit 空闲块管理
 //
 //使用 glMapBufferRange 来高效更新 VBO / EBO（避免频繁 glBufferSubData）
 //
@@ -28,6 +28,31 @@
 #include <thread>
 #include <chrono>
 
+// ----------------------------- (配置常量) -----------------------------  
+// 缓冲区池大小配置
+const size_t MAX_VERTICES = 2000000;  // 最大顶点数
+const size_t MAX_INDICES = 4000000;   // 最大索引数
+
+// 初始多段线配置
+const size_t MAX_INITIAL_POLYLINES = 1000000;  // 最大尝试创建的初始多段线数量
+const int MIN_VERTICES_PER_POLYLINE = 4;      // 每条多段线最小顶点数
+const int MAX_VERTICES_PER_POLYLINE = 100;     // 每条多段线最大顶点数
+
+// 每帧更新配置
+const int MIN_UPDATES_PER_FRAME = 50;    // 每帧最少更新的多段线数量
+const int MAX_UPDATES_PER_FRAME = 700;    // 每帧最多更新的多段线数量
+
+// 周期性操作配置
+const double OPERATION_INTERVAL = 1.0;   // 添加/删除操作的时间间隔（秒）
+const int UPDATE_VERTEX_PROBABILITY = 4; // 更新顶点的概率（1/4）
+
+// 内存碎片整理配置
+const size_t FRAG_THRESHOLD = 20;        // 空闲块数量阈值，超过时触发整理
+const double DEFRAG_INTERVAL = 5.0;      // 两次整理之间的最小时间间隔（秒）
+
+// 帧率更新配置
+const double FPS_UPDATE_INTERVAL = 1;  // FPS更新间隔（秒）
+
 // ----------------------------- (数据结构) -----------------------------
 // 表示一条多段线（由多个线段连接的顶点序列）
 struct Polyline
@@ -36,7 +61,8 @@ struct Polyline
     size_t vertexCount = 0;         // 顶点数量
     size_t indexOffset = 0;         // 该多段线索引数据在EBO中的起始偏移量（以索引数量为单位）
     size_t indexCount = 0;          // 索引数量，通常为 (vertexCount - 1) * 2，因为每段线段需要2个索引
-    std::vector<float> verts;       // CPU端保存的顶点数据副本，格式为x,y坐标对，大小为 vertexCount * 2
+    std::vector<float> verts;       // CPU端保存的顶点数据副本，格式为x,y,r,g,b坐标和颜色，大小为 vertexCount * 5
+    float color[3];                 // 线条颜色 (r, g, b)
 };
 
 // 表示VBO中的空闲内存块
@@ -108,21 +134,25 @@ void freeBlock(std::vector<FreeBlock>& vFreeBlock, size_t offset, size_t length)
 }
 
 // ----------------------------- (着色器代码) -----------------------------
-// 顶点着色器: 简单传递顶点位置
+// 顶点着色器: 传递顶点位置和颜色
 static const char* vs_src = R"(
 #version 330 core
 layout(location = 0) in vec2 aPos;
+layout(location = 1) in vec3 aColor;
+out vec3 ourColor;
 void main() { 
     gl_Position = vec4(aPos, 0.0, 1.0); 
+    ourColor = aColor;
 }
 )";
 
-// 片段着色器: 输出白色线条
+// 片段着色器: 使用传入的颜色
 static const char* fs_src = R"(
 #version 330 core
+in vec3 ourColor;
 out vec4 FragColor;
 void main() { 
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0); 
+    FragColor = vec4(ourColor, 1.0); 
 }
 )";
 
@@ -172,17 +202,39 @@ GLuint buildProgram()
 
 // -----------------------------  生成随机多段线顶点 -----------------------------
 // 生成包含pts个顶点的随机多段线顶点数据
-// 返回值: 顶点数据向量，格式为x,y坐标对
-std::vector<float> randomPolylineVerts(int pts)
+// 返回值: 顶点数据向量，格式为x,y,r,g,b坐标和颜色
+std::vector<float> randomPolylineVerts(int pts, const float* color = nullptr)
 {
-    std::vector<float> v(pts * 2);
+    std::vector<float> v(pts * 5);  // x, y, r, g, b
+
+    // 如果没有提供颜色，使用默认白色
+    float lineColor[3] = { 1.0f, 1.0f, 1.0f };
+    if (color)
+    {
+        lineColor[0] = color[0];
+        lineColor[1] = color[1];
+        lineColor[2] = color[2];
+    }
+
     for (int i = 0; i < pts; i++)
     {
         // 生成 -1.0 到 1.0 之间的随机坐标
-        v[i * 2 + 0] = ((rand() % 2000) / 1000.0f) - 1.0f;  // x坐标
-        v[i * 2 + 1] = ((rand() % 2000) / 1000.0f) - 1.0f;  // y坐标
+        v[i * 5 + 0] = ((rand() % 2000) / 1000.0f) - 1.0f;  // x坐标
+        v[i * 5 + 1] = ((rand() % 2000) / 1000.0f) - 1.0f;  // y坐标
+        v[i * 5 + 2] = lineColor[0];  // r
+        v[i * 5 + 3] = lineColor[1];  // g
+        v[i * 5 + 4] = lineColor[2];  // b
     }
     return v;
+}
+
+// 生成随机颜色
+void generateRandomColor(float* color)
+{
+    // 生成较鲜艳的颜色，避免太暗
+    color[0] = 0.2f + (rand() % 801) / 1000.0f;  // r: 0.2-1.0
+    color[1] = 0.2f + (rand() % 801) / 1000.0f;  // g: 0.2-1.0
+    color[2] = 0.2f + (rand() % 801) / 1000.0f;  // b: 0.2-1.0
 }
 
 // ----------------------------- 内存整理: 紧凑化VBO和EBO -----------------------------
@@ -221,7 +273,7 @@ void defragmentBuffers(GLuint VBO, GLuint EBO,
 
     // 映射VBO到CPU内存以便写入
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    void* vPtr = glMapBufferRange(GL_ARRAY_BUFFER, 0, MaxVertices * sizeof(float) * 2,
+    void* vPtr = glMapBufferRange(GL_ARRAY_BUFFER, 0, MaxVertices * sizeof(float) * 5,
         GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);  // INVALIDATE: 丢弃原有内容
     if (!vPtr)
     {
@@ -253,9 +305,9 @@ void defragmentBuffers(GLuint VBO, GLuint EBO,
         p.vboOffset = newVboOffset;
         p.indexOffset = newIndexOffset;
 
-        // 复制顶点数据
+        // 复制顶点数据（包含颜色）
         size_t vbytes = p.verts.size() * sizeof(float);
-        memcpy(vwrite + newVboOffset * sizeof(float) * 2, p.verts.data(), vbytes);
+        memcpy(vwrite + newVboOffset * sizeof(float) * 5, p.verts.data(), vbytes);
 
         // 生成线段索引（每个线段需要2个索引）
         // 索引值是相对于整个VBO的全局索引
@@ -311,6 +363,7 @@ int main()
     // 禁用垂直同步，以便观察实际帧率
     // glfwSwapInterval(1): 启用V-Sync，帧率锁定显示器刷新率(通常60FPS)
     // glfwSwapInterval(0): 禁用V-Sync，帧率无限制
+    //glfwSwapInterval(0);
     glfwSwapInterval(0);
 
     // 加载OpenGL函数指针
@@ -321,14 +374,14 @@ int main()
     }
 
     // 输出OpenGL信息
-    {
-        std::cout << "=== OpenGL Information ===" << std::endl;
-        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
-        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-        std::cout << "===================" << std::endl;
-    }
+    //{
+    //    std::cout << "=== OpenGL Information ===" << std::endl;
+    //    std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+    //    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    //    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    //    std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    //    std::cout << "===================" << std::endl;
+    //}
 
     // 编译链接着色器程序
     GLuint program = buildProgram();
@@ -345,29 +398,38 @@ int main()
 
     glGenBuffers(1, &VBO);  // 生成顶点缓冲对象
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
     // 预分配整个VBO空间，使用动态绘制模式(DYNAMIC_DRAW表示数据会频繁更新)
-    glBufferData(GL_ARRAY_BUFFER, MaxVertices * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
+    // 每个顶点包含5个float: x, y, r, g, b
+    glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(float) * 5, nullptr, GL_DYNAMIC_DRAW);
 
     glGenBuffers(1, &EBO);  // 生成索引缓冲对象
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, MaxIndices * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
-    // 设置顶点属性指针: 每个顶点2个float(x,y)
+    // 设置顶点属性指针: 每个顶点5个float(x,y,r,g,b)
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);  // 位置属性
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));  // 颜色属性
 
     // 初始化空闲块列表：开始时整个VBO都是空闲的
     std::vector<FreeBlock> vFreeBlock;
     vFreeBlock.push_back({ 0, MaxVertices });
 
-    std::vector<Polyline> polylines;  // 存储所有多段线
-    size_t eboUsedCount = 0;          // EBO中已使用的索引数量
+    std::vector<Polyline> vPolylines;  // 存储所有多段线
+    size_t nEboUsedCount = 0;          // EBO中已使用的索引数量
 
-    // 创建初始多段线（500条）
-    for (int i = 0; i < 500; i++)
+    // 创建初始多段线
+    for (int i = 0; i < MAX_INITIAL_POLYLINES; i++)
     {
-        int pts = 4 + rand() % 12;  // 每个多段线4-15个顶点
-        auto verts = randomPolylineVerts(pts);
+        int pts = MIN_VERTICES_PER_POLYLINE + rand() %
+            (MAX_VERTICES_PER_POLYLINE - MIN_VERTICES_PER_POLYLINE + 1);  // 每个多段线顶点数
+
+        // 生成随机颜色
+        float color[3];
+        generateRandomColor(color);
+        auto verts = randomPolylineVerts(pts, color);
 
         size_t vOffset;
         if (!allocateFreeBlock(vFreeBlock, pts, vOffset))  // 从空闲块分配空间
@@ -376,14 +438,18 @@ int main()
         Polyline pl{};  // 创建多段线对象
         pl.vertexCount = pts;
         pl.vboOffset = vOffset;
-        pl.indexOffset = eboUsedCount;
+        pl.indexOffset = nEboUsedCount;
         pl.indexCount = (pts > 1) ? (pts - 1) * 2 : 0;  // 线段数量 * 2个索引
         pl.verts = verts;  // 保存CPU端副本
+        pl.color[0] = color[0];
+        pl.color[1] = color[1];
+        pl.color[2] = color[2];
 
         // 使用glMapBufferRange上传顶点数据到VBO的指定区域
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
         void* ptr = glMapBufferRange(GL_ARRAY_BUFFER,
-            pl.vboOffset * sizeof(float) * 2,  // 偏移量(字节)
+            pl.vboOffset * sizeof(float) * 5,  // 偏移量(字节)
             pl.verts.size() * sizeof(float),     // 大小(字节)
             GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);  // 写入并失效该范围
 
@@ -395,7 +461,7 @@ int main()
         else  // 映射失败，使用回退方案
         {
             glBufferSubData(GL_ARRAY_BUFFER,
-                pl.vboOffset * sizeof(float) * 2,
+                pl.vboOffset * sizeof(float) * 5,
                 pl.verts.size() * sizeof(float),
                 pl.verts.data());
         }
@@ -410,10 +476,12 @@ int main()
 
         // 上传索引数据到EBO的指定区域
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
         void* iPtr = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER,
             pl.indexOffset * sizeof(unsigned int),
             idx.size() * sizeof(unsigned int),
             GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+
         if (iPtr)
         {
             memcpy(iPtr, idx.data(), idx.size() * sizeof(unsigned int));
@@ -427,8 +495,8 @@ int main()
                 idx.data());
         }
 
-        eboUsedCount += pl.indexCount;  // 更新已使用索引数
-        polylines.push_back(std::move(pl));  // 添加到列表
+        nEboUsedCount += pl.indexCount;  // 更新已使用索引数
+        vPolylines.push_back(std::move(pl));  // 添加到列表
     }
 
     // FPS计算相关变量
@@ -446,29 +514,35 @@ int main()
         glfwPollEvents();  // 处理窗口事件
 
         // ---- 随机更新部分多段线的顶点数据 ----
-        int updates = 5 + rand() % 20;  // 每帧更新5-24条多段线
-        for (int u = 0; u < updates; ++u)
+        int nUpdates = 50 + rand() % 20;  // 每帧更新5-24条多段线
+        for (int u = 0; u < nUpdates; ++u)
         {
-            if (polylines.empty()) break;
-            int id = rand() % polylines.size();  // 随机选择一条多段线
-            Polyline& pl = polylines[id];
+            if (vPolylines.empty())
+                break;
 
-            // 随机扰动部分顶点（约25%概率）
+            int nId = rand() % vPolylines.size();  // 随机选择一条多段线
+            Polyline& pl = vPolylines[nId];
+
+            // 随机扰动部分顶点（约25%概率），保持颜色不变
             for (int k = 0; k < (int)pl.vertexCount; ++k)
             {
                 if (rand() % 4 == 0)
                 {
-                    pl.verts[k * 2 + 0] = ((rand() % 2000) / 1000.0f) - 1.0f;
-                    pl.verts[k * 2 + 1] = ((rand() % 2000) / 1000.0f) - 1.0f;
+                    // 只更新位置，保持颜色不变
+                    pl.verts[k * 5 + 0] = ((rand() % 2000) / 1000.0f) - 1.0f;  // x坐标
+                    pl.verts[k * 5 + 1] = ((rand() % 2000) / 1000.0f) - 1.0f;  // y坐标
+                    // 颜色保持不变：pl.verts[k*5+2], pl.verts[k*5+3], pl.verts[k*5+4]
                 }
             }
 
             // 将更新后的顶点数据上传到VBO
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
             void* ptr = glMapBufferRange(GL_ARRAY_BUFFER,
-                pl.vboOffset * sizeof(float) * 2,
+                pl.vboOffset * sizeof(float) * 5,
                 pl.verts.size() * sizeof(float),
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+
             if (ptr)
             {
                 memcpy(ptr, pl.verts.data(), pl.verts.size() * sizeof(float));
@@ -477,41 +551,51 @@ int main()
             else
             {
                 glBufferSubData(GL_ARRAY_BUFFER,
-                    pl.vboOffset * sizeof(float) * 2,
+                    pl.vboOffset * sizeof(float) * 5,
                     pl.verts.size() * sizeof(float),
                     pl.verts.data());
             }
         }
 
         // ---- 周期性添加/删除多段线 ----
-        static double opTimer = glfwGetTime();
-        if (glfwGetTime() - opTimer > 1.0)  // 每秒执行一次
+        static double dOpTimer = glfwGetTime();
+        if (glfwGetTime() - dOpTimer > 1.0)  // 每秒执行一次
         {
-            opTimer = glfwGetTime();
+            dOpTimer = glfwGetTime();
             if (rand() % 2 == 0)  // 50%概率添加
             {
                 // 添加新多段线
                 int pts = 4 + rand() % 12;
-                auto verts = randomPolylineVerts(pts);
-                size_t vOffset;
+
+                // 生成随机颜色
+                float color[3];
+                generateRandomColor(color);
+                auto verts = randomPolylineVerts(pts, color);
+
+                size_t nOffset;
 
                 // 检查空间是否足够
-                if (allocateFreeBlock(vFreeBlock, pts, vOffset) &&
-                    eboUsedCount + (pts - 1) * 2 < MaxIndices)
+                if (allocateFreeBlock(vFreeBlock, pts, nOffset) &&
+                    nEboUsedCount + (pts - 1) * 2 < MaxIndices)
                 {
                     Polyline pl;
                     pl.vertexCount = pts;
-                    pl.vboOffset = vOffset;
-                    pl.indexOffset = eboUsedCount;
+                    pl.vboOffset = nOffset;
+                    pl.indexOffset = nEboUsedCount;
                     pl.indexCount = (pts > 1) ? (pts - 1) * 2 : 0;
                     pl.verts = verts;
+                    pl.color[0] = color[0];
+                    pl.color[1] = color[1];
+                    pl.color[2] = color[2];
 
                     // 上传顶点数据
                     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
                     void* ptr = glMapBufferRange(GL_ARRAY_BUFFER,
-                        pl.vboOffset * sizeof(float) * 2,
+                        pl.vboOffset * sizeof(float) * 5,
                         pl.verts.size() * sizeof(float),
                         GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+
                     if (ptr)
                     {
                         memcpy(ptr, pl.verts.data(), pl.verts.size() * sizeof(float));
@@ -520,7 +604,7 @@ int main()
                     else
                     {
                         glBufferSubData(GL_ARRAY_BUFFER,
-                            pl.vboOffset * sizeof(float) * 2,
+                            pl.vboOffset * sizeof(float) * 5,
                             pl.verts.size() * sizeof(float),
                             pl.verts.data());
                     }
@@ -534,10 +618,12 @@ int main()
                     }
 
                     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
                     void* iPtr = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER,
                         pl.indexOffset * sizeof(unsigned int),
                         idx.size() * sizeof(unsigned int),
                         GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+
                     if (iPtr)
                     {
                         memcpy(iPtr, idx.data(), idx.size() * sizeof(unsigned int));
@@ -551,23 +637,23 @@ int main()
                             idx.data());
                     }
 
-                    eboUsedCount += pl.indexCount;
-                    polylines.push_back(std::move(pl));
+                    nEboUsedCount += pl.indexCount;
+                    vPolylines.push_back(std::move(pl));
                 }
             }
             else  // 50%概率删除
             {
                 // 删除一条随机的多段线
-                if (!polylines.empty())
+                if (!vPolylines.empty())
                 {
-                    int id = rand() % polylines.size();
-                    Polyline pl = polylines[id];
+                    int id = rand() % vPolylines.size();
+                    Polyline pl = vPolylines[id];
 
                     // 释放VBO空间（EBO空间暂时不处理，等待defrag整理）
                     freeBlock(vFreeBlock, pl.vboOffset, pl.vertexCount);
 
                     // 从列表中移除
-                    polylines.erase(polylines.begin() + id);
+                    vPolylines.erase(vPolylines.begin() + id);
                     // eboUsedCount 不立即更新，defrag时会重新计算
                 }
             }
@@ -585,7 +671,7 @@ int main()
         if (needDefrag)
         {
             // 执行内存整理
-            defragmentBuffers(VBO, EBO, polylines, vFreeBlock, MaxVertices, MaxIndices, eboUsedCount);
+            defragmentBuffers(VBO, EBO, vPolylines, vFreeBlock, MaxVertices, MaxIndices, nEboUsedCount);
             lastDefrag = glfwGetTime();  // 更新上次整理时间
         }
 
@@ -596,12 +682,12 @@ int main()
         glBindVertexArray(VAO);         // 绑定VAO
 
         // 检查eboUsedCount有效性后绘制
-        if (eboUsedCount > 0 && eboUsedCount <= MaxIndices)
+        if (nEboUsedCount > 0 && nEboUsedCount <= MaxIndices)
         {
             //glDrawElements(GL_LINES, (GLsizei)eboUsedCount, GL_UNSIGNED_INT, 0);  // 绘制所有线段
 
             size_t effectiveEboCount = 0;
-            for (const auto& p : polylines)
+            for (const auto& p : vPolylines)
             {
                 effectiveEboCount += p.indexCount;
             }
@@ -612,7 +698,8 @@ int main()
             }
             else if (effectiveEboCount > MaxIndices)
             {
-                std::cerr << "Error: Valid index count(" << effectiveEboCount << ") exceeds maximum(" << MaxIndices << ")!\n";
+                std::cerr << "Error: Valid index count(" << effectiveEboCount
+                    << ") exceeds maximum(" << MaxIndices << ")!\n";
             }
         }
 
@@ -627,8 +714,8 @@ int main()
             frameCount = 0;  // 重置计数器
 
             char title[256];
-            sprintf(title, "多段线数量: %zu  |  FPS: %.1f  |  空闲块: %zu",
-                polylines.size(), fps, vFreeBlock.size());
+            sprintf(title, "Polylines: %zu  |  FPS: %.1f  |  FreeBlocks: %zu",
+                vPolylines.size(), fps, vFreeBlock.size());
             glfwSetWindowTitle(window, title);  // 设置窗口标题
         }
 

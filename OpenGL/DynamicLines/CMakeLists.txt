@@ -6,7 +6,7 @@ foreach(sub_dir ${CPP_DIR})
     file(GLOB src_files "${CMAKE_CURRENT_SOURCE_DIR}/${sub_dir}/*.cpp")
     foreach(cpp_file ${src_files})
         string(REGEX REPLACE ".+/(.+)\\..*" "\\1" file_name ${cpp_file})
-        set(app_name OpenGL_Base_${file_name})
+        set(app_name OpenGL_DynamicLines_${file_name})
         # message(STATUS "Building OpenGL executable: ${app_name}")
         
         add_executable(${app_name} ${cpp_file})

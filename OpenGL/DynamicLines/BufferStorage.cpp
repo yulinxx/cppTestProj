@@ -3,16 +3,18 @@
 //极致性能、每帧大量更新（OpenGL 4.4 + ）	✅ glBufferStorage + Persistent & Coherent Mapping
 /*
 
-与传统方式对比	                       是否可变存储	是否支持持久映射	        性能	                复杂度
-glBufferData + glBufferSubData	    ✅ 可变	    ❌ 不支持	            中等（有拷贝）	        简单
-glBufferData + glMapBufferRange	    ✅ 可变	    ❌ 不支持（加 flag 也无效）较好	            中等
-glBufferStorage + glMapBufferRange	❌ 不可变	✅ 支持（需正确 flags）	极高（零拷贝, 无同步） 较高
+与传统方式对比	                       是否可变存储	是否支持持久映射	  性能	             复杂度
+glBufferData + glBufferSubData	    ✅ 可变	    ❌ 不支持	       中等（有拷贝）	     简单
+glBufferData + glMapBufferRange	    ✅ 可变	    ❌ 不支持           较好	                中等
+glBufferStorage + glMapBufferRange	❌ 不可变	✅ 支持             极高（零拷贝, 无同步） 较高
 */
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
 
 // 检查 OpenGL 版本或扩展
 bool checkPersistentMappingSupport()
@@ -31,16 +33,20 @@ bool checkPersistentMappingSupport()
 const char* vertexShaderSource = R"(
 #version 440 core
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+out vec3 ourColor;
 void main() {
     gl_Position = vec4(aPos, 1.0);
+    ourColor = aColor;
 }
 )";
 
 const char* fragmentShaderSource = R"(
 #version 440 core
+in vec3 ourColor;
 out vec4 FragColor;
 void main() {
-    FragColor = vec4(0.8f, 0.2f, 0.6f, 1.0f);
+    FragColor = vec4(ourColor, 1.0f);
 }
 )";
 
@@ -55,6 +61,15 @@ void processInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 }
 
+// 生成随机颜色的函数
+void generateRandomColor(float& r, float& g, float& b)
+{
+    // 生成较鲜艳的颜色，避免太暗
+    r = 0.2f + (rand() % 801) / 1000.0f;  // r: 0.2-1.0
+    g = 0.2f + (rand() % 801) / 1000.0f;  // g: 0.2-1.0
+    b = 0.2f + (rand() % 801) / 1000.0f;  // b: 0.2-1.0
+}
+
 int main()
 {
     // 初始化 GLFW
@@ -63,7 +78,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4); // 必须 ≥ 4.4
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Persistent Mapping Example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Persistent Mapping Example", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -125,12 +140,26 @@ int main()
     glDeleteShader(vs);
     glDeleteShader(fs);
 
-    // 初始顶点数据
+
+
+    srand((unsigned)time(nullptr)); // 初始化随机种子
+
+    // 初始顶点数据（x, y, z, r, g, b）
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f   // 将动态更新此顶点的 Y
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f   // 将动态更新此顶点的 Y
     };
+
+    // 为每个顶点生成随机颜色
+    for (int i = 0; i < 3; i++)
+    {
+        float r, g, b;
+        generateRandomColor(r, g, b);
+        vertices[i * 6 + 3] = r;
+        vertices[i * 6 + 4] = g;
+        vertices[i * 6 + 5] = b;
+    }
 
     const size_t bufferSize = sizeof(vertices);
 
@@ -153,8 +182,12 @@ int main()
     );
 
     // 设置顶点属性
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // 位置属性（x, y, z）
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // 颜色属性（r, g, b）
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // 🔥 永久映射缓冲区（只需 map 一次！）映射缓冲区的一部分到 CPU 地址空间
     float* mappedVertices = (float*)glMapBufferRange(
@@ -189,7 +222,7 @@ int main()
         glBindVertexArray(VAO);
 
         // 🔥 直接写入映射内存！无需 glBufferSubData，无需 glMap/glUnmap
-        mappedVertices[7] = 0.5f + 0.3f * sin(time); // 第3个顶点的Y（索引=2*3+1=7）
+        mappedVertices[2 * 6 + 1] = 0.5f + 0.3f * sin(time); // 第3个顶点的Y（索引=2*6+1）
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
