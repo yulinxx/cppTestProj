@@ -11,6 +11,46 @@
 // 映射后返回的是 void*，需强转为对应类型（float*）。
 // 偏移和长度单位是 字节。
 
+/*
+glBufferSubData 和 glMapBufferRange 都是 OpenGL 中用于更新缓冲区对象（如 VBO、UBO）数据的函数，但它们在使用方式、性能特性、适用场景上有显著区别。
+
+特性：                       glBufferSubData                         	glMapBufferRange
+
+操作方式： 	        复制式：将 CPU 内存中的数据拷贝到 GPU 缓冲区     	    映射式：将 GPU 缓冲区内存直接映射到 CPU 地址空间，可直接读写
+
+是否需要中间内存：         	是（你提供一个源指针）	                        否（返回的指针就是缓冲区的一部分）
+
+典型用途： 	                小量、偶尔更新	                                频繁、大量或复杂更新
+
+优点：             简单易用，一行代码完成更新。                        	 直接在 GPU 内存上操作，无需拷贝。
+                  驱动通常会做内部优化（如双缓冲、DMA 传输）              可配合 GL_MAP_INVALIDATE_RANGE_BIT 等标志让驱动避免同步等待。
+                                                                     支持流式写入：比如循环写粒子位置，无需先在 CPU 上拼好整个数组。 
+
+缺点：             每次调用都会触发一次内存拷贝（CPU → driver → GPU）。   使用更复杂（需 map/unmap，检查返回值）。
+                    如果频繁更新大块数据，可能成为瓶颈。                  若不加 GL_MAP_UNSYNCHRONIZED_BIT，可能因 GPU 正在使用 buffer 而阻塞 CPU。
+                无法“部分构造”数据（必须准备好完整数据块再传入）。          错误使用（如忘记 unmap）会导致未定义行为。
+
+
+
+// glBufferSubData：把 data 指向的数据拷贝进 buffer
+void glBufferSubData(
+    GLenum target,
+    GLintptr offset,
+    GLsizeiptr size,
+    const void *data   // ← 源数据指针（CPU 内存）
+);
+
+// glMapBufferRange：返回 buffer 的一段可访问指针
+void *glMapBufferRange(
+    GLenum target,
+    GLintptr offset,
+    GLsizeiptr length,
+    GLbitfield access  // ← 控制读/写/优化行为
+);
+// 使用后必须调用 glUnmapBuffer
+*/
+
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
