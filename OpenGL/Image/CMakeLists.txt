@@ -15,7 +15,7 @@ foreach(SUB_DIR ${CPP_DIR})
         # message(${CPP})
         STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
 
-        set(APP_NAME OpenGL_Base_${FILE_NAME})
+        set(APP_NAME OpenGL_Image_${FILE_NAME})
         add_executable(${APP_NAME} ${CPP})
 
         find_package(GLEW REQUIRED)

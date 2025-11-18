@@ -23,7 +23,7 @@ foreach(SUB_DIR ${CPP_DIR})
     foreach(CPP ${SRC})
         STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
 
-        set(APP_NAME OpenGL_Base3D_${FILE_NAME})
+        set(APP_NAME OpenGL_MousePickup_${FILE_NAME})
         add_executable(${APP_NAME} ${CPP})
 
         # 链接库
