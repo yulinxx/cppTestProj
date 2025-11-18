@@ -326,6 +326,16 @@ int main()
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Text Atlas Rendering with Chinese", NULL, NULL);
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    
+    // Output OpenGL information
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===========================" << std::endl;
+    }
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

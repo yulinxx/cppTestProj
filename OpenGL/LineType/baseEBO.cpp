@@ -1,6 +1,6 @@
 // 生成多条连续的线(而不是单条线段的集合).
 // 使用 GL_LINE_STRIP 进行绘制,并确保顶点和索引存储时避免重复.
-// 优化后的代码将调整 generateRandomMixedLine 函数以生成多条连续的折线,同时改进索引生成逻辑,使其适配 GL_LINE_STRIP 的连续绘制方式.以下是完整代码:
+// 优化后的代码将调整 generateRandomMixedLine 函数以生成多条连续的折线,同时改进索引生成逻辑,使其适配 GL_LINE_STRIP 的连续绘制方式.
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -370,6 +370,16 @@ int main()
         // 如果初始化失败,输出错误信息并返回 -1
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
+    }
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
     }
 
     // 设置鼠标滚轮滚动回调函数

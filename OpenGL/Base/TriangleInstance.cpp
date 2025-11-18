@@ -1,5 +1,17 @@
 // 把一个三角形沿 X、Y 各排 1000 个，生成 1 000 000 个实例的方阵。
 // g++ main.cpp -lglfw -ldl -lGL -std=c++17
+
+// 核心思想 
+// OpenGL实例化就是用一份几何数据+多份参数，高效绘制多个相似物体
+// 一个VBO存基础图形（如一个立方体的顶点）
+// 另一个VBO存实例数据（如每个立方体的位置、颜色、缩放等）
+// 顶点着色器自动组合，让每个实例有不同变化
+
+// GPU绘制第0个实例时，gl_InstanceID=0
+// 从实例VBO中取出第0个数据（如位置）
+// 应用到这个实例的全部N个顶点上
+// 移动到第1个实例，gl_InstanceID=1，重复...
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -9,8 +21,8 @@
 
 // ---------- 着色器 ----------
 const char* vs = R"(#version 330 core
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in mat4 instanceMatrix;   // 占用 4 个 attribute 槽
+layout (location = 0) in vec2 aPos;   // 基础图形顶点
+layout (location = 1) in mat4 instanceMatrix;   // 占用 4 个 attribute 槽 每个实例的位置矩阵
 void main() {
     gl_Position = instanceMatrix * vec4(aPos, 0.0, 1.0);
 })";
@@ -82,6 +94,8 @@ int main()
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
+
+    // VBO1: 基础图形（只需设置一次）
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(tri), tri, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -106,6 +120,7 @@ int main()
         }
     }
 
+    // VBO2: 实例数据（每个实例一个矩阵）
     GLuint instanceVBO;
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
@@ -128,9 +143,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(program);
         glBindVertexArray(VAO);
+
+        // 绘制 N 个实例，每个实例用相同的3个顶点
         glDrawArraysInstanced(GL_TRIANGLES, 0, 3, NX * NY);
 
-        glfwSwapBuffers(w); glfwPollEvents();
+        glfwSwapBuffers(w); 
+        glfwPollEvents();
     }
 
     glDeleteVertexArrays(1, &VAO);

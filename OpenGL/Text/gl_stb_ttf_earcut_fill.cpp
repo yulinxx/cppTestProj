@@ -58,7 +58,7 @@ std::vector<unsigned char> readFontFile(const std::string& filename)
     if (!file)
     {
         // 输出错误信息
-        std::cerr << "无法打开字体文件: " << filename << std::endl;
+        std::cerr << "Failed to open font file: " << filename << std::endl;
         // 终止程序
         exit(EXIT_FAILURE);
     }
@@ -486,6 +486,16 @@ int main()
         std::cerr << "Failed to init GLAD" << std::endl;
         // 返回错误状态码
         return -1;
+    }
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
     }
 
     // 初始化 OpenGL 着色器程序

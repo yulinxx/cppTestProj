@@ -114,14 +114,14 @@ void initFont(const char* fontPath, const wchar_t* text, float fontSize, float x
     FT_Library ft;
     if (FT_Init_FreeType(&ft))
     {
-        std::cerr << "无法初始化 FreeType 库!" << std::endl;
+        std::cerr << "Failed to initialize FreeType library!" << std::endl;
         std::exit(1);
     }
 
     FT_Face face;
     if (FT_New_Face(ft, fontPath, 0, &face))
     {
-        std::cerr << "无法加载字体文件!" << std::endl;
+        std::cerr << "Failed to load font file!" << std::endl;
         std::exit(1);
     }
 
@@ -133,13 +133,13 @@ void initFont(const char* fontPath, const wchar_t* text, float fontSize, float x
         FT_UInt glyph_index = FT_Get_Char_Index(face, *text);
         if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT))
         {
-            std::cerr << "无法加载字形!" << std::endl;
+            std::cerr << "Failed to load glyph!" << std::endl;
             continue;
         }
 
         if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL))
         {
-            std::cerr << "无法渲染字形!" << std::endl;
+            std::cerr << "Failed to render glyph!" << std::endl;
             continue;
         }
 
@@ -264,6 +264,16 @@ int main()
         printf("GLAD 初始化失败!\n");
         // 返回错误状态码
         return -1;
+    }
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
     }
 
     // 创建顶点着色器对象

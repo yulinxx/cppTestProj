@@ -302,6 +302,16 @@ int main()
         glfwTerminate();  // 终止GLFW
         return -1;
     }
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
+    }
 
     // 设置视口和启用深度测试
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);  // 设置视口大小

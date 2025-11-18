@@ -59,7 +59,7 @@ std::vector<unsigned char> readFontFile(const std::string& filename)
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
     if (!file)
     {
-        std::cerr << "无法打开字体文件: " << filename << std::endl;
+        std::cerr << "Failed to open font file: " << filename << std::endl;
         exit(EXIT_FAILURE);
     }
     size_t size = file.tellg();
@@ -256,6 +256,16 @@ int main()
     if (!window) return -1;
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
+    }
 
     // 初始化 OpenGL
     initOpenGL();

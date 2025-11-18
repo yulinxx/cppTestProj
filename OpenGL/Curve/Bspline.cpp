@@ -262,9 +262,16 @@ int main()
         glfwTerminate();
         return -1;
     }
-
-    // 打印 OpenGL 版本信息
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
+    }
 
     // 创建着色器程序
     GLuint shaderProgram = createShaderProgram();

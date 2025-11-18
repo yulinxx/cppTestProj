@@ -72,6 +72,16 @@ int main()
     GLFWwindow* win = glfwCreateWindow(800, 600, "Boost+GLM OK!", nullptr, nullptr);
     glfwMakeContextCurrent(win);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
+    }
 
     while (!glfwWindowShouldClose(win))
     {

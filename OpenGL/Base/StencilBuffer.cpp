@@ -1,11 +1,13 @@
-#include <GL/glew.h>  
-#include <GLFW/glfw3.h> 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 // 检查OpenGL错误，便于调试
-void checkGLError(const char* stage) {
+void checkGLError(const char* stage)
+{
     GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
+    while ((err = glGetError()) != GL_NO_ERROR)
+    {
         std::cerr << "OpenGL error at " << stage << ": " << err << std::endl;
     }
 }
@@ -13,9 +15,9 @@ void checkGLError(const char* stage) {
 // 顶点着色器源码
 const char* vertexShaderSource = R"(
 #version 330 core
-layout (location = 0) in vec3 aPos; 
+layout (location = 0) in vec3 aPos;
 void main() {
-    gl_Position = vec4(aPos, 1.0); 
+    gl_Position = vec4(aPos, 1.0);
 }
 )";
 
@@ -38,13 +40,15 @@ void main() {
 )";
 
 // 创建并编译着色器
-GLuint createShader(GLenum type, const char* source) {
+GLuint createShader(GLenum type, const char* source)
+{
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
     GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
         std::cerr << "Shader compilation failed: " << infoLog << std::endl;
@@ -53,7 +57,8 @@ GLuint createShader(GLenum type, const char* source) {
 }
 
 // 创建着色器程序
-GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource) {
+GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource)
+{
     GLuint vertexShader = createShader(GL_VERTEX_SHADER, vertexSource);
     GLuint fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentSource);
     GLuint program = glCreateProgram();
@@ -62,7 +67,8 @@ GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource)
     glLinkProgram(program);
     GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success)
+    {
         char infoLog[512];
         glGetProgramInfoLog(program, 512, nullptr, infoLog);
         std::cerr << "Program linking failed: " << infoLog << std::endl;
@@ -72,9 +78,11 @@ GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource)
     return program;
 }
 
-int main() {
+int main()
+{
     // 初始化GLFW
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -87,7 +95,8 @@ int main() {
 
     // 创建窗口
     GLFWwindow* window = glfwCreateWindow(800, 600, "Enhanced Stencil Buffer Example", nullptr, nullptr);
-    if (!window) {
+    if (!window)
+    {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -96,7 +105,8 @@ int main() {
 
     // 初始化GLEW
     glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) {
+    if (glewInit() != GLEW_OK)
+    {
         std::cerr << "Failed to initialize GLEW" << std::endl;
         glfwTerminate();
         return -1;
@@ -166,7 +176,8 @@ int main() {
     checkGLError("VAO/VBO setup");
 
     // 主循环
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 

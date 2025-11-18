@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QDebug>
 #include <QFile>
-#include <QOpenGLShaderProgram> 
+#include <QOpenGLShaderProgram>
 
 // --- OpenGL 着色器源代码 ---
 // 顶点着色器
@@ -88,7 +88,6 @@ void drawTriangle(QOpenGLFunctions_3_3_Core* f)
     f->glDeleteVertexArrays(1, &VAO);
     f->glDeleteBuffers(1, &VBO);
 }
-
 
 /**
  * @brief 执行 OpenGL 离屏渲染并将结果保存为文件
@@ -223,7 +222,6 @@ bool renderOffScreen(const QString& outputFileName, int width, int height)
     qDebug() << "Successfully rendered off-screen and saved to:" << outputFileName;
     return true;
 }
-
 
 // --- main 函数：只调用，不显示类 ---
 int main(int argc, char* argv[])

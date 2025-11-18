@@ -79,7 +79,7 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     {
         char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-        std::cerr << "顶点着色器编译失败:\n" << infoLog << std::endl;
+        std::cerr << "Vertex shader compilation failed:\n" << infoLog << std::endl;
     }
 
     // 创建并编译片段着色器
@@ -93,7 +93,7 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-        std::cerr << "片段着色器编译失败:\n" << infoLog << std::endl;
+        std::cerr << "Fragment shader compilation failed:\n" << infoLog << std::endl;
     }
 
     // 创建着色器程序并链接
@@ -108,7 +108,7 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
     {
         char infoLog[512];
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-        std::cerr << "着色器程序链接失败:\n" << infoLog << std::endl;
+        std::cerr << "Shader program linking failed:\n" << infoLog << std::endl;
     }
 
     // 删除着色器对象(已链接到程序中,不再需要)
@@ -266,6 +266,16 @@ int main()
     {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
+    }
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
     }
 
     // 设置滚轮回调函数

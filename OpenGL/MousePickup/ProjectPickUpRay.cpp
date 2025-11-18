@@ -315,7 +315,7 @@ void mouseClickCallback(GLFWwindow* window, int button, int action, int mods)
     // 步骤7: 输出选中信息
     if (hitId != -1)
     {
-        std::cout << "选中三角形 ID: " << hitId << ", 深度: " << closestT << std::endl;
+        std::cout << "Selected Triangle ID: " << hitId << ", Depth: " << closestT << std::endl;
     }
 }
 
@@ -490,6 +490,16 @@ int main()
     // 6. 初始化GLAD - 加载OpenGL函数指针
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         return -1;  // 加载失败
+    
+    // 输出 OpenGL 信息
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
+    }
 
     // 7. 初始化OpenGL资源
     initOpenGL();
