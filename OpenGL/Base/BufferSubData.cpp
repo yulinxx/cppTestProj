@@ -117,8 +117,8 @@ int main()
         time += 0.016f; // 假设 ~60 FPS
         float newY = 0.5f + 0.3f * sin(time); // 在 0.2 ~ 0.8 之间跳动
 
-        // 使用 glBufferSubData 更新第三个顶点（索引为 2）的 Y 值
-        // 第三个顶点从字节偏移 2 * 3 * sizeof(float) 开始
+        // 使用 glBufferSubData 更新第三个顶点（索引为 2）的 Y 值  第7个float，即Y坐标
+        // 第三个顶点从字节偏移 2 * 3 * sizeof(float) 开始 
         //glBufferSubData(target, offset, size, data)：
         glBufferSubData(GL_ARRAY_BUFFER, 2 * 3 * sizeof(float) + 1 * sizeof(float), sizeof(float), &newY);
 
