@@ -233,6 +233,7 @@ void main(){ FragColor = fColor; }
             }
             return s;
             };
+
         GLuint v = compile(vs, GL_VERTEX_SHADER), g = compile(gs, GL_GEOMETRY_SHADER), f = compile(fs, GL_FRAGMENT_SHADER);
         prog = glCreateProgram();
         glAttachShader(prog, v); glAttachShader(prog, g); glAttachShader(prog, f);
@@ -303,10 +304,11 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* win = glfwCreateWindow(1400, 1000, "2D CAD - 1M primitives + RTree + GeometryShader", nullptr, nullptr);
+    GLFWwindow* win = glfwCreateWindow(1400, 1000, 
+        "2D CAD - 1M primitives + RTree + GeometryShader", nullptr, nullptr);
     glfwMakeContextCurrent(win);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -330,7 +332,7 @@ int main()
         };
 
     //constexpr int N = 10000;
-    constexpr int N = 10;
+    constexpr int N = 100;  // 增加图元数量以便更容易看到
     for (int i = 0; i < 4 * N; ++i) add(new Line({ dist(rng),dist(rng) }, { dist(rng),dist(rng) },
         vec4(col(rng), col(rng), col(rng), 1), 1.5f + 3.f * col(rng)));
 

@@ -35,23 +35,23 @@ const size_t MAX_INDICES = 4000000;   // 最大索引数
 
 // 初始多段线配置
 const size_t MAX_INITIAL_POLYLINES = 1000000;  // 最大尝试创建的初始多段线数量
-const int MIN_VERTICES_PER_POLYLINE = 4;      // 每条多段线最小顶点数
+const int MIN_VERTICES_PER_POLYLINE = 4;       // 每条多段线最小顶点数
 const int MAX_VERTICES_PER_POLYLINE = 100;     // 每条多段线最大顶点数
 
 // 每帧更新配置
-const int MIN_UPDATES_PER_FRAME = 50;    // 每帧最少更新的多段线数量
+const int MIN_UPDATES_PER_FRAME = 50;     // 每帧最少更新的多段线数量
 const int MAX_UPDATES_PER_FRAME = 700;    // 每帧最多更新的多段线数量
 
 // 周期性操作配置
-const double OPERATION_INTERVAL = 1.0;   // 添加/删除操作的时间间隔（秒）
-const int UPDATE_VERTEX_PROBABILITY = 4; // 更新顶点的概率（1/4）
+const double OPERATION_INTERVAL = 1.0;    // 添加/删除操作的时间间隔（秒）
+const int UPDATE_VERTEX_PROBABILITY = 4;  // 更新顶点的概率（1/4）
 
 // 内存碎片整理配置
-const size_t FRAG_THRESHOLD = 20;        // 空闲块数量阈值，超过时触发整理
-const double DEFRAG_INTERVAL = 5.0;      // 两次整理之间的最小时间间隔（秒）
+const size_t FRAG_THRESHOLD = 20;         // 空闲块数量阈值，超过时触发整理
+const double DEFRAG_INTERVAL = 5.0;       // 两次整理之间的最小时间间隔（秒）
 
 // 帧率更新配置
-const double FPS_UPDATE_INTERVAL = 1;  // FPS更新间隔（秒）
+const double FPS_UPDATE_INTERVAL = 1;     // FPS更新间隔（秒）
 
 // ----------------------------- (数据结构) -----------------------------
 // 表示一条多段线（由多个线段连接的顶点序列）
@@ -275,6 +275,7 @@ void defragmentBuffers(GLuint VBO, GLuint EBO,
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     void* vPtr = glMapBufferRange(GL_ARRAY_BUFFER, 0, MaxVertices * sizeof(float) * 5,
         GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);  // INVALIDATE: 丢弃原有内容
+
     if (!vPtr)
     {
         std::cerr << "VBO mapping failed!\n";
@@ -285,6 +286,7 @@ void defragmentBuffers(GLuint VBO, GLuint EBO,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     void* iPtr = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, 0, MaxIndices * sizeof(unsigned int),
         GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
     if (!iPtr)
     {
         std::cerr << "EBO mapping failed!\n";
@@ -364,7 +366,6 @@ int main()
     // glfwSwapInterval(1): 启用V-Sync，帧率锁定显示器刷新率(通常60FPS)
     // glfwSwapInterval(0): 禁用V-Sync，帧率无限制
     //glfwSwapInterval(0);
-    glfwSwapInterval(0);
 
     // 加载OpenGL函数指针
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -374,14 +375,14 @@ int main()
     }
 
     // 输出OpenGL信息
-    //{
-    //    std::cout << "=== OpenGL Information ===" << std::endl;
-    //    std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
-    //    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    //    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-    //    std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-    //    std::cout << "===================" << std::endl;
-    //}
+    {
+        std::cout << "=== OpenGL Information ===" << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+        std::cout << "===================" << std::endl;
+    }
 
     // 编译链接着色器程序
     GLuint program = buildProgram();

@@ -432,7 +432,7 @@ int main()
     }
 
     glfwMakeContextCurrent(win);
-    glfwSwapInterval(0); // 禁用V-Sync
+    //glfwSwapInterval(0); // 禁用V-Sync
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
