@@ -139,7 +139,7 @@ std::vector<VecPt> computeBSplinePoints(const Bspline& spline, int numPoints)
 }
 
 // GLSL 顶点着色器代码
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 460 core
 // 顶点属性，位置坐标
 layout (location = 0) in vec2 aPos;
@@ -150,7 +150,7 @@ void main() {
 )";
 
 // GLSL 片段着色器代码
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 460 core
 // 输出的片段颜色
 out vec4 FragColor;
@@ -197,9 +197,9 @@ GLuint compileShader(GLenum type, const char* source)
 GLuint createShaderProgram()
 {
     // 编译顶点着色器
-    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vs);
     // 编译片段着色器
-    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fs);
 
     // 创建着色器程序对象
     GLuint program = glCreateProgram();
@@ -262,7 +262,7 @@ int main()
         glfwTerminate();
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

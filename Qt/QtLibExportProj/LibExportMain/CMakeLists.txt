@@ -12,15 +12,15 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 # 设置包含Qt5头文件的目录
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
-set(EXE_NAME LibExportMain)
+set(APP_NAME LibExportMain)
 
-add_executable(${EXE_NAME} main.cpp MainWindow.cpp)
+add_executable(${APP_NAME} main.cpp MainWindow.cpp)
 
-target_include_directories(${EXE_NAME} PUBLIC ./)
-target_include_directories(${EXE_NAME} PUBLIC ../LibExportImplementation/)
+target_include_directories(${APP_NAME} PUBLIC ./)
+target_include_directories(${APP_NAME} PUBLIC ../LibExportImplementation/)
 
-#target_link_libraries(${EXE_NAME} PUBLIC Interface)
-target_link_libraries(${EXE_NAME} PUBLIC LibExportImplementation)
+#target_link_libraries(${APP_NAME} PUBLIC Interface)
+target_link_libraries(${APP_NAME} PUBLIC LibExportImplementation)
 
 
-target_link_libraries(${EXE_NAME} PUBLIC  Qt5::Core Qt5::Widgets)
+target_link_libraries(${APP_NAME} PUBLIC  Qt5::Core Qt5::Widgets)

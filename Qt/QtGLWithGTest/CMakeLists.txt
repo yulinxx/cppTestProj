@@ -34,12 +34,12 @@ include_directories(${Qt5Widgets_INCLUDE_DIRS})
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-set(EXE_NAME QtWithGTest_Main)
+set(APP_NAME QtWithGTest_Main)
 
 # 主程序目标
-add_executable(${EXE_NAME} src/main.cpp src/OpenGLWidget.cpp)
-target_include_directories(${EXE_NAME} PUBLIC ./)
-target_link_libraries(${EXE_NAME} PUBLIC Qt5::Core Qt5::Widgets)
+add_executable(${APP_NAME} src/main.cpp src/OpenGLWidget.cpp)
+target_include_directories(${APP_NAME} PUBLIC ./)
+target_link_libraries(${APP_NAME} PUBLIC Qt5::Core Qt5::Widgets)
 
 # 添加测试目录
 add_subdirectory(tests)

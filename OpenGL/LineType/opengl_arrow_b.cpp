@@ -15,7 +15,7 @@
 constexpr float X = 4.0f;
 
 // Vertex Shader: 传递控制点位置
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 400 core
 // 输入:顶点位置
 layout(location = 0) in vec2 in_pos;
@@ -193,7 +193,7 @@ void main() {
 )";
 
 // Fragment Shader: 绘制蓝色线条
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 400 core
 // 输入:从几何着色器传递过来的位置
 in vec2 geo_pos;
@@ -217,7 +217,7 @@ GLuint loadShader()
     // 创建顶点着色器
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     // 指定顶点着色器的源代码
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glShaderSource(vertexShader, 1, &vs, nullptr);
     // 编译顶点着色器
     glCompileShader(vertexShader);
 
@@ -245,7 +245,7 @@ GLuint loadShader()
     // 创建片段着色器
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     // 指定片段着色器的源代码
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glShaderSource(fragmentShader, 1, &fs, nullptr);
     // 编译片段着色器
     glCompileShader(fragmentShader);
 
@@ -429,7 +429,7 @@ int main()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

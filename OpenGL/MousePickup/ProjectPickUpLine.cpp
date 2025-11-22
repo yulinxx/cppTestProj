@@ -73,7 +73,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 // 着色器源码
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 460 core
 layout (location = 0) in vec3 aPos;
 uniform mat4 model;
@@ -84,7 +84,7 @@ void main() {
 }
 )";
 
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 460 core
 out vec4 FragColor;
 uniform vec3 color;
@@ -283,7 +283,7 @@ int main()
         glfwTerminate();
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -302,8 +302,8 @@ int main()
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // 创建着色器程序
-    shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
-    pickShaderProgram = createShaderProgram(vertexShaderSource, pickFragmentShaderSource);
+    shaderProgram = createShaderProgram(vs, fs);
+    pickShaderProgram = createShaderProgram(vs, pickFragmentShaderSource);
     if (shaderProgram == 0 || pickShaderProgram == 0)
     {
         std::cerr << "Failed to create shader programs" << std::endl;

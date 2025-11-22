@@ -22,12 +22,12 @@ foreach(SUB_DIR ${CPP_DIR})
     foreach(CPP ${SRC})
         STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
 
-        set(EXE_NAME DUMP_${FILE_NAME})
-        add_executable(${EXE_NAME} ${CPP})
+        set(APP_NAME DUMP_${FILE_NAME})
+        add_executable(${APP_NAME} ${CPP})
 
-        # target_include_directories(${EXE_NAME} PRIVATE ./)
-        # target_link_libraries(${EXE_NAME} ${PROTOBUF_LIBRARY_DEBUG}) 
-        target_link_libraries(${EXE_NAME} PRIVATE unofficial::breakpad::libbreakpad unofficial::breakpad::libbreakpad_client)
+        # target_include_directories(${APP_NAME} PRIVATE ./)
+        # target_link_libraries(${APP_NAME} ${PROTOBUF_LIBRARY_DEBUG}) 
+        target_link_libraries(${APP_NAME} PRIVATE unofficial::breakpad::libbreakpad unofficial::breakpad::libbreakpad_client)
 
     endforeach(CPP)    
 

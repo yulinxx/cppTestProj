@@ -420,7 +420,7 @@ int main()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

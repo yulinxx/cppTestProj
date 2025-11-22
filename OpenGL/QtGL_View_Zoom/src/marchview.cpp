@@ -45,7 +45,7 @@ void MarchView::initializeGL()
         qFatal("Could not initialize OpenGL 4.0 functions");
     }
 
-    const char* vertexShaderSource = R"(
+    const char* vs = R"(
         #version 400
         layout(location = 0) in vec2 position;
         uniform mat4 projection;
@@ -57,7 +57,7 @@ void MarchView::initializeGL()
             gl_Position = projection * vec4(scaledPos, 0.0, 1.0);
         }
     )";
-    const char* fragmentShaderSource = R"(
+    const char* fs = R"(
         #version 400
         out vec4 fragColor;
         void main()
@@ -66,8 +66,8 @@ void MarchView::initializeGL()
         }
     )";
     m_lineProgram = new QOpenGLShaderProgram;
-    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
-    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
+    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
+    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fs);
     m_lineProgram->link();
     glGenVertexArrays(1, &m_lineVao);
     glGenBuffers(1, &m_lineVbo);

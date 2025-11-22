@@ -16,7 +16,7 @@
 constexpr float X = 4.0f; // 定义窗口的可见范围,用于正交投影
 
 // 顶点着色器源代码
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout(location = 0) in vec2 in_pos;  // 顶点位置 (x,y)
 layout(location = 1) in float in_len; // 顶点到起点的累计长度
@@ -38,7 +38,7 @@ void main() {
 )";
 
 // 片段着色器源代码
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 in float dashParam;    // 从顶点着色器传入的虚线参数
 uniform vec4 color;    // 线条颜色
@@ -65,11 +65,11 @@ void main() {
 )";
 
 // 加载并编译着色器程序
-GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
+GLuint loadShader(const char* vs, const char* fs)
 {
     // 创建并编译顶点着色器
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glShaderSource(vertexShader, 1, &vs, nullptr);
     glCompileShader(vertexShader);
 
     // 检查顶点着色器编译状态
@@ -84,7 +84,7 @@ GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSour
 
     // 创建并编译片段着色器
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glShaderSource(fragmentShader, 1, &fs, nullptr);
     glCompileShader(fragmentShader);
 
     // 检查片段着色器编译状态
@@ -267,7 +267,7 @@ int main()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -282,7 +282,7 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
 
     // 加载并编译着色器程序
-    GLuint shaderProgram = loadShader(vertexShaderSource, fragmentShaderSource);
+    GLuint shaderProgram = loadShader(vs, fs);
     glUseProgram(shaderProgram);
 
     // 设置正交投影矩阵

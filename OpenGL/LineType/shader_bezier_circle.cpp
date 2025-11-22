@@ -101,7 +101,7 @@ int main()
         glfwTerminate();
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -113,7 +113,7 @@ int main()
     }
 
     // 修改顶点着色器代码
-    const char* vertexShaderSource = R"(
+    const char* vs = R"(
         #version 330 core
         uniform int numPoints; // 新增：用于指定采样点数
         uniform vec2 controlPoints[4];
@@ -150,7 +150,7 @@ int main()
     )";
 
     // 片段着色器代码
-    const char* fragmentShaderSource = R"(
+    const char* fs = R"(
         #version 330 core
         out vec4 FragColor;
 
@@ -161,7 +161,7 @@ int main()
     )";
 
     // 创建着色器程序
-    GLuint shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
+    GLuint shaderProgram = createShaderProgram(vs, fs);
 
     // 定义三阶贝塞尔曲线的四个控制点
     std::vector<float> controlPoints = {

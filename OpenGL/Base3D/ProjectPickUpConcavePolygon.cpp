@@ -45,7 +45,7 @@ void checkGLError(const char* operation)
 
 // ===================== 着色器源码 =====================
 // 顶点着色器: 处理坐标变换
-const char* vertexShaderSource = R"(#version 460 core
+const char* vs = R"(#version 460 core
 layout (location = 0) in vec3 aPos;    // 顶点位置输入
 uniform mat4 model;     // 模型矩阵
 uniform mat4 view;      // 视图矩阵
@@ -56,7 +56,7 @@ void main(){
 })";
 
 // 标准片段着色器: 用于正常显示多边形
-const char* fragmentShaderSource = R"(#version 460 core
+const char* fs = R"(#version 460 core
 out vec4 FragColor;     // 输出颜色
 uniform vec3 color;     // 输入颜色
 void main(){
@@ -412,9 +412,9 @@ int main()
     glfwSetMouseButtonCallback(window, mouse_button_callback);  // 注册鼠标回调
 
     // 加载OpenGL函数指针
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         return -1;
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -430,8 +430,8 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     // 2. 初始化着色器和多边形数据
-    shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
-    pickShaderProgram = createShaderProgram(vertexShaderSource, pickFragmentShaderSource);
+    shaderProgram = createShaderProgram(vs, fs);
+    pickShaderProgram = createShaderProgram(vs, pickFragmentShaderSource);
     initPolygons();  // 生成随机凹多边形
     initBuffers();   // 创建OpenGL缓冲区
 

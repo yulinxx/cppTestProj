@@ -1,3 +1,73 @@
+/*
+## 概述
+这是一个基于OpenGL的高性能动态多段线渲染程序，能够高效地管理、渲染和更新大量的多段线数据。
+程序采用了多种优化技术，包括双缓冲机制、内存碎片整理和高效的对象引用管理系统。
+
+## 核心功能
+1. 大规模多段线渲染 ：能够渲染多达50,000条或更多的多段线，每条多段线包含4-12个顶点
+2. 动态数据更新 ：支持在运行时随机更新部分多段线顶点位置，实现动态效果
+3. 对象生命周期管理 ：通过槽位映射(SlotMap)实现高效的多段线对象创建和删除
+4. 内存碎片整理 ：自动检测并整理内存碎片，保持渲染性能
+5. 性能监控 ：实时显示FPS和多段线数量等性能指标
+
+## 系统架构
+### 1. 数据结构
+- Handle ：句柄结构，使用索引+代数组合防止悬垂引用
+- PolylineData ：存储单条多段线的顶点数据、颜色和在缓冲区中的位置信息
+- FreeBlockMap ：使用有序映射管理空闲内存块
+
+### 2. 内存管理
+- 首次适应算法 ：高效查找合适的内存块
+- 空闲块合并 ：释放内存时自动与相邻块合并，减少碎片
+- 双缓冲设计 ：使用两个缓冲区交替进行渲染和数据更新，提高效率
+
+### 3. 对象管理系统
+- SlotMap ：结合数组和链表优势，提供O(1)时间复杂度的对象创建和删除
+- 代数跟踪 ：通过递增代数检测无效句柄
+- Swap-and-Pop ：删除元素时避免大量数据移动
+
+### 4. OpenGL资源管理
+- 双缓冲区 ：两个VBO和VAO交替使用
+- 同步机制 ：使用GLsync fence确保GPU和CPU正确同步
+- 顶点数据格式 ：每个顶点包含位置(X,Y)和颜色(RGB)信息
+
+## 主要工作流程
+### 初始化阶段
+1. 初始化GLFW和OpenGL上下文
+2. 创建并配置双缓冲VBO和VAO
+3. 构建并链接着色器程序
+4. 初始化多段线数据和内存管理系统
+5. 创建初始的随机多段线集合
+
+### 主渲染循环
+1. 事件处理 ：调用glfwPollEvents处理用户输入
+2. 数据更新 ：
+   - 每200ms随机更新最多1000条多段线的部分顶点
+   - 每5秒随机添加或删除多段线
+   - 当空闲块过多时执行碎片整理
+3. 渲染 ：清除缓冲区并绘制所有多段线
+4. 性能监控 ：每秒更新FPS显示和窗口标题
+5. 缓冲区交换 ：调用glfwSwapBuffers显示渲染结果
+
+### 碎片整理过程
+1. 将所有活跃多段线数据紧凑地复制到后台缓冲区
+2. 重建后台缓冲区的空闲块列表
+3. 等待GPU完成当前帧渲染
+4. 创建新的同步栅栏
+5. 切换到整理后的缓冲区
+
+## 技术亮点
+1. 高效内存管理 ：使用有序映射实现的首次适应算法，支持快速内存分配和合并
+2. 稳定的对象引用 ：Handle系统确保在对象删除和重用后不会出现悬垂引用
+3. 双缓冲优化 ：分离渲染和数据更新过程，避免渲染卡顿
+4. GPU同步 ：使用fence机制确保CPU和GPU操作的正确同步
+5. 低内存开销 ：对象池和数据压缩策略减少内存占用和GC压力
+
+## 代码组织
+代码按功能模块清晰组织，包括配置常量、数据结构定义、内存分配器、SlotMap实现、
+OpenGL状态管理、初始化函数、辅助函数和主函数等部分，整体结构清晰，注释完善。
+*/
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -10,7 +80,7 @@
 
 // ====================== 1. 配置常量 ======================
 constexpr size_t MAX_VERTICES = 500'000;    // 顶点缓冲区最大容量（顶点数量）
-constexpr size_t INIT_PL_NUMS = 50'000;     // 初始化线段数量 
+constexpr size_t INIT_PL_NUMS = 50'000;     // 初始化线段数量
 constexpr size_t BUFFER_COUNT = 2;          // 双缓冲数量
 constexpr size_t VERTEX_STRIDE = 5;         // 每个顶点的浮点数数量（X, Y, R, G, B）
 
@@ -39,10 +109,9 @@ struct Handle
  */
 struct PolylineData
 {
-    size_t offset = 0;           // 在顶点缓冲区中的偏移量（以顶点为单位）
-    size_t count = 0;            // 顶点数量
-    float color[3] = { 1, 1, 1 };// 多段线颜色 (RGB)
-    std::vector<float> verts;    // 顶点数据CPU备份 (X,Y,R,G,B交替存储)
+    size_t nPtOffset = 0;           // 在顶点缓冲区中的偏移量（以顶点为单位）
+    size_t nPtSz = 0;            // 顶点数量
+    std::vector<float> nPts;    // 顶点数据CPU备份 (X,Y,R,G,B交替存储)
 };
 
 // ====================== 3. 内存分配器 ======================
@@ -106,13 +175,13 @@ void deallocate(FreeBlockMap& fb, size_t offset, size_t size)
         return; // 忽略大小为0的释放请求
 
     // 查找第一个起始位置大于等于offset的块（用于后继检查）
-    auto next = fb.lower_bound(offset);
+    auto nextIter = fb.lower_bound(offset);
     bool mergedPrev = false; // 标记是否与前驱块合并
 
     // 检查前驱块（前一个空闲块）
-    if (next != fb.begin())
+    if (nextIter != fb.begin())
     {
-        auto prev = std::prev(next);
+        auto prev = std::prev(nextIter);
         // 检查前驱块是否与当前释放块相邻（前驱结束位置 == 当前开始位置）
         if (prev->first + prev->second == offset)
         {
@@ -125,11 +194,11 @@ void deallocate(FreeBlockMap& fb, size_t offset, size_t size)
     }
 
     // 检查后继块（下一个空闲块）
-    if (next != fb.end() && offset + size == next->first)
+    if (nextIter != fb.end() && offset + size == nextIter->first)
     {
         // 与后继相邻，合并后继块
-        size_t nextSize = next->second;
-        fb.erase(next); // 移除后继块
+        size_t nextSize = nextIter->second;
+        fb.erase(nextIter); // 移除后继块
 
         if (mergedPrev)
         {
@@ -174,60 +243,53 @@ struct SlotMapEntry
 class PolylineSlotMap
 {
 private:
-    std::vector<SlotMapEntry> vSlotMapEntry;    // 槽位数组，管理对象生命周期
-    std::vector<uint32_t> vDataIndices;         // 槽位到数据索引的映射 slots[slot] -> data index
-    std::vector<uint32_t> vSlotIndices;         // 数据索引到槽位的映射 data[index] -> slot index
-    uint32_t nFreeHead = ~0u;                   // 空闲链表头指针
+    std::vector<SlotMapEntry> m_vSlotMapEntry;    // 槽位数组，管理对象生命周期
+    std::vector<uint32_t> m_vDataIndices;         // 槽位到数据索引的映射 slots[slot] -> data index
+    std::vector<uint32_t> m_vSlotIndices;         // 数据索引到槽位的映射 data[index] -> slot index
+    uint32_t m_nFreeHead = ~0u;                   // 空闲链表头指针 无符号整数的最大值
 
 public:
-    std::vector<PolylineData> vPlDatas;        // 实际的多段线数据存储
+    std::vector<PolylineData> m_vPlDatas;         // 实际的多段线数据存储
 
     /**
      * @brief 创建新的多段线对象
      * @param vertexCount 顶点数量
-     * @param color 颜色数组指针，默认为白色
      * @return 新创建对象的句柄
      */
-    Handle create(size_t vertexCount, const float* color = nullptr)
+    Handle create(size_t vertexCount)
     {
         uint32_t nSlot;
 
         // 检查是否有可重用的空闲槽
-        if (nFreeHead != ~0u)
+        if (m_nFreeHead != ~0u)
         {
             // 从空闲链表中取出槽位
-            nSlot = nFreeHead;
-            nFreeHead = vSlotMapEntry[nSlot].nextFree;
+            nSlot = m_nFreeHead;
+            m_nFreeHead = m_vSlotMapEntry[nSlot].nextFree;
         }
         else
         {
             // 没有空闲槽，扩展槽位数组
-            nSlot = (uint32_t)vSlotMapEntry.size();
-            vSlotMapEntry.emplace_back();
-            vDataIndices.push_back(0);
-            vSlotIndices.push_back(nSlot);
-            vPlDatas.emplace_back();
+            nSlot = (uint32_t)m_vSlotMapEntry.size();
+
+            m_vSlotMapEntry.emplace_back();
+            m_vDataIndices.push_back(0);
+            m_vSlotIndices.push_back(nSlot);
+            m_vPlDatas.emplace_back();
         }
 
         // 获取新数据在polylines向量中的索引
-        uint32_t nDataIdx = (uint32_t)vPlDatas.size() - 1;
+        uint32_t nDataIdx = (uint32_t)m_vPlDatas.size() - 1;
 
         // 初始化槽位状态
-        vSlotMapEntry[nSlot].alive = true;
-        vSlotMapEntry[nSlot].generation++;
-        vDataIndices[nSlot] = nDataIdx;
-        vSlotIndices[nDataIdx] = nSlot;
+        m_vSlotMapEntry[nSlot].alive = true;
+        m_vSlotMapEntry[nSlot].generation++;
 
-        // 设置颜色（默认为白色）
-        float c[3] = { 1, 1, 1 };
-        if (color)
-            std::memcpy(c, color, sizeof(c));
+        m_vDataIndices[nSlot] = nDataIdx;
 
-        vPlDatas[nDataIdx].color[0] = c[0];
-        vPlDatas[nDataIdx].color[1] = c[1];
-        vPlDatas[nDataIdx].color[2] = c[2];
+        m_vSlotIndices[nDataIdx] = nSlot;
 
-        return { nSlot, vSlotMapEntry[nSlot].generation };
+        return { nSlot, m_vSlotMapEntry[nSlot].generation };
     }
 
     /**
@@ -241,9 +303,9 @@ public:
 
         uint32_t nSlot = h.index;
         // 将槽位加入空闲链表
-        vSlotMapEntry[nSlot].nextFree = nFreeHead;
-        nFreeHead = nSlot;
-        vSlotMapEntry[nSlot].alive = false;
+        m_vSlotMapEntry[nSlot].nextFree = m_nFreeHead;
+        m_nFreeHead = nSlot;
+        m_vSlotMapEntry[nSlot].alive = false;
         // 注意：此时polylines中的数据尚未被移除，需要后续调用remove_at_data_index
     }
 
@@ -255,31 +317,31 @@ public:
      */
     void remove_at_data_index(size_t nDataIdx)
     {
-        if (nDataIdx >= vPlDatas.size())
+        if (nDataIdx >= m_vPlDatas.size())
             return;
 
         // 1. 销毁对应的槽位
-        uint32_t nSlotToDelete = vSlotIndices[nDataIdx];
-        destroy({ nSlotToDelete, vSlotMapEntry[nSlotToDelete].generation });
+        uint32_t nSlotToDelete = m_vSlotIndices[nDataIdx];
+        destroy({ nSlotToDelete, m_vSlotMapEntry[nSlotToDelete].generation });
 
         // 2. 执行swap-and-pop：将末尾元素移动到被删除位置
-        size_t nLastDataIdx = vPlDatas.size() - 1;
+        size_t nLastDataIdx = m_vPlDatas.size() - 1;
         if (nDataIdx != nLastDataIdx)
         {
             // 找到被移动元素（末尾元素）对应的槽位
-            uint32_t nSlotToUpdate = vSlotIndices[nLastDataIdx];
+            uint32_t nSlotToUpdate = m_vSlotIndices[nLastDataIdx];
 
             // 移动数据：将末尾元素移动到被删除位置
-            vPlDatas[nDataIdx] = std::move(vPlDatas.back());
+            m_vPlDatas[nDataIdx] = std::move(m_vPlDatas.back());
 
             // 更新映射关系
-            vDataIndices[nSlotToUpdate] = (uint32_t)nDataIdx;
-            vSlotIndices[nDataIdx] = nSlotToUpdate;
+            m_vDataIndices[nSlotToUpdate] = (uint32_t)nDataIdx;
+            m_vSlotIndices[nDataIdx] = nSlotToUpdate;
         }
 
         // 3. 移除末尾元素
-        vPlDatas.pop_back();
-        vSlotIndices.pop_back();
+        m_vPlDatas.pop_back();
+        m_vSlotIndices.pop_back();
     }
 
     /**
@@ -289,20 +351,20 @@ public:
      */
     bool isValid(Handle h) const
     {
-        return h.index < vSlotMapEntry.size() &&
-            vSlotMapEntry[h.index].alive &&
-            vSlotMapEntry[h.index].generation == h.generation;
+        return h.index < m_vSlotMapEntry.size() &&
+            m_vSlotMapEntry[h.index].alive &&
+            m_vSlotMapEntry[h.index].generation == h.generation;
     }
 
     // 通过句柄访问多段线数据
     PolylineData& operator[](Handle h)
     {
-        return vPlDatas[vDataIndices[h.index]];
+        return m_vPlDatas[m_vDataIndices[h.index]];
     }
 
     const PolylineData& operator[](Handle h) const
     {
-        return vPlDatas[vDataIndices[h.index]];
+        return m_vPlDatas[m_vDataIndices[h.index]];
     }
 
     /**
@@ -311,7 +373,7 @@ public:
      */
     size_t size() const
     {
-        return vPlDatas.size();
+        return m_vPlDatas.size();
     }
 };
 
@@ -322,7 +384,7 @@ int nCurBuffer = 0;             // 当前活跃的缓冲区索引
 GLsync fence = nullptr;         // GPU同步栅栏，用于双缓冲同步
 
 FreeBlockMap freeBlocksMap[BUFFER_COUNT]; // 每个缓冲区的空闲块管理
-PolylineSlotMap plSlotMap;               // 多段线数据管理
+PolylineSlotMap objPlineSlotMap;               // 多段线数据管理
 
 // ====================== 6. 初始化函数 ======================
 
@@ -392,10 +454,11 @@ bool initBuffers()
 void updateVertexData(size_t offset, const float* data, size_t vertexCount)
 {
     glBindBuffer(GL_ARRAY_BUFFER, VBOs[nCurBuffer]);
+
     glBufferSubData(GL_ARRAY_BUFFER,
-        offset * VERTEX_STRIDE * sizeof(float),                    // 起始字节偏移
-        vertexCount * VERTEX_STRIDE * sizeof(float), // 数据字节大小
-        data);                                                       // 数据指针
+        offset * VERTEX_STRIDE * sizeof(float),     // 起始字节偏移
+        vertexCount * VERTEX_STRIDE * sizeof(float),// 数据字节大小
+        data);                                      // 数据指针
 }
 
 /**
@@ -408,14 +471,15 @@ void batchUpdateVertexData()
 {
     glBindBuffer(GL_ARRAY_BUFFER, VBOs[nCurBuffer]);
 
-    size_t currentOffset = 0;
-    for (const auto& pl : plSlotMap.vPlDatas)
+    size_t nCurOffset = 0;
+    for (const auto& pl : objPlineSlotMap.m_vPlDatas)
     {
         glBufferSubData(GL_ARRAY_BUFFER,
-            currentOffset * VERTEX_STRIDE * sizeof(float),
-            pl.verts.size() * sizeof(float),
-            pl.verts.data());
-        currentOffset += pl.count;
+            nCurOffset * VERTEX_STRIDE * sizeof(float),
+            pl.nPts.size() * sizeof(float),
+            pl.nPts.data());
+
+        nCurOffset += pl.nPtSz;
     }
 }
 
@@ -428,31 +492,32 @@ void batchUpdateVertexData()
  */
 void defragment()
 {
-    int back = 1 - nCurBuffer; // 后台缓冲区索引
+    int nBack = 1 - nCurBuffer; // 后台缓冲区索引
 
     // 紧凑复制所有数据到后台缓冲区
-    glBindBuffer(GL_ARRAY_BUFFER, VBOs[back]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[nBack]);
 
-    size_t currentOffset = 0;
-    for (auto& pl : plSlotMap.vPlDatas)
+    size_t nCurOffset = 0;
+    for (auto& pl : objPlineSlotMap.m_vPlDatas)
     {
         // 更新多段线在缓冲区中的新偏移
-        pl.offset = currentOffset;
+        pl.nPtOffset = nCurOffset;
 
         // 上传顶点数据到后台缓冲区
         glBufferSubData(GL_ARRAY_BUFFER,
-            currentOffset * VERTEX_STRIDE * sizeof(float),
-            pl.verts.size() * sizeof(float),
-            pl.verts.data());
-        currentOffset += pl.count;
+            nCurOffset * VERTEX_STRIDE * sizeof(float),
+            pl.nPts.size() * sizeof(float),
+            pl.nPts.data());
+
+        nCurOffset += pl.nPtSz;
     }
 
     // 重建后台缓冲区的空闲列表
-    freeBlocksMap[back].clear();
-    if (currentOffset < MAX_VERTICES)
+    freeBlocksMap[nBack].clear();
+    if (nCurOffset < MAX_VERTICES)
     {
         // 添加剩余空间到空闲列表
-        freeBlocksMap[back].emplace(currentOffset, MAX_VERTICES - currentOffset);
+        freeBlocksMap[nBack].emplace(nCurOffset, MAX_VERTICES - nCurOffset);
     }
 
     // 等待GPU完成当前帧的所有渲染命令
@@ -467,10 +532,10 @@ void defragment()
     fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
     // 切换到整理后的缓冲区
-    nCurBuffer = back;
+    nCurBuffer = nBack;
 
-    std::cout << "[Defragment] Completed. Polylines=" << plSlotMap.size()
-        << ", Used Vertices=" << currentOffset << std::endl;
+    std::cout << "[Defragment] Completed. Polylines=" << objPlineSlotMap.size()
+        << ", Used Vertices=" << nCurOffset << std::endl;
 }
 
 // ====================== 7. 辅助函数 ======================
@@ -484,14 +549,16 @@ std::uniform_real_distribution<float> col(0.3f, 1.0f);
 
 /**
  * @brief 生成随机多段线顶点数据
- * @param cnt 顶点数量
- * @param c 颜色数组指针
+ * @param nSz 顶点数量
  * @return 包含随机顶点数据的vector
  */
-std::vector<float> randomPolylineVerts(size_t cnt, const float* c)
+std::vector<float> randomPolyline(size_t nSz/*, const float* c*/)
 {
-    std::vector<float> v(cnt * VERTEX_STRIDE);
-    for (size_t j = 0; j < cnt; ++j)
+    std::vector<float> v(nSz * VERTEX_STRIDE);
+
+    float c[3] = { col(rng), col(rng), col(rng) };
+
+    for (size_t j = 0; j < nSz; ++j)
     {
         // 位置数据 (X, Y)
         v[j * VERTEX_STRIDE] = pos(rng);
@@ -596,13 +663,13 @@ void render()
     glBindVertexArray(VAOs[nCurBuffer]);
 
     size_t currentOffset = 0;
-    for (const auto& pl : plSlotMap.vPlDatas)
+    for (const auto& pl : objPlineSlotMap.m_vPlDatas)
     {
         // 绘制单个多段线
         glDrawArrays(GL_LINE_STRIP,   // 图元类型：线段带
             (GLint)currentOffset,     // 起始顶点索引
-            (GLsizei)pl.count);       // 顶点数量
-        currentOffset += pl.count;
+            (GLsizei)pl.nPtSz);       // 顶点数量
+        currentOffset += pl.nPtSz;
     }
 }
 
@@ -629,7 +696,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // 创建窗口
-    GLFWwindow* win = glfwCreateWindow(1200, 800,
+    GLFWwindow* win = glfwCreateWindow(2100, 1600,
         "Dynamic Polylines - Simplified Version", nullptr, nullptr);
     if (!win)
     {
@@ -685,28 +752,32 @@ int main()
             break; // 空间不足时停止创建
 
         // 生成随机颜色和顶点数据
-        float color[3] = { col(rng), col(rng), col(rng) };
-        auto verts = randomPolylineVerts(nPts, color);
+        std::vector<float> verts = randomPolyline(nPts);
 
         // 创建多段线对象并设置数据
-        auto h = plSlotMap.create(nPts, color);
-        plSlotMap[h].offset = nOff;  // 设置在缓冲区中的偏移量
-        plSlotMap[h].count = nPts;   // 设置顶点数量
-        plSlotMap[h].verts = std::move(verts); // 移动顶点数据（避免拷贝）
+        Handle h = objPlineSlotMap.create(nPts);
+
+        //m_vPlDatas[m_vDataIndices[h.index]];
+
+        PolylineData& plData = objPlineSlotMap[h];
+        plData.nPtOffset = nOff;  // 设置在缓冲区中的偏移量
+        plData.nPtSz = nPts;   // 设置顶点数量
+        plData.nPts = std::move(verts); // 移动顶点数据（避免拷贝）
     }
 
     // 初始上传所有数据到GPU
     batchUpdateVertexData();
 
-    std::cout << "Initialized " << plSlotMap.size() << " polylines" << std::endl;
+    std::cout << "Initialized " << objPlineSlotMap.size() << " polylines" << std::endl;
 
     // 时间跟踪变量
-    double lastOp = glfwGetTime();     // 上次增删操作时间
-    double lastDefrag = glfwGetTime(); // 上次碎片整理时间
-    double lastUpdate = glfwGetTime(); // 上次顶点更新时间
-    double fpsTime = glfwGetTime();    // 上次FPS更新时间
-    int frames = 0;                    // 帧计数器
-    bool needsUpdate = false;          // 标记是否需要更新（当前未使用）
+    double dLastOpTm = glfwGetTime();     // 上次增删操作时间
+    double dLastDefragTm = glfwGetTime(); // 上次碎片整理时间
+    double dLastUpdateTm = glfwGetTime(); // 上次顶点更新时间
+    double dFpsTm = glfwGetTime();    // 上次FPS更新时间
+
+    int nFrames = 0;                    // 帧计数器
+    bool bNeedsUpdate = false;          // 标记是否需要更新（当前未使用）
 
     // 设置OpenGL状态
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // 深灰色背景
@@ -718,74 +789,80 @@ int main()
         // 处理窗口事件（输入等）
         glfwPollEvents();
 
-        double currentTime = glfwGetTime();
+        double dCurTm = glfwGetTime();
 
         // 随机更新一些多段线的顶点位置
-        if (currentTime - lastUpdate > 0.2f) // 每200ms更新一次
+        if (dCurTm - dLastUpdateTm > 0.2f) // 每50ms更新一次（提高频率）
         {
-            lastUpdate = currentTime;
+            dLastUpdateTm = dCurTm;
 
-            if (!plSlotMap.vPlDatas.empty())
+            if (!objPlineSlotMap.m_vPlDatas.empty())
             {
-                // 只更新少量多段线（最多5个或总数的一半）
-                int updates = std::min(5, (int)plSlotMap.vPlDatas.size());
-                for (int i = 0; i < updates; ++i)
+                // 更新更多多段线（最多20个或总数的1/5）
+                int nUpdates = std::min(1000, (int)(objPlineSlotMap.m_vPlDatas.size() / 5));
+                for (int i = 0; i < nUpdates; ++i)
                 {
                     // 随机选择一个多段线
-                    auto& pl = plSlotMap.vPlDatas[rng() % plSlotMap.vPlDatas.size()];
+                    size_t nIdx = rng() % objPlineSlotMap.m_vPlDatas.size();
+                    auto& pl = objPlineSlotMap.m_vPlDatas[nIdx];
 
                     // 随机更新部分顶点位置
-                    for (size_t j = 0; j < pl.count; j += 2) // 每隔一个顶点检查
+                    for (size_t j = 0; j < pl.nPtSz; j += 2) // 每隔一个顶点检查
                     {
                         if (rng() % 5 == 0) // 20%的概率更新该顶点
                         {
-                            pl.verts[j * VERTEX_STRIDE] = pos(rng);
-                            pl.verts[j * VERTEX_STRIDE + 1] = pos(rng);
+                            pl.nPts[j * VERTEX_STRIDE] = pos(rng);
+                            pl.nPts[j * VERTEX_STRIDE + 1] = pos(rng);
                         }
                     }
 
                     // 将更新后的数据上传到GPU
-                    updateVertexData(pl.offset, pl.verts.data(), pl.count);
+                    updateVertexData(pl.nPtOffset, pl.nPts.data(), pl.nPtSz);
                 }
+
+                // 添加内存屏障确保GPU能看到所有更新
+                // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
             }
         }
 
         // 周期性增删操作
-        if (currentTime - lastOp > 5.0) // 每5秒执行一次
+        if (dCurTm - dLastOpTm > 5.0) // 每5秒执行一次
         {
-            lastOp = currentTime;
+            dLastOpTm = dCurTm;
 
-            if (rng() % 2 == 0 && plSlotMap.size() < 1000) // 50%概率添加，且总数不超过1000
+            if (rng() % 2 == 0 && objPlineSlotMap.size() < 5000000) // 50%概率添加，且总数不超过1000
             {
-                size_t cnt = 4 + rng() % 6; // 新多段线的顶点数
-                size_t off;
+                size_t nPtSz = 4 + rng() % 6; // 新多段线的顶点数
+                size_t nOff = 0;
 
-                if (allocate(freeBlocksMap[nCurBuffer], cnt, off))
+                if (allocate(freeBlocksMap[nCurBuffer], nPtSz, nOff))
                 {
                     // 创建新多段线
-                    float color[3] = { col(rng), col(rng), col(rng) };
-                    auto verts = randomPolylineVerts(cnt, color);
+                    auto verts = randomPolyline(nPtSz);
 
-                    auto h = plSlotMap.create(cnt, color);
-                    plSlotMap[h].offset = off;
-                    plSlotMap[h].count = cnt;
-                    plSlotMap[h].verts = std::move(verts);
+                    auto h = objPlineSlotMap.create(nPtSz);
+
+                    PolylineData& plData = objPlineSlotMap[h];
+
+                    plData.nPtOffset = nOff;
+                    plData.nPtSz = nPtSz;
+                    plData.nPts = std::move(verts);
 
                     // 上传新数据到GPU
-                    updateVertexData(off, verts.data(), cnt);
+                    updateVertexData(nOff, verts.data(), nPtSz);
                 }
             }
-            else if (!plSlotMap.vPlDatas.empty()) // 50%概率删除
+            else if (!objPlineSlotMap.m_vPlDatas.empty()) // 50%概率删除
             {
                 // 随机选择一个多段线删除
-                size_t idx = rng() % plSlotMap.vPlDatas.size();
-                auto& pl = plSlotMap.vPlDatas[idx];
+                size_t nIdx = rng() % objPlineSlotMap.m_vPlDatas.size();
+                auto& pl = objPlineSlotMap.m_vPlDatas[nIdx];
 
                 // 释放顶点缓冲区空间
-                deallocate(freeBlocksMap[nCurBuffer], pl.offset, pl.count);
+                deallocate(freeBlocksMap[nCurBuffer], pl.nPtOffset, pl.nPtSz);
 
                 // 从SlotMap中移除多段线
-                plSlotMap.remove_at_data_index(idx);
+                objPlineSlotMap.remove_at_data_index(nIdx);
 
                 // 重新上传所有数据（简化处理，实际可优化为部分更新）
                 batchUpdateVertexData();
@@ -793,10 +870,10 @@ int main()
         }
 
         // 碎片整理：当空闲块过多且距离上次整理足够久时执行
-        if (freeBlocksMap[nCurBuffer].size() > 5 && currentTime - lastDefrag > 20.0)
+        if (freeBlocksMap[nCurBuffer].size() > 5 && dCurTm - dLastDefragTm > 20.0)
         {
             defragment();
-            lastDefrag = currentTime;
+            dLastDefragTm = dCurTm;
         }
 
         // ====================== 渲染阶段 ======================
@@ -804,16 +881,17 @@ int main()
         render();                     // 绘制所有多段线
 
         // 更新FPS显示
-        ++frames;
-        if (currentTime - fpsTime >= 1.0) // 每秒更新一次窗口标题
+        ++nFrames;
+        if (dCurTm - dFpsTm >= 1.0) // 每秒更新一次窗口标题
         {
-            double fps = frames / (currentTime - fpsTime);
+            double fps = nFrames / (dCurTm - dFpsTm);
             char title[256];
             sprintf_s(title, "Polylines: %zu | FPS: %.0f | FreeBlocks: %zu",
-                plSlotMap.size(), fps, freeBlocksMap[nCurBuffer].size());
+                objPlineSlotMap.size(), fps, freeBlocksMap[nCurBuffer].size());
+
             glfwSetWindowTitle(win, title);
-            fpsTime = currentTime;
-            frames = 0;
+            dFpsTm = dCurTm;
+            nFrames = 0;
         }
 
         // 交换前后缓冲区

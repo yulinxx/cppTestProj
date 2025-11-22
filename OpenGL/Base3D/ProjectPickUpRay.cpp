@@ -149,7 +149,7 @@ const unsigned int SCR_HEIGHT = 600; // 窗口高度（像素）
 
 // 顶点着色器：处理顶点位置、模型视图投影变换
 // 使用GLSL 330版本，兼容大多数现代GPU
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout(location = 0) in vec3 aPos; // 顶点位置属性（0号位置）
 
@@ -165,7 +165,7 @@ void main() {
 )";
 
 // 片段着色器：处理像素颜色输出
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 
 // 输入uniform变量
@@ -353,8 +353,8 @@ unsigned int createShader(const char* source, GLenum type)
 unsigned int createShaderProgram()
 {
     // 1. 创建并编译顶点着色器和片段着色器
-    unsigned int vertex = createShader(vertexShaderSource, GL_VERTEX_SHADER);
-    unsigned int fragment = createShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
+    unsigned int vertex = createShader(vs, GL_VERTEX_SHADER);
+    unsigned int fragment = createShader(fs, GL_FRAGMENT_SHADER);
 
     // 2. 创建着色器程序并附加着色器
     unsigned int program = glCreateProgram();
@@ -490,7 +490,7 @@ int main()
     // 6. 初始化GLAD - 加载OpenGL函数指针
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         return -1;  // 加载失败
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

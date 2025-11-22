@@ -70,7 +70,7 @@ std::vector<unsigned char> readFontFile(const std::string& filename)
 }
 
 // 顶点着色器
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout (location = 0) in vec2 aPos;
 uniform mat4 projection;
@@ -80,7 +80,7 @@ void main() {
 )";
 
 // 片段着色器(填充颜色)
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 out vec4 FragColor;
 void main() {
@@ -108,8 +108,8 @@ GLuint compileShader(GLenum type, const char* source)
 // 初始化 OpenGL
 void initOpenGL()
 {
-    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vs);
+    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fs);
 
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -256,7 +256,7 @@ int main()
     if (!window) return -1;
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

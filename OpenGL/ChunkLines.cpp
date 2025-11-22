@@ -187,7 +187,7 @@ private:
     // 初始化着色器（保持不变）
     GLuint initShaders()
     {
-        const char* vertexShaderSource = R"(
+        const char* vs = R"(
             #version 330 core
             layout (location = 0) in vec2 aPos;
             uniform mat4 projection;
@@ -197,7 +197,7 @@ private:
                 fragCoord = aPos;
             }
         )";
-        const char* fragmentShaderSource = R"(
+        const char* fs = R"(
             #version 330 core
             out vec4 FragColor;
             uniform vec3 lineColor;
@@ -219,11 +219,11 @@ private:
         )";
 
         GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+        glShaderSource(vertexShader, 1, &vs, nullptr);
         glCompileShader(vertexShader);
 
         GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+        glShaderSource(fragmentShader, 1, &fs, nullptr);
         glCompileShader(fragmentShader);
 
         GLuint program = glCreateProgram();

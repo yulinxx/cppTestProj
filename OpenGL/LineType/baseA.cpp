@@ -32,7 +32,7 @@ constexpr float X = 4.0f;
  * - 应用相机变换矩阵
  * - 计算虚线参数并传递给片段着色器
  */
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout(location = 0) in vec2 in_pos;
 layout(location = 1) in float in_len;
@@ -56,7 +56,7 @@ void main() {
  * - 根据参数值决定是否绘制当前片段
  * - 实现虚线效果
  */
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 in float dashParam;
 uniform vec4 color;
@@ -72,14 +72,14 @@ void main() {
 }
 )";
 
-GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
+GLuint loadShader(const char* vs, const char* fs)
 {
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glShaderSource(vertexShader, 1, &vs, nullptr);
     glCompileShader(vertexShader);
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glShaderSource(fragmentShader, 1, &fs, nullptr);
     glCompileShader(fragmentShader);
 
     GLuint shaderProgram = glCreateProgram();
@@ -225,7 +225,7 @@ int main()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -238,7 +238,7 @@ int main()
 
     glfwSetScrollCallback(window, scroll_callback);
 
-    GLuint shaderProgram = loadShader(vertexShaderSource, fragmentShaderSource);
+    GLuint shaderProgram = loadShader(vs, fs);
     glUseProgram(shaderProgram);
 
     glm::mat4 cameraTrans = glm::ortho(-X, X, -X, X);

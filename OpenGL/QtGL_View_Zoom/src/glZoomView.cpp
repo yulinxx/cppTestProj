@@ -57,7 +57,7 @@ void glZoomView::initializeGL()
     }
 
     // 修改顶点着色器以处理新的数据类型
-    const char *vertexShaderSource = R"(
+    const char *vs = R"(
         #version 400
         layout(location = 0) in vec3 position;
         layout(location = 1) in vec3 color;
@@ -74,7 +74,7 @@ void glZoomView::initializeGL()
     )";
     
     // 修改片段着色器以接收颜色信息
-    const char *fragmentShaderSource = R"(
+    const char *fs = R"(
         #version 400
         in vec3 fragColor;
         out vec4 outColor;
@@ -86,8 +86,8 @@ void glZoomView::initializeGL()
     
 
     m_lineProgram = new QOpenGLShaderProgram;
-    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
-    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
+    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
+    m_lineProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fs);
     m_lineProgram->link();
     glGenVertexArrays(1, &m_lineVao);
     glGenBuffers(1, &m_lineVbo);

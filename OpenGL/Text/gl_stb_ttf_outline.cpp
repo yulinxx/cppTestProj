@@ -55,7 +55,7 @@ std::vector<unsigned char> readFontFile(const std::string& filename)
 }
 
 // 顶点着色器代码
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout (location = 0) in vec2 aPos; // 输入顶点位置
 uniform mat4 projection; // 投影矩阵
@@ -65,7 +65,7 @@ void main() {
 )";
 
 // 片段着色器代码
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 out vec4 FragColor; // 输出片段颜色
 void main() {
@@ -107,8 +107,8 @@ GLuint compileShader(GLenum type, const char* source)
  */
 void initOpenGL()
 {
-    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource); // 编译顶点着色器
-    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource); // 编译片段着色器
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vs); // 编译顶点着色器
+    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fs); // 编译片段着色器
 
     shaderProgram = glCreateProgram(); // 创建着色器程序
     glAttachShader(shaderProgram, vertexShader); // 将顶点着色器附加到着色器程序
@@ -259,7 +259,7 @@ int main()
     if (!window) return -1; // 如果窗口创建失败则返回 -1
     glfwMakeContextCurrent(window); // 将窗口的上下文设置为当前上下文
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress); // 加载 OpenGL 函数指针
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

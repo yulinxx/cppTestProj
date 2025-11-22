@@ -13,8 +13,8 @@ add_executable("MemPoolTest" main.cpp)
 #     foreach(CPP ${SRC})
 #         STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" FILE_NAME ${CPP})
 
-#         set(EXE_NAME MemPool_${FILE_NAME})
-#         add_executable(${EXE_NAME} ${CPP})
+#         set(APP_NAME MemPool_${FILE_NAME})
+#         add_executable(${APP_NAME} ${CPP})
 
 #     endforeach(CPP)    
 

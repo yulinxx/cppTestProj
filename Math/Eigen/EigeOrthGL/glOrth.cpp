@@ -89,7 +89,7 @@ OriginPosition currentOrigin = BOTTOM_LEFT;
  * @param width 新的窗口宽度
  * @param height 新的窗口高度
  */
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_cb(GLFWwindow* window, int width, int height)
 {
     float aspect = static_cast<float>(width) / height;
     orthoMatrix = Eigen::Matrix4f::Identity();
@@ -329,19 +329,19 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_L:
             currentOrigin = BOTTOM_LEFT;
-            framebuffer_size_callback(window, 800, 600); // 更新正交投影矩阵
+            framebuffer_size_cb(window, 800, 600); // 更新正交投影矩阵
             break;
         case GLFW_KEY_K:
             currentOrigin = TOP_LEFT;
-            framebuffer_size_callback(window, 800, 600); // 更新正交投影矩阵
+            framebuffer_size_cb(window, 800, 600); // 更新正交投影矩阵
             break;
         case GLFW_KEY_R:
             currentOrigin = TOP_RIGHT;
-            framebuffer_size_callback(window, 800, 600); // 更新正交投影矩阵
+            framebuffer_size_cb(window, 800, 600); // 更新正交投影矩阵
             break;
         case GLFW_KEY_T:
             currentOrigin = BOTTOM_RIGHT;
-            framebuffer_size_callback(window, 800, 600); // 更新正交投影矩阵
+            framebuffer_size_cb(window, 800, 600); // 更新正交投影矩阵
             break;
         }
     }
@@ -434,7 +434,7 @@ int main()
         return -1;
     }
 
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_cb);
 
     std::vector<Eigen::Vector2f> controlPoints1;
     std::vector<Eigen::Vector2f> controlPoints2;
@@ -489,7 +489,7 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
 
-    const char* vertexShaderSource = R"(
+    const char* vs = R"(
         #version 330 core
         layout (location = 0) in vec2 aPos;
         uniform mat4 orthoMatrix;
@@ -502,7 +502,7 @@ int main()
         }
     )";
 
-    const char* fragmentShaderSource = R"(
+    const char* fs = R"(
         #version 330 core
         in vec2 pos;
         out vec4 FragColor;
@@ -515,8 +515,8 @@ int main()
         }
     )";
 
-    GLuint vs = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+    GLuint vs = compileShader(GL_VERTEX_SHADER, vs);
+    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fs);
 
     GLuint shaderProgram = linkShaderProgram(vs, fs);
 

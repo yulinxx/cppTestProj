@@ -91,7 +91,7 @@
 constexpr float X = 4.0f;
 
 // Vertex Shader: 传递控制点位置和累计长度
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 400 core
 // 输入控制点坐标
 layout(location = 0) in vec2 in_pos;
@@ -200,7 +200,7 @@ void main() {
 )";
 
 // Fragment Shader: 实现虚线样式
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 400 core
 // 从 Tessellation Evaluation Shader 传入的虚线参数
 in float dashParam;
@@ -254,7 +254,7 @@ GLuint loadShader()
     // 创建顶点着色器
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     // 设置顶点着色器源代码
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glShaderSource(vertexShader, 1, &vs, nullptr);
     // 编译顶点着色器
     glCompileShader(vertexShader);
 
@@ -275,7 +275,7 @@ GLuint loadShader()
     // 创建片段着色器
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     // 设置片段着色器源代码
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glShaderSource(fragmentShader, 1, &fs, nullptr);
     // 编译片段着色器
     glCompileShader(fragmentShader);
 
@@ -746,7 +746,7 @@ int main()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

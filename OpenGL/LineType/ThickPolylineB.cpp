@@ -6,7 +6,7 @@
 #include <vector>    // 添加 vector 头文件
 
 // 顶点着色器(使用 Raw String Literal)
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 400
 layout (location = 0) in vec2 aPos;
 void main()
@@ -71,7 +71,7 @@ void main()
 )";
 
 // 片段着色器(使用 Raw String Literal)
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 400
 out vec4 FragColor;
 uniform vec4 lineColor;  // 在全局作用域声明 uniform
@@ -183,7 +183,7 @@ int main()
         printf("Failed to initialize GLAD\n");
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -196,7 +196,7 @@ int main()
 
     // 编译着色器
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertexShader, 1, &vs, NULL);
     glCompileShader(vertexShader);
 
     int success;
@@ -220,7 +220,7 @@ int main()
     }
 
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fs, NULL);
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);

@@ -32,7 +32,7 @@ const int WIDTH = 1200;
 const int HEIGHT = 1200;
 
 // 顶点着色器
-const char* vertexShaderSource = R"(
+const char* vs = R"(
     #version 330 core
     layout (location = 0) in vec2 aPos;
     void main() {
@@ -41,7 +41,7 @@ const char* vertexShaderSource = R"(
 )";
 
 // 片段着色器
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
     #version 330 core
     out vec4 FragColor;
     uniform vec3 color;
@@ -221,7 +221,7 @@ int main()
         glfwTerminate();
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -234,11 +234,11 @@ int main()
 
     // 编译着色器
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glShaderSource(vertexShader, 1, &vs, nullptr);
     glCompileShader(vertexShader);
 
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glShaderSource(fragmentShader, 1, &fs, nullptr);
     glCompileShader(fragmentShader);
 
     unsigned int shaderProgram = glCreateProgram();

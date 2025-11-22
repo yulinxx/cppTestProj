@@ -96,7 +96,7 @@ public:
     ImageRender()
     {
         // Vertex Shader
-        const char* vertexShaderSource = R"(
+        const char* vs = R"(
             #version 330 core
             layout (location = 0) in vec3 aPos;
             layout (location = 1) in vec2 aTexCoord;
@@ -110,7 +110,7 @@ public:
         )";
 
         // Fragment Shader
-        const char* fragmentShaderSource = R"(
+        const char* fs = R"(
             #version 330 core
             out vec4 FragColor;
             in vec2 TexCoord;
@@ -124,11 +124,11 @@ public:
 
         // Compile shaders
         unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+        glShaderSource(vertexShader, 1, &vs, NULL);
         glCompileShader(vertexShader);
 
         unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+        glShaderSource(fragmentShader, 1, &fs, NULL);
         glCompileShader(fragmentShader);
 
         // Link shader program
@@ -261,7 +261,7 @@ int main()
         glfwTerminate();
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

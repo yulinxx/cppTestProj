@@ -12,7 +12,7 @@
 #include <cmath>
 
 // 顶点着色器源码
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout (location = 0) in vec2 aPos;
 void main() {
@@ -21,7 +21,7 @@ void main() {
 )";
 
 // 片段着色器源码，添加一个 uniform 变量来控制颜色
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 out vec4 FragColor;
 uniform vec4 u_Color;
@@ -437,7 +437,7 @@ int main()
         glfwTerminate();
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -449,7 +449,7 @@ int main()
     }
 
     // 创建并链接着色器程序
-    unsigned int shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
+    unsigned int shaderProgram = createShaderProgram(vs, fs);
     GLint colorUniformLocation = glGetUniformLocation(shaderProgram, "u_Color");
 
     // 随机生成三阶贝塞尔曲线的四个控制点
@@ -589,7 +589,7 @@ int main()
 // #include <cmath>
 //
 //// 顶点着色器源码
-// const char *vertexShaderSource = R"(
+// const char *vs = R"(
 // #version 330 core
 // layout (location = 0) in vec2 aPos;
 // void main() {
@@ -598,7 +598,7 @@ int main()
 //)";
 //
 //// 片段着色器源码，添加一个 uniform 变量来控制颜色
-// const char *fragmentShaderSource = R"(
+// const char *fs = R"(
 // #version 330 core
 // out vec4 FragColor;
 // uniform vec4 u_Color; // 添加一个 uniform 变量来控制颜色
@@ -779,11 +779,11 @@ int main()
 //
 //     // 创建并编译着色器
 //     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-//     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+//     glShaderSource(vertexShader, 1, &vs, NULL);
 //     glCompileShader(vertexShader);
 //
 //     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-//     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+//     glShaderSource(fragmentShader, 1, &fs, NULL);
 //     glCompileShader(fragmentShader);
 //
 //     // 在主函数中，在渲染循环之前设置颜色的 uniform 位置

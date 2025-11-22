@@ -27,7 +27,7 @@
  * 顶点着色器代码,使用原始字符串字面量表示
  * 接收顶点位置,通过投影矩阵将其转换到裁剪空间
  */
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 400
 // 顶点属性,位置坐标,在顶点缓冲区中的位置为 0
 layout (location = 0) in vec2 aPos;
@@ -45,7 +45,7 @@ void main()
  * 片段着色器代码,使用原始字符串字面量表示
  * 为每个片段输出白色颜色
  */
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 400
 // 输出变量,最终的片段颜色
 out vec4 FragColor;
@@ -265,7 +265,7 @@ int main()
         // 返回错误状态码
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -279,7 +279,7 @@ int main()
     // 创建顶点着色器对象
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     // 设置顶点着色器源代码
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertexShader, 1, &vs, NULL);
     // 编译顶点着色器
     glCompileShader(vertexShader);
 
@@ -298,7 +298,7 @@ int main()
     // 创建片段着色器对象
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     // 设置片段着色器源代码
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fs, NULL);
     // 编译片段着色器
     glCompileShader(fragmentShader);
 

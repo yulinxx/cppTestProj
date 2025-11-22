@@ -214,7 +214,7 @@ int main()
     GLFWwindow* win = glfwCreateWindow(900, 200, "FreeType Static Batch + 中文", nullptr, nullptr);
     glfwMakeContextCurrent(win);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

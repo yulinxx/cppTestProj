@@ -15,7 +15,7 @@
  * 顶点着色器源码
  * 该着色器接收顶点位置数据,并将其转换为齐次坐标
  */
-const char* vertexShaderSource = "#version 400\n"
+const char* vs = "#version 400\n"
 // 定义顶点位置属性,位置为0
 "layout (location = 0) in vec2 aPos;\n"
 // 主函数
@@ -69,7 +69,7 @@ const char* geometryShaderSource = "#version 400\n"
  * 片段着色器源码
  * 该着色器将每个片段的颜色设置为红色
  */
-const char* fragmentShaderSource = "#version 400\n"
+const char* fs = "#version 400\n"
 // 定义输出颜色变量
 "out vec4 FragColor;\n"
 // 主函数
@@ -166,7 +166,7 @@ int main()
         printf("Failed to initialize GLAD\n");
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -181,7 +181,7 @@ int main()
     // 创建顶点着色器
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     // 设置顶点着色器源码
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertexShader, 1, &vs, NULL);
     // 编译顶点着色器
     glCompileShader(vertexShader);
 
@@ -195,7 +195,7 @@ int main()
     // 创建片段着色器
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     // 设置片段着色器源码
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fs, NULL);
     // 编译片段着色器
     glCompileShader(fragmentShader);
 

@@ -20,7 +20,7 @@ struct Character
 std::map<wchar_t, Character> mapCharacters;
 GLuint VAO, VBO, shaderProgram;
 
-const char* vertexShaderSource = R"glsl(
+const char* vs = R"glsl(
     #version 330 core
     layout(location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
     out vec2 TexCoords;
@@ -31,7 +31,7 @@ const char* vertexShaderSource = R"glsl(
     }
 )glsl";
 
-const char* fragmentShaderSource = R"glsl(
+const char* fs = R"glsl(
     #version 330 core
     in vec2 TexCoords;
     out vec4 color;
@@ -51,7 +51,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 GLuint createShaderProgram()
 {
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertexShader, 1, &vs, NULL);
     glCompileShader(vertexShader);
 
     GLint success;
@@ -64,7 +64,7 @@ GLuint createShaderProgram()
     }
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fs, NULL);
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);

@@ -75,7 +75,7 @@ std::vector<unsigned char> readFontFile(const std::string& filename)
 }
 
 // 顶点着色器源代码
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 // 定义顶点属性,位置为 0 的二维向量
 layout(location = 0) in vec2 aPos;
@@ -89,7 +89,7 @@ void main()
 )";
 
 // 片段着色器源代码
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 // 定义片段着色器的输出颜色
 out vec4 FragColor;
@@ -132,9 +132,9 @@ GLuint compileShader(GLenum type, const char* src)
 void initOpenGL()
 {
     // 编译顶点着色器
-    GLuint vShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+    GLuint vShader = compileShader(GL_VERTEX_SHADER, vs);
     // 编译片段着色器
-    GLuint fShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+    GLuint fShader = compileShader(GL_FRAGMENT_SHADER, fs);
     // 创建一个着色器程序对象
     shaderProgram = glCreateProgram();
     // 将顶点着色器附加到着色器程序中
@@ -487,7 +487,7 @@ int main()
         // 返回错误状态码
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;

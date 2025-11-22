@@ -14,7 +14,7 @@
 #define WINDOW_HEIGHT 600
 
 // 顶点着色器
-const char* vertexShaderSource = "#version 400\n"
+const char* vs = "#version 400\n"
 "layout (location = 0) in vec2 aPos;\n"
 "uniform mat4 projection;\n"
 "void main()\n"
@@ -23,7 +23,7 @@ const char* vertexShaderSource = "#version 400\n"
 "}\0";
 
 // 片段着色器
-const char* fragmentShaderSource = "#version 400\n"
+const char* fs = "#version 400\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
@@ -204,7 +204,7 @@ int main()
         printf("GLAD 初始化失败!\n");
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -216,11 +216,11 @@ int main()
     }
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertexShader, 1, &vs, NULL);
     glCompileShader(vertexShader);
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fs, NULL);
     glCompileShader(fragmentShader);
 
     GLuint shaderProgram = glCreateProgram();

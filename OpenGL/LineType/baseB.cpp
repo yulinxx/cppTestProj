@@ -11,7 +11,7 @@
 
 constexpr float X = 4.0f;
 
-const char* vertexShaderSource = R"(
+const char* vs = R"(
 #version 330 core
 layout(location = 0) in vec2 in_pos;
 layout(location = 1) in float in_len;
@@ -26,7 +26,7 @@ void main() {
 }
 )";
 
-const char* fragmentShaderSource = R"(
+const char* fs = R"(
 #version 330 core
 in float dashParam;
 uniform vec4 color;
@@ -45,23 +45,23 @@ void main() {
 /**
  * @brief 加载并编译顶点着色器和片段着色器,然后链接成一个着色器程序.
  *
- * @param vertexShaderSource 顶点着色器的源代码.
- * @param fragmentShaderSource 片段着色器的源代码.
+ * @param vs 顶点着色器的源代码.
+ * @param fs 片段着色器的源代码.
  * @return GLuint 编译并链接后的着色器程序的 ID.
  */
-GLuint loadShader(const char* vertexShaderSource, const char* fragmentShaderSource)
+GLuint loadShader(const char* vs, const char* fs)
 {
     // 创建顶点着色器
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     // 设置顶点着色器源代码
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glShaderSource(vertexShader, 1, &vs, nullptr);
     // 编译顶点着色器
     glCompileShader(vertexShader);
 
     // 创建片段着色器
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     // 设置片段着色器源代码
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glShaderSource(fragmentShader, 1, &fs, nullptr);
     // 编译片段着色器
     glCompileShader(fragmentShader);
 
@@ -278,7 +278,7 @@ int main()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // 输出 OpenGL 信息
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
@@ -290,7 +290,7 @@ int main()
     }
 
     // 加载着色器程序
-    GLuint shaderProgram = loadShader(vertexShaderSource, fragmentShaderSource);
+    GLuint shaderProgram = loadShader(vs, fs);
     // 使用着色器程序
     glUseProgram(shaderProgram);
 

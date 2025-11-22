@@ -326,7 +326,7 @@ int main()
     GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenGL Text Atlas Rendering with Chinese", NULL, NULL);
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    
+
     // Output OpenGL information
     {
         std::cout << "=== OpenGL Information ===" << std::endl;
