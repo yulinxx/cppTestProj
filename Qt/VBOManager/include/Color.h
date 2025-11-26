@@ -1,6 +1,8 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <cstdint>
+
 namespace GLRhi
 {
     /**
@@ -82,6 +84,8 @@ namespace GLRhi
         void setBlue(float blue);
         void setAlpha(float alpha);
 
+        uint32_t toUInt32() const;
+        
     private:
         float m_arrColor[COLOR_COUNT] = { 1.0f, 1.0f, 1.0f, 1.0f }; // RGBA颜色数组
     };

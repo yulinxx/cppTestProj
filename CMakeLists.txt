@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 # 使用vcpkg进行包管理
 if(WIN32)
     set(VCPKG_PATH D:/Install/vcpkg/scripts/buildsystems/vcpkg.cmake)
+    # set(VCPKG_PATH C:/vcpkg/scripts/buildsystems/vcpkg.cmake)
 elseif(UNIX AND NOT APPLE)
     set(VCPKG_PATH /home/x/install/vcpkg/scripts/buildsystems/vcpkg.cmake)
 elseif(APPLE)

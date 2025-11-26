@@ -9,6 +9,15 @@
 #include <QOpenGLFunctions_3_3_Core>
 namespace GLRhi
 {
+    // 辅助函数：将Color转换为uint32_t键值
+    inline uint32_t colorToKey(const Color& color)
+    {
+        return (static_cast<uint32_t>(color.r() * 255) << 24) | 
+               (static_cast<uint32_t>(color.g() * 255) << 16) | 
+               (static_cast<uint32_t>(color.b() * 255) << 8) | 
+               static_cast<uint32_t>(color.a() * 255);
+    }
+    
     // 每个图元在块中的真实信息
     struct PrimitiveInfo
     {
@@ -64,12 +73,13 @@ namespace GLRhi
     private:
         QOpenGLFunctions_3_3_Core* m_gl{ nullptr };
         mutable std::shared_mutex m_mutex; // 可多线程读（render）
-        // 颜色 → 多个 block（同一个颜色可能有多个 block，防止单个太大）
-        std::map<Color, std::vector<ColorVBOBlock*>> m_colorBlocks;
-        // 全局 ID → {color, block*, primitiveIndexInBlock}
+        // 颜色键(uint32_t) → 多个 block（同一个颜色可能有多个 block，防止单个太大）
+        std::map<uint32_t, std::vector<ColorVBOBlock*>> m_colorBlocks;
+        // 全局 ID → {colorKey, block*, primitiveIndexInBlock}
         struct Loc
         {
-            Color color;
+            uint32_t colorKey{ 0 };
+            Color color; // 保留原始颜色用于渲染
             ColorVBOBlock* block{ nullptr };
             size_t primIdx{ 0 };
         };

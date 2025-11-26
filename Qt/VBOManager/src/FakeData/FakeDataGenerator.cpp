@@ -64,13 +64,13 @@ namespace GLRhi
 
         s_colorPool.reserve(7);
 
-        s_colorPool.emplace_back(1.0, 0.0, 0.0, 1.0);
-        s_colorPool.emplace_back(0.0, 1.0, 0.0, 1.0);
-        s_colorPool.emplace_back(0.0, 0.0, 1.0, 1.0);
-        s_colorPool.emplace_back(1.0, 1.0, 0.0, 1.0);
-        s_colorPool.emplace_back(1.0, 0.0, 1.0, 1.0);
-        s_colorPool.emplace_back(0.0, 1.0, 1.0, 1.0);
-        s_colorPool.emplace_back(1.0, 1.0, 1.0, 1.0);
+        s_colorPool.emplace_back(1.0f, 0.0f, 0.0f, 1.0f);
+        s_colorPool.emplace_back(0.0f, 1.0f, 0.0f, 1.0f);
+        s_colorPool.emplace_back(0.0f, 0.0f, 1.0f, 1.0f);
+        s_colorPool.emplace_back(1.0f, 1.0f, 0.0f, 1.0f);
+        s_colorPool.emplace_back(1.0f, 0.0f, 1.0f, 1.0f);
+        s_colorPool.emplace_back(0.0f, 1.0f, 1.0f, 1.0f);
+        s_colorPool.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     Color FakeDataBase::genRandomColor()

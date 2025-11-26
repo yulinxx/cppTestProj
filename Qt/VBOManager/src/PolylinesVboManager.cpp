@@ -77,7 +77,7 @@ namespace GLRhi
 
         // 缓存顶点 + 全局位置
         m_vertexCache[id] = vVertices;
-        m_locationMap[id] = { color, block, primIdx };
+        m_locationMap[id] = { color.toUInt32(), color, block, primIdx };
 
         // 直接全量上传（最安全）
         uploadAllData(block);
@@ -222,8 +222,12 @@ namespace GLRhi
         m_gl->glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
         GLint uColorLoc = (prog > 0) ? m_gl->glGetUniformLocation(prog, "uColor") : -1;
 
-        for (const auto& [color, vBlocks] : m_colorBlocks)
+        for (const auto& [colorKey, vBlocks] : m_colorBlocks)
         {
+            if (vBlocks.empty())
+                continue;
+            // 使用第一个block的颜色（同一键下所有block颜色相同）
+            const Color& color = vBlocks[0]->color;
             if (uColorLoc != -1)
                 m_gl->glUniform4f(uColorLoc, color.r(), color.g(), color.b(), color.a());
 
@@ -267,8 +271,12 @@ namespace GLRhi
     //    m_gl->glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
     //    GLint uColorLoc = (prog > 0) ? m_gl->glGetUniformLocation(prog, "uColor") : -1;
 
-    //    for (const auto& [color, vBlocks] : m_colorBlocks)
+    //    for (const auto& [colorKey, vBlocks] : m_colorBlocks)
     //    {
+    //        if (vBlocks.empty())
+    //            continue;
+    //        // 使用第一个block的颜色（同一键下所有block颜色相同）
+    //        const Color& color = vBlocks[0]->color;
     //        if (uColorLoc != -1)
     //            m_gl->glUniform4f(uColorLoc, color.r(), color.g(), color.b(), color.a());
 
@@ -303,7 +311,8 @@ namespace GLRhi
 
     ColorVBOBlock* PolylinesVboManager::findOrCreateColorBlock(const Color& color)
     {
-        auto& vBlock = m_colorBlocks[color];
+        uint32_t colorKey = color.toUInt32();
+        auto& vBlock = m_colorBlocks[colorKey];
         // 找一个还有足够空间的 block
         for (auto* b : vBlock)
         {
@@ -316,6 +325,7 @@ namespace GLRhi
 
     ColorVBOBlock* PolylinesVboManager::createNewColorBlock(const Color& color)
     {
+        uint32_t colorKey = color.toUInt32();
         auto* block = new ColorVBOBlock();
         block->color = color;
 
@@ -343,7 +353,7 @@ namespace GLRhi
 
         m_gl->glBindVertexArray(0);
 
-        m_colorBlocks[color].push_back(block);
+        m_colorBlocks[colorKey].push_back(block);
         return block;
     }
 
@@ -472,7 +482,7 @@ namespace GLRhi
 
         // 简单的策略：只要有任何无效图元就整体重新打包一次
         bool bDefrag = false;
-        for (const auto& [c, vBlock] : m_colorBlocks)
+        for (const auto& [colorKey, vBlock] : m_colorBlocks)
         {
             for (auto* b : vBlock)
             {
@@ -491,7 +501,7 @@ namespace GLRhi
             return;
 
         // 直接调用 uploadAllData 即可完成真正意义上的紧凑
-        for (auto& [c, vBlock] : m_colorBlocks)
+        for (auto& [colorKey, vBlock] : m_colorBlocks)
         {
             for (auto* b : vBlock)
                 uploadAllData(b);

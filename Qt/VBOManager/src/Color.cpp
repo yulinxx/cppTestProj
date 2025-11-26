@@ -175,4 +175,19 @@ namespace GLRhi
     {
         m_arrColor[ALPHA] = alpha;
     }
+
+    uint32_t Color::toUInt32() const
+    {
+        // 将RGBA颜色值转换为32位整数，格式为0xAABBGGRR
+        uint8_t r = static_cast<uint8_t>(m_arrColor[RED] * 255.0f);
+        uint8_t g = static_cast<uint8_t>(m_arrColor[GREEN] * 255.0f);
+        uint8_t b = static_cast<uint8_t>(m_arrColor[BLUE] * 255.0f);
+        uint8_t a = static_cast<uint8_t>(m_arrColor[ALPHA] * 255.0f);
+        
+        return (static_cast<uint32_t>(a) << 24) |
+                (static_cast<uint32_t>(b) << 16) |
+                (static_cast<uint32_t>(g) << 8) |
+                static_cast<uint32_t>(r);
+    }
+    
 } // namespace GLRhi
