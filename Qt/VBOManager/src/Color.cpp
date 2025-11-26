@@ -101,12 +101,10 @@ namespace GLRhi
         red = m_arrColor[RED];
         green = m_arrColor[GREEN];
         blue = m_arrColor[BLUE];
-        clampValues();
     }
 
     void Color::getRgba(float& red, float& green, float& blue, float& alpha) const
     {
-        clampValues();
         red = m_arrColor[RED];
         green = m_arrColor[GREEN];
         blue = m_arrColor[BLUE];
@@ -121,8 +119,6 @@ namespace GLRhi
 
     Color Color::blend(const Color& other, float factor) const
     {
-        clampValues();
-        other.clampValues();
         factor = std::max(0.0f, std::min(1.0f, factor));
         float invFactor = 1.0f - factor;
 
@@ -191,9 +187,6 @@ namespace GLRhi
 
     uint32_t Color::toUInt32() const
     {
-        // 将RGBA颜色值转换为32位整数，格式为0xAABBGGRR
-        clampValues();
-        
 // 将RGBA颜色值转换为32位整数，格式为0xAARRGGBB
     auto toByte = [](float f) -> uint32_t {        
         return static_cast<uint32_t>(std::lround(f * 255.0f));
