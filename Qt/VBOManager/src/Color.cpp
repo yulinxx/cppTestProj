@@ -10,6 +10,7 @@ namespace GLRhi
         m_arrColor[GREEN] = green;
         m_arrColor[BLUE] = blue;
         m_arrColor[ALPHA] = alpha;
+        clampValues();
     }
 
     Color::Color(const Color& other)
@@ -18,6 +19,7 @@ namespace GLRhi
         m_arrColor[GREEN] = other.m_arrColor[GREEN];
         m_arrColor[BLUE] = other.m_arrColor[BLUE];
         m_arrColor[ALPHA] = other.m_arrColor[ALPHA];
+        clampValues();
     }
 
     Color& Color::operator=(const Color& other)
@@ -29,6 +31,7 @@ namespace GLRhi
             m_arrColor[BLUE] = other.m_arrColor[BLUE];
             m_arrColor[ALPHA] = other.m_arrColor[ALPHA];
         }
+        clampValues();
         return *this;
     }
 
@@ -82,6 +85,7 @@ namespace GLRhi
         m_arrColor[GREEN] = green;
         m_arrColor[BLUE] = blue;
         m_arrColor[ALPHA] = alpha;
+        clampValues();
     }
 
     void Color::setRgb(float red, float green, float blue)
@@ -89,6 +93,7 @@ namespace GLRhi
         m_arrColor[RED] = red;
         m_arrColor[GREEN] = green;
         m_arrColor[BLUE] = blue;
+        clampValues();
     }
 
     void Color::getRgb(float& red, float& green, float& blue) const
@@ -96,10 +101,12 @@ namespace GLRhi
         red = m_arrColor[RED];
         green = m_arrColor[GREEN];
         blue = m_arrColor[BLUE];
+        clampValues();
     }
 
     void Color::getRgba(float& red, float& green, float& blue, float& alpha) const
     {
+        clampValues();
         red = m_arrColor[RED];
         green = m_arrColor[GREEN];
         blue = m_arrColor[BLUE];
@@ -114,6 +121,8 @@ namespace GLRhi
 
     Color Color::blend(const Color& other, float factor) const
     {
+        clampValues();
+        other.clampValues();
         factor = std::max(0.0f, std::min(1.0f, factor));
         float invFactor = 1.0f - factor;
 
@@ -162,32 +171,38 @@ namespace GLRhi
     void Color::setRed(float red)
     {
         m_arrColor[RED] = red;
+        clampValues();
     }
     void Color::setGreen(float green)
     {
         m_arrColor[GREEN] = green;
+        clampValues();
     }
     void Color::setBlue(float blue)
     {
         m_arrColor[BLUE] = blue;
+        clampValues();
     }
     void Color::setAlpha(float alpha)
     {
         m_arrColor[ALPHA] = alpha;
+        clampValues();
     }
 
     uint32_t Color::toUInt32() const
     {
         // 将RGBA颜色值转换为32位整数，格式为0xAABBGGRR
-        uint8_t r = static_cast<uint8_t>(m_arrColor[RED] * 255.0f);
-        uint8_t g = static_cast<uint8_t>(m_arrColor[GREEN] * 255.0f);
-        uint8_t b = static_cast<uint8_t>(m_arrColor[BLUE] * 255.0f);
-        uint8_t a = static_cast<uint8_t>(m_arrColor[ALPHA] * 255.0f);
+        clampValues();
         
-        return (static_cast<uint32_t>(a) << 24) |
-                (static_cast<uint32_t>(b) << 16) |
-                (static_cast<uint32_t>(g) << 8) |
-                static_cast<uint32_t>(r);
+// 将RGBA颜色值转换为32位整数，格式为0xAARRGGBB
+    auto toByte = [](float f) -> uint32_t {        
+        return static_cast<uint32_t>(std::lround(f * 255.0f));
+    };
+    
+    return (toByte(m_arrColor[ALPHA]) << 24) |
+           (toByte(m_arrColor[BLUE])  << 16) |
+           (toByte(m_arrColor[GREEN]) << 8) |
+           toByte(m_arrColor[RED]);
     }
     
 } // namespace GLRhi
