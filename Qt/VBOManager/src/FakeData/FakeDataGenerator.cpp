@@ -75,7 +75,6 @@ namespace GLRhi
 
     Color FakeDataBase::genRandomColor()
     {
-
         initializeColorPool();
         //return s_colorPool[0];
 

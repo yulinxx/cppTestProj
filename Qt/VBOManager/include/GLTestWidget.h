@@ -7,6 +7,9 @@
 #include <QTimer>
 #include <QKeyEvent>
 
+#include <vector>
+#include "RenderCommon.h"
+
 namespace GLRhi
 {
     class PolylinesVboManager;
@@ -29,13 +32,19 @@ protected:
 
 private:
     void createShader();
-    void genFakeData();       // 添加几万条测试线
     void updateSomeLines();      // 每帧随机改几条线（演示动态更新）
+
+    void genFakeData();         // 添加几万条测试线
+    void addNewFakeData();      // 添加测试线数据
+    void delFakeData();         // 删除测试
+    void modifyFakeData();      // 修改测试线数据
+
 
     QOpenGLShaderProgram* m_program{ nullptr };
     GLRhi::PolylinesVboManager* m_linesMgr{ nullptr };
 
-    GLRhi::FakeDataProvider* m_dataProvider { nullptr };
+    GLRhi::FakeDataProvider* m_dataProvider{ nullptr };
+    std::vector<GLRhi::PolylineData> m_polylineData;
 
     QMatrix4x4  m_proj;
     QMatrix4x4  m_view;

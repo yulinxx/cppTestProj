@@ -32,7 +32,7 @@ namespace GLRhi
         // 生成指定数量的线段
         for (int i = 0; i < lineCount; ++i)
         {
-            int pointCount = getRandomInt(minPoints, maxPoints);
+            int pointCount = getRandomInt(static_cast<int>(minPoints), static_cast<int>(maxPoints));
             generateSingleLine(pointCount);
 
             //static size_t N = 3;
@@ -81,8 +81,7 @@ namespace GLRhi
         auto clipXYZ = [this](float& x, float& y) {
             x = std::clamp(x, -0.98f, 0.98f);
             y = std::clamp(y, -0.98f, 0.98f);
-        };
-
+            };
 
         // 添加起始点到顶点数据
         m_vertices.push_back(startX);
@@ -91,7 +90,7 @@ namespace GLRhi
 
         clipXYZ(startX, startY);
 
-        qDebug() << "\n--- startX:" << startX << ", startY:" << startY;
+        //qDebug() << "\n--- startX:" << startX << ", startY:" << startY;
 
         // 生成线段的其余点
         for (int i = 1; i < nPointSz; ++i)
@@ -137,7 +136,7 @@ namespace GLRhi
 
             clipXYZ(nextX, nextY);
 
-            qDebug() << "nextX:" << nextX << ", nextY:" << nextY;
+            //qDebug() << "nextX:" << nextX << ", nextY:" << nextY;
         }
 
         // 记录当前线段的信息

@@ -47,7 +47,7 @@ namespace GLRhi
 
             Color c = fakePlData.genRandomColor();
 
-            qDebug() << "颜色: " << c.r() << ", " << c.g() << ", " << c.b() << ", " << c.a();
+            //qDebug() << "颜色: " << c.r() << ", " << c.g() << ", " << c.b() << ", " << c.a();
 
             //float d = fakePlData.getRandomFloat(-1.0f, 1.0f);
 
@@ -55,8 +55,8 @@ namespace GLRhi
             vPLineDatas.emplace_back(polyLineData);
         }
 
-        qDebug() << "生成线段组数量: " << group << ", 每个组线段数量: " << nLineSz
-            << ", 总线段数量: " << group * nLineSz << ", 总顶点数量: " << nVerts;
+        //qDebug() << "生成线段组数量: " << group << ", 每个组线段数量: " << nLineSz
+        //    << ", 总线段数量: " << group * nLineSz << ", 总顶点数量: " << nVerts;
 
         return vPLineDatas;
     }

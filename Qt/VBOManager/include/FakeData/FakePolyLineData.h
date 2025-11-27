@@ -28,7 +28,6 @@ namespace GLRhi
         // 清空数据
         void clear() override;
 
-    private:
         // 生成单个线段的随机点
         void generateSingleLine(int pointCount);
 
