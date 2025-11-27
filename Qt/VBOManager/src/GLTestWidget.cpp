@@ -111,7 +111,11 @@ void GLTestWidget::paintGL()
 
     // 关键：让 PolylinesVboManager 使用当前激活的着色器程序
     // 它会自动读取 uColor 并设置颜色
-    m_linesMgr->renderVisiblePrimitives();
+
+    if (m_bUseDrawEx)
+        m_linesMgr->renderVisiblePrimitivesEx();
+    else
+        m_linesMgr->renderVisiblePrimitives();
 
     m_program->release();
 
@@ -192,6 +196,17 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
     }
     break;
 
+    case Qt::Key_F11:
+    {
+        m_bUseDrawEx = !m_bUseDrawEx;
+        if (m_bUseDrawEx)
+            qDebug() << "\nF7 - 切换到高性能绘制模式";
+        else
+            qDebug() << "\nF7 - 切换到普通绘制模式";
+
+        update();
+    }
+    break;
     default:
         QOpenGLWidget::keyPressEvent(event);
         break;

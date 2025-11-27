@@ -32,7 +32,7 @@ protected:
 
 private:
     void createShader();
-    void updateSomeLines();      // 每帧随机改几条线（演示动态更新）
+    void updateSomeLines();     // 每帧随机改几条线（演示动态更新）
 
     void genFakeData();         // 添加几万条测试线
     void addNewFakeData();      // 添加测试线数据
@@ -50,6 +50,7 @@ private:
     QMatrix4x4  m_view;
     QMatrix4x4  m_model;
 
+    bool m_bUseDrawEx{ true };  // 是否使用高性能绘制
     QTimer      m_timer;
     int         m_frame{ 0 };
 };

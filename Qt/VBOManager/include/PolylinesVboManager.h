@@ -72,26 +72,13 @@ namespace GLRhi
     class PolylinesVboManager final
     {
     public:
-        /**
-         * @brief 构造函数
-         *
-         * 初始化PolylinesVboManager，尝试获取当前OpenGL上下文。
-         * 注意：创建对象时必须确保OpenGL上下文已激活。
-         */
         PolylinesVboManager();
-
-        /**
-         * @brief 析构函数
-         *
-         * 清理所有资源，包括停止后台线程、删除OpenGL对象、释放内存。
-         */
         ~PolylinesVboManager();
+    public:
 
         /**
          * @brief 添加单条折线
-         *
          * 将一条新的折线添加到管理器中，自动按颜色分组存储。
-         *
          * @param id 折线唯一标识符
          * @param vertices 顶点数据，格式为[x1,y1,z1,x2,y2,z2,...]
          * @param color 折线颜色
@@ -101,9 +88,7 @@ namespace GLRhi
 
         /**
          * @brief 批量添加折线
-         *
          * 一次性添加多条折线，比单条添加更高效。
-         *
          * @param vPolylineDatas 折线数据向量
          * @return true全部或部分添加成功，false全部失败
          */
@@ -111,9 +96,7 @@ namespace GLRhi
 
         /**
          * @brief 删除指定ID的折线
-         *
          * 从管理器中移除指定ID的折线，不立即释放内存而是标记为待清理。
-         *
          * @param id 要删除的折线ID
          * @return true删除成功，false未找到该ID的折线
          */
@@ -121,9 +104,7 @@ namespace GLRhi
 
         /**
          * @brief 更新折线数据
-         *
          * 更新指定ID折线的顶点数据，支持顶点数量变化。
-         *
          * @param id 要更新的折线ID
          * @param vertices 新的顶点数据
          * @return true更新成功，false未找到该ID或参数无效
@@ -132,9 +113,7 @@ namespace GLRhi
 
         /**
          * @brief 设置折线可见性
-         *
          * 控制指定ID折线的可见性状态。
-         *
          * @param id 要设置的折线ID
          * @param visible 是否可见
          * @return true设置成功，false未找到该ID的折线
@@ -143,30 +122,26 @@ namespace GLRhi
 
         /**
          * @brief 清空所有折线
-         *
          * 移除并释放所有折线数据和相关资源。
          */
         void clearAllPrimitives();
 
         /**
          * @brief 渲染所有可见的折线
-         *
          * 按颜色分组批量渲染所有可见的折线，是系统的核心渲染方法。
          * 应在OpenGL渲染上下文中调用。
          */
-        void renderVisiblePrimitives();
+        void renderVisiblePrimitives(); // glDrawElementsBaseVertex
+        void renderVisiblePrimitivesEx(); // glDrawElementsInstancedBaseVertex
 
         /**
          * @brief 启动后台碎片整理线程
-         *
          * 启动一个单独的线程进行内存碎片整理，定期检查并压缩需要整理的块。
          */
         void startBackgroundDefrag();
 
         /**
          * @brief 停止后台碎片整理线程
-         *
-         * 安全地终止后台碎片整理线程。
          */
         void stopBackgroundDefrag();
 
@@ -183,9 +158,7 @@ namespace GLRhi
 
         /**
          * @brief 创建新的颜色VBO块
-         *
          * 分配并初始化新的ColorVBOBlock对象及其OpenGL资源。
-         *
          * @param color 块颜色
          * @return 指向新创建块的指针
          */
@@ -193,9 +166,7 @@ namespace GLRhi
 
         /**
          * @brief 确保VBO块有足够容量
-         *
          * 检查并在必要时扩容指定的VBO块。
-         *
          * @param block 要检查的块
          * @param needVert 需要的顶点数量
          * @param needIdx 需要的索引数量
@@ -204,9 +175,7 @@ namespace GLRhi
 
         /**
          * @brief 增量上传单个图元
-         *
          * 将单个图元的数据上传到GPU，只更新必要的部分。
-         *
          * @param block 目标块
          * @param primIdx 图元在块中的索引
          */
@@ -214,18 +183,14 @@ namespace GLRhi
 
         /**
          * @brief 压缩内存块
-         *
          * 移除已删除的图元并重建内存布局，消除空洞。
-         *
          * @param block 要压缩的块
          */
         void compactBlock(ColorVBOBlock* block);
 
         /**
          * @brief 重建绘制命令
-         *
          * 根据块中的图元数据重新生成批量绘制命令。
-         *
          * @param block 要重建命令的块
          */
         void rebuildDrawCommands(ColorVBOBlock* block);
@@ -254,7 +219,6 @@ namespace GLRhi
 
         /**
          * @brief 位置信息结构体
-         *
          * 存储折线在系统中的精确位置，用于快速查找和更新。
          */
         struct Location

@@ -396,52 +396,64 @@ namespace GLRhi
         }
     }
 
-    //
-    // void PolylinesVboManager::renderVisiblePrimitives()
-    //{
-    //    if (!m_gl) return;
-    //
-    //    std::shared_lock<std::shared_mutex> lock(m_mutex);
-    //
-    //    GLint nProg = 0;
-    //    m_gl->glGetIntegerv(GL_CURRENT_PROGRAM, &nProg);
-    //    GLint uColorLoc = (nProg > 0) ? m_gl->glGetUniformLocation(nProg, "uColor") : -1;
-    //
-    //    for (const auto& pair : m_colorBlocks)
-    //    {
-    //        const auto& vBlocks = pair.second;
-    //        if (vBlocks.empty()) continue;
-    //
-    //        const Color& c = vBlocks[0]->color;
-    //        if (uColorLoc != -1)
-    //            m_gl->glUniform4f(uColorLoc, c.r(), c.g(), c.b(), c.a());
-    //
-    //        for (ColorVBOBlock* block : vBlocks)
-    //        {
-    //            if (block->vDrawCounts.empty() && !block->bDirty) continue;
-    //
-    //            if (block->bDirty)
-    //                rebuildDrawCommands(block);
-    //
-    //            compactBlock(block);  // 必要时压缩内存
-    //
-    //            if (block->vDrawCounts.empty()) continue;
-    //
-    //            bindBlock(block);
-    //
-    //            m_gl->glMultiDrawElementsBaseVertex(
-    //                GL_LINE_STRIP,
-    //                block->vDrawCounts.data(),
-    //                GL_UNSIGNED_INT,
-    //                nullptr,  // 相对索引，偏移永远是 nullptr
-    //                static_cast<GLsizei>(block->vDrawCounts.size()),
-    //                block->vBaseVertices.data()
-    //            );
-    //
-    //            unbindBlock();
-    //        }
-    //    }
-    //}
+
+    void PolylinesVboManager::renderVisiblePrimitivesEx()
+    {
+        if (!m_gl || m_colorBlocksMap.empty())
+            return;
+
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
+
+        GLint nProg = 0;
+        m_gl->glGetIntegerv(GL_CURRENT_PROGRAM, &nProg);
+        GLint uColorLoc = (nProg > 0) ? m_gl->glGetUniformLocation(nProg, "uColor") : -1;
+
+        // 预分配一个足够大的指针数组（避免每次 new）
+        static std::vector<const void*> zero_offsets(10000, nullptr);  // 10k 条足够用了
+
+        for (const auto& pair : m_colorBlocksMap)
+        {
+            const auto& vBlocks = pair.second;
+            if (vBlocks.empty()) continue;
+
+            const Color& c = vBlocks[0]->color;
+            if (uColorLoc != -1)
+                m_gl->glUniform4f(uColorLoc, c.r(), c.g(), c.b(), c.a());
+
+            for (ColorVBOBlock* block : vBlocks)
+            {
+                if (block->bDirty)
+                    rebuildDrawCommands(block);
+
+                if (block->bNeedCompact)
+                    compactBlock(block);
+
+                if (block->vDrawCounts.empty())
+                    continue;
+
+                bindBlock(block);
+
+                GLsizei primCount = static_cast<GLsizei>(block->vDrawCounts.size());
+
+                // 关键修复：构造一个全是 nullptr / 0 的指针数组
+                // 因为我们使用的是相对索引（0,1,2,...），所有 draw command 的 index offset 都是 0
+                const void** indices_array = zero_offsets.data();  // 直接复用
+
+                m_gl->glMultiDrawElementsBaseVertex(
+                    GL_LINE_STRIP,
+                    block->vDrawCounts.data(),      // count[]
+                    GL_UNSIGNED_INT,
+                    indices_array,                  // 必须是 [nullptr, nullptr, ...]，长度 = primCount
+                    primCount,                      // draw command 数量
+                    block->vBaseVertices.data()     // basevertex[]
+                );
+
+                unbindBlock();
+            }
+        }
+    }
+
+
 
     // ===================================================================
     // 私有工具函数
