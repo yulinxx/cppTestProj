@@ -18,6 +18,7 @@
  */
 
 #include "PolylinesVboManager.h"
+#include <mutex>
 #include <algorithm>
 #include <chrono>
 
