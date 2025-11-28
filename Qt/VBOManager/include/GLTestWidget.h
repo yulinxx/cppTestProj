@@ -32,12 +32,15 @@ protected:
 
 private:
     void createShader();
-    void updateSomeLines();     // 每帧随机改几条线（演示动态更新）
+    void updateSomeLines();                 // 每帧随机改几条线（演示动态更新）
 
-    void genFakeData();         // 添加几万条测试线
-    void addNewFakeData();      // 添加测试线数据
-    void delFakeData();         // 删除测试
-    void modifyFakeData();      // 修改测试线数据
+    void genFakeData(bool bLarge = false);  // 添加几万条测试线
+    void addSignalLineFakeData();           // 添加测试线数据
+    void addNewFakeData();                  // 添加测试线数据
+    void delFakeData();                     // 删除测试
+    void delFakeDatas();                    // 删除测试
+    void modifyFakeData();                  // 修改测试线数据
+    void showHideLines(bool bAll = false);  // 显示隐藏测试线
 
 
     QOpenGLShaderProgram* m_program{ nullptr };
@@ -50,9 +53,14 @@ private:
     QMatrix4x4  m_view;
     QMatrix4x4  m_model;
 
-    bool m_bUseDrawEx{ true };  // 是否使用高性能绘制
+    bool m_bUseDrawEx{ true };              // 是否使用高性能绘制
     QTimer      m_timer;
     int         m_frame{ 0 };
+
+    // 帧率统计相关
+    qint64 m_lastFPSUpdateTime{ 0 };        // 上次更新帧率的时间
+    int m_fpsFrameCount{ 0 };               // 当前计算周期内的帧数
+    float m_currentFPS{ 0.0f };             // 当前帧率
 };
 
 #endif // GLTEST_WIDGET_H
