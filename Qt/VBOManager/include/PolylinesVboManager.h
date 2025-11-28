@@ -85,6 +85,7 @@ namespace GLRhi
          * @return true成功添加，false失败（无效参数或ID已存在）
          */
         bool addPolyline(long long id, const std::vector<float>& vertices, const Color& color);
+        size_t addPolylines(const std::vector<std::tuple<long long, std::vector<float>, Color>>& vPolylineDatas);
 
         /**
          * @brief 批量添加折线
@@ -101,6 +102,9 @@ namespace GLRhi
          * @return true删除成功，false未找到该ID的折线
          */
         bool removePolyline(long long id);
+
+        // 批量删除折线, 返回实际删除的折线数量
+        size_t removePolylines(const std::vector<long long>& vIds);
 
         /**
          * @brief 更新折线数据
@@ -154,7 +158,7 @@ namespace GLRhi
          * @param color 目标颜色
          * @return 指向ColorVBOBlock的指针，失败返回nullptr
          */
-        ColorVBOBlock* findOrCreateColorBlock(const Color& color);
+        ColorVBOBlock* getColorBlock(const Color& color);
 
         /**
          * @brief 创建新的颜色VBO块
@@ -171,7 +175,7 @@ namespace GLRhi
          * @param needVert 需要的顶点数量
          * @param needIdx 需要的索引数量
          */
-        void ensureBlockCapacity(ColorVBOBlock* block, size_t needVert, size_t needIdx);
+        void checkBlockCapacity(ColorVBOBlock* block, size_t needVert, size_t needIdx);
 
         /**
          * @brief 增量上传单个图元
@@ -193,7 +197,7 @@ namespace GLRhi
          * 根据块中的图元数据重新生成批量绘制命令。
          * @param block 要重建命令的块
          */
-        void rebuildDrawCommands(ColorVBOBlock* block);
+        void rebuildDrawCmds(ColorVBOBlock* block);
 
         /**
          * @brief 绑定块的OpenGL资源
@@ -212,8 +216,8 @@ namespace GLRhi
         void unbindBlock() const;
 
     private:
-        QOpenGLFunctions_3_3_Core* m_gl{ nullptr };            // OpenGL函数接口指针
-        mutable std::shared_mutex m_mutex;                    // 读写锁，保护并发访问
+        QOpenGLFunctions_3_3_Core* m_gl{ nullptr };
+        mutable std::shared_mutex m_mutex;
 
         std::map<uint32_t, std::vector<ColorVBOBlock*>> m_colorBlocksMap; // 按颜色键分组的VBO块映射
 
@@ -226,9 +230,9 @@ namespace GLRhi
             uint32_t colorKey{ 0 };         // 颜色哈希键值
             Color    color;                 // 实际颜色值
             ColorVBOBlock* block{ nullptr }; // 所属VBO块
-            size_t   primIdx{ 0 };        // 在块中的图元索引
+            size_t   nPrimIdx{ 0 };        // 在块中的图元索引
         };
-        std::unordered_map<long long, Location> m_locationMap; // ID到位置的快速映射
+        std::unordered_map<long long, Location> m_IDLocationMap; // ID到位置的快速映射
 
         // 顶点缓存（用于增量上传和 compact）
         std::unordered_map<long long, std::vector<float>> m_vVertexCache; // 原始顶点数据缓存
