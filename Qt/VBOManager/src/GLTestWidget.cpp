@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <random>
+#include <chrono>
 
 using namespace GLRhi;
 
@@ -167,6 +168,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
         if (m_linesMgr)
         {
             qDebug() << "\nCtrl+F1 - clearAllPrimitives genFakeData";
+            auto startTime = std::chrono::high_resolution_clock::now();
 
             makeCurrent();
             m_linesMgr->clearAllPrimitives();
@@ -180,12 +182,17 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
                 genFakeData(false);
 
             update();
+            
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+            qDebug() << "F1按键处理耗时: " << duration.count() << " ms";
         }
     }
     break;
 
     case Qt::Key_F2:
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         makeCurrent();
         if (event->modifiers() & Qt::ControlModifier)
         {
@@ -198,6 +205,10 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
             addSignalLineFakeData();
         }
         update();
+        
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        qDebug() << "F2按键处理耗时: " << duration.count() << " ms";
     }
     break;
 
@@ -205,6 +216,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
     {
         if (m_linesMgr)
         {
+            auto startTime = std::chrono::high_resolution_clock::now();
             makeCurrent();
             if (event->modifiers() & Qt::ControlModifier)
             {
@@ -217,29 +229,44 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
                 delFakeData();
             }
             update();
+            
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+            qDebug() << "F3按键处理耗时: " << duration.count() << " ms";
         }
     }
     break;
     case Qt::Key_F4:
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         makeCurrent();
         qDebug() << "\nF4 - modifyFakeData";
         modifyFakeData();
         update();
+        
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        qDebug() << "F4按键处理耗时: " << duration.count() << " ms";
     }
     break;
 
     case Qt::Key_F5:
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         makeCurrent();
         qDebug() << "\nF5 - clearAllPrimitives";
         m_linesMgr->clearAllPrimitives();
         update();
+        
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        qDebug() << "F5按键处理耗时: " << duration.count() << " ms";
     }
     break;
 
     case Qt::Key_F6:
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         makeCurrent();
         if (event->modifiers() & Qt::ControlModifier)
         {
@@ -248,24 +275,33 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
         }
         else
         {
-
             qDebug() << "\nF6 - showHideLines";
             showHideLines(false);
         }
 
         update();
+        
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        qDebug() << "F6按键处理耗时: " << duration.count() << " ms";
     }
     break;
     case Qt::Key_F8:
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         makeCurrent();
         qDebug() << "\nF8 - ";
         update();
+        
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        qDebug() << "F8按键处理耗时: " << duration.count() << " ms";
     }
     break;
 
     case Qt::Key_F11:
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         m_bUseDrawEx = !m_bUseDrawEx;
         if (m_bUseDrawEx)
             qDebug() << "\nF11 - 切换到高性能绘制模式";
@@ -273,6 +309,10 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
             qDebug() << "\nF11 - 切换到普通绘制模式";
 
         update();
+        
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        qDebug() << "F11按键处理耗时: " << duration.count() << " ms";
     }
     break;
     default:

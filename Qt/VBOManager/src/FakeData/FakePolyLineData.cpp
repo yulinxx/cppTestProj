@@ -30,7 +30,7 @@ namespace GLRhi
         clear();
 
         // 生成指定数量的线段
-        for (int i = 0; i < lineCount; ++i)
+        for (size_t i = 0; i < lineCount; ++i)
         {
             int pointCount = getRandomInt(static_cast<int>(minPoints), static_cast<int>(maxPoints));
             generateSingleLine(pointCount);
