@@ -34,15 +34,15 @@ namespace GLRhi
      */
     struct ColorVBOBlock
     {
-        unsigned int vao{ 0 };       // 顶点数组对象
-        unsigned int vbo{ 0 };       // 顶点缓冲区对象
-        unsigned int ebo{ 0 };       // 索引缓冲区对象
-        Color color;                 // 该块所有折线的统一颜色
+        unsigned int vao{ 0 };          // 顶点数组对象
+        unsigned int vbo{ 0 };          // 顶点缓冲区对象
+        unsigned int ebo{ 0 };          // 索引缓冲区对象
+        Color color;                    // 该块所有折线的统一颜色
 
-        size_t nVertexCapacity{ 0 }; // 顶点容量上限
-        size_t nIndexCapacity{ 0 };  // 索引容量上限
-        size_t nVertexCount{ 0 };    // 当前实际使用的顶点数
-        size_t nIndexCount{ 0 };     // 当前实际使用的索引数
+        size_t nVertexCapacity{ 0 };    // 顶点容量上限
+        size_t nIndexCapacity{ 0 };     // 索引容量上限
+        size_t nVertexCount{ 0 };       // 当前实际使用的顶点数
+        size_t nIndexCount{ 0 };        // 当前实际使用的索引数
 
         std::vector<GLsizei> vDrawCounts;       // 每个图元的索引数量数组，用于批量绘制
         std::vector<GLint>   vBaseVertices;     // 每个图元的基础顶点偏移数组
@@ -50,10 +50,11 @@ namespace GLRhi
 
         std::unordered_map<long long, size_t> idToIndexMap; // 图元ID到索引的映射，用于快速查找
 
-        bool bDirty{ false };        // 标记绘制命令是否需要重建
-        bool bNeedCompact{ false };  // 标记是否需要进行内存碎片整理
+        bool bDirty{ false };           // 标记绘制命令是否需要重建
+        bool bCompact{ false };         // 标记是否需要进行内存碎片整理
     };
 
+    //////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * @class PolylinesVboManager
      * @brief 高性能折线渲染管理器
@@ -199,6 +200,8 @@ namespace GLRhi
          */
         void rebuildDrawCmds(ColorVBOBlock* block);
 
+        void touchCache(long long id);
+
         /**
          * @brief 绑定块的OpenGL资源
          *
@@ -219,26 +222,29 @@ namespace GLRhi
         QOpenGLFunctions_3_3_Core* m_gl{ nullptr };
         mutable std::shared_mutex m_mutex;
 
-        std::map<uint32_t, std::vector<ColorVBOBlock*>> m_colorBlocksMap; // 按颜色键分组的VBO块映射
-
+        std::unordered_map<uint32_t, std::vector<ColorVBOBlock*>> m_colorBlocksMap; // 按颜色键分组的VBO块映射
         /**
          * @brief 位置信息结构体
          * 存储折线在系统中的精确位置，用于快速查找和更新。
          */
         struct Location
         {
-            uint32_t colorKey{ 0 };         // 颜色哈希键值
-            Color    color;                 // 实际颜色值
-            ColorVBOBlock* block{ nullptr }; // 所属VBO块
-            size_t   nPrimIdx{ 0 };        // 在块中的图元索引
+            uint32_t colorKey{ 0 };             // 颜色哈希键值
+            Color    color;                     // 实际颜色值
+            ColorVBOBlock* block{ nullptr };    // 所属VBO块
+            size_t   nPrimIdx{ 0 };             // 在块中的图元索引
         };
         std::unordered_map<long long, Location> m_IDLocationMap; // ID到位置的快速映射
 
         // 顶点缓存（用于增量上传和 compact）
         std::unordered_map<long long, std::vector<float>> m_vVertexCache; // 原始顶点数据缓存
+        // LRU
+        std::list<long long> m_vertexCacheOrder;
+        static constexpr size_t MAX_CACHE_SIZE = 5000;  // 只缓存最近 5000 条被改过的线
 
-        std::thread m_defragThread;       // 后台碎片整理线程
-        std::atomic<bool> m_bStopDefrag{ false }; // 线程停止标志
+        // 后台碎片整理相关
+        std::thread m_defragThread;                 // 后台碎片整理线程
+        std::atomic<bool> m_bStopDefrag{ false };   // 线程停止标志
     };
 }
 

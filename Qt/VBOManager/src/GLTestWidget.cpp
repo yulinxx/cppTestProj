@@ -182,7 +182,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
                 genFakeData(false);
 
             update();
-            
+
             auto endTime = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
             qDebug() << "F1按键处理耗时: " << duration.count() << " ms";
@@ -205,7 +205,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
             addSignalLineFakeData();
         }
         update();
-        
+
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         qDebug() << "F2按键处理耗时: " << duration.count() << " ms";
@@ -229,7 +229,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
                 delFakeData();
             }
             update();
-            
+
             auto endTime = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
             qDebug() << "F3按键处理耗时: " << duration.count() << " ms";
@@ -243,7 +243,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
         qDebug() << "\nF4 - modifyFakeData";
         modifyFakeData();
         update();
-        
+
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         qDebug() << "F4按键处理耗时: " << duration.count() << " ms";
@@ -257,7 +257,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
         qDebug() << "\nF5 - clearAllPrimitives";
         m_linesMgr->clearAllPrimitives();
         update();
-        
+
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         qDebug() << "F5按键处理耗时: " << duration.count() << " ms";
@@ -280,7 +280,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
         }
 
         update();
-        
+
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         qDebug() << "F6按键处理耗时: " << duration.count() << " ms";
@@ -292,7 +292,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
         makeCurrent();
         qDebug() << "\nF8 - ";
         update();
-        
+
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         qDebug() << "F8按键处理耗时: " << duration.count() << " ms";
@@ -309,7 +309,7 @@ void GLTestWidget::keyPressEvent(QKeyEvent* event)
             qDebug() << "\nF11 - 切换到普通绘制模式";
 
         update();
-        
+
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         qDebug() << "F11按键处理耗时: " << duration.count() << " ms";
@@ -400,20 +400,79 @@ void GLTestWidget::addSignalLineFakeData()
     std::random_device rd;
     std::mt19937 rng(rd());
 
-    std::uniform_int_distribution<size_t> group(1, 1);
-    std::uniform_int_distribution<size_t> lines(1, 1);
-    std::uniform_int_distribution<size_t> maxPts(2, 10);
-
-    auto polylineData = m_dataProvider->genLineData(1, 1, 2, maxPts(rng));
-    for (auto& pls : polylineData)
+    if (0)
     {
-        Color c = pls.brush.getColor();
-        for (auto& id : pls.vId)
+
+        std::uniform_int_distribution<size_t> group(1, 1);
+        std::uniform_int_distribution<size_t> lines(1, 1);
+        std::uniform_int_distribution<size_t> maxPts(2, 10);
+
+
+        auto polylineData = m_dataProvider->genLineData(1, 1, 2, maxPts(rng));
+        for (auto& pls : polylineData)
         {
-            std::vector<float>& vVertices = pls.vVerts;
-            m_linesMgr->addPolyline(id, vVertices, c);
+            Color c = pls.brush.getColor();
+            for (auto& id : pls.vId)
+            {
+                std::vector<float>& vVertices = pls.vVerts;
+                m_linesMgr->addPolyline(id, vVertices, c);
+            }
         }
     }
+    else
+    {
+        std::uniform_int_distribution<size_t> group(1, 10);
+        std::uniform_int_distribution<size_t> lines(2, 20);
+        std::uniform_int_distribution<size_t> maxPts(2, 10);
+
+        std::vector<std::tuple<long long, std::vector<float>, Color>> vPolylines;
+        vPolylines.reserve(100);
+
+        //auto polylineData = m_dataProvider->genLineData(1, 1, 2, maxPts(rng));
+        auto polylineData = m_dataProvider->genLineData(group(rng), lines(rng), 2, maxPts(rng));
+
+        //auto polylineData = m_dataProvider->genLineData(10, 200, 100, 100);
+
+        std::vector<float> vVertices;
+
+        for (auto& pls : polylineData) // 群组
+        {
+            size_t nBase = 0;
+            Color c = pls.brush.getColor();
+            for (size_t i = 0; i < pls.vId.size(); i++) // 线段
+            {
+                auto id = pls.vId[i];
+                auto verts = pls.vCount[i];
+
+
+                std::vector<float>& vertices = pls.vVerts;
+
+                for (size_t j = 0; j < verts * 3; j += 3) // 点
+                {
+                    vVertices.push_back(vertices[nBase + j]);
+                    vVertices.push_back(vertices[nBase + j + 1]);
+                    vVertices.push_back(0);
+                }
+
+                nBase += (verts * 3);
+
+                vPolylines.emplace_back(id, vVertices, c);
+
+                vVertices.clear();
+            }
+
+        }
+
+        if (!vPolylines.empty())
+        {
+            auto startTime = std::chrono::high_resolution_clock::now();
+            size_t addedCount = m_linesMgr->addPolylines(vPolylines);
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+            qDebug() << "添加" << addedCount << "条折线，耗时:" << duration << "ms";
+        }
+    }
+
 }
 void GLTestWidget::addNewFakeData()
 {

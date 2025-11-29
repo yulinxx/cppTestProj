@@ -11,8 +11,8 @@ namespace GLRhi
     struct  PolylineData
     {
         std::vector<long long> vId;                 // ID
-        std::vector<float> vVerts;                  // x, y, z
         std::vector<size_t> vCount;                 // 线段顶点数
+        std::vector<float> vVerts;                  // x, y, z
         Brush brush{ 0.0f, 0.0f, 0.0f, 1.0f, 1 };   // 渲染信息
 
         bool bDirty{ true };       // 是否需要更新
