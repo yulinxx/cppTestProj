@@ -51,7 +51,7 @@ namespace GLRhi
 
             //float d = fakePlData.getRandomFloat(-1.0f, 1.0f);
 
-            PolylineData polyLineData{ vIDs, vVerts, vLineVertexCounts, {c} };
+            PolylineData polyLineData{ vIDs, vLineVertexCounts, vVerts, {c} };
             vPLineDatas.emplace_back(polyLineData);
         }
 
