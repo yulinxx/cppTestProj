@@ -29,14 +29,14 @@ namespace GLRhi
     // 类常量定义
     namespace
     {
-        static constexpr size_t INIT_CAPACITY = 100'000;   // 改这里！原来 1'000'000 太离谱
+        static constexpr size_t INIT_CAPACITY = 100'000; // 改这里！原来 1'000'000 太离谱
         static constexpr size_t GROW_STEP = 200'000;
         static constexpr size_t MAX_VERT_PER_BLOCK = 1'500'000;
 
-        //static constexpr size_t INIT_CAPACITY = 1'000'000;     // VBO块的初始容量
-        //static constexpr size_t GROW_STEP = 500'000;         // 容量增长步长
-        //static constexpr size_t MAX_VERT_PER_BLOCK = 2'000'000; // 每个VBO块的最大顶点数量
-        static constexpr float  COMPACT_THRESHOLD = 0.70f; // 使用率 < 70% 才压缩
+        // static constexpr size_t INIT_CAPACITY = 1'000'000;     // VBO块的初始容量
+        // static constexpr size_t GROW_STEP = 500'000;         // 容量增长步长
+        // static constexpr size_t MAX_VERT_PER_BLOCK = 2'000'000; // 每个VBO块的最大顶点数量
+        static constexpr float COMPACT_THRESHOLD = 0.70f; // 使用率 < 70% 才压缩
     }
 
     /**
@@ -180,7 +180,10 @@ namespace GLRhi
 
                 Color c(data.brush.getColor());
                 if (!addPolyline(data.vId[i], vVerts, c))
+                {
+                    touchCache(data.vId[i]);
                     bAllSuccess = false;
+                }
 
                 offset += nCount;
             }
@@ -188,21 +191,23 @@ namespace GLRhi
         return bAllSuccess;
     }
 
+   
     /**
- * @brief 批量添加多条折线
- *
- * 比逐个调用 addPolyline() 快 5~20 倍，专为一次性加载数十万条线设计。
- * 内部会：
- * - 按颜色自动分组
- * - 每种颜色只扩容/上传一次
- * - 最小化锁粒度、OpenGL 调用、内存拷贝
- *
- * @param vPolylineDatas 批量数据：{id, vertices, color}
- * @return 添加成功的图元数量（失败的会跳过并打印警告）
- */
+     * @brief 批量添加多条折线
+     *
+     * 比逐个调用 addPolyline() 快 5~20 倍，专为一次性加载数十万条线设计。
+     * 内部会：
+     * - 按颜色自动分组
+     * - 每种颜色只扩容/上传一次
+     * - 最小化锁粒度、OpenGL 调用、内存拷贝
+     *
+     * @param vPolylineDatas 批量数据：{id, vertices, color}
+     * @return 添加成功的图元数量（失败的会跳过并打印警告）
+     */
     size_t PolylinesVboManager::addPolylines(
         const std::vector<std::tuple<long long, std::vector<float>, Color>>& vPolylineDatas)
     {
+
         if (vPolylineDatas.empty() || !m_gl)
             return 0;
 
@@ -220,32 +225,32 @@ namespace GLRhi
         size_t validCount = 0;
 
         {
-            std::shared_lock<std::shared_mutex> readLock(m_mutex); // 只读锁查ID冲突
-            for (size_t i = 0; i < vPolylineDatas.size(); ++i)
+            std::shared_lock<std::shared_mutex> readLock(m_mutex);
+            for (size_t i = 0; i < vPolylineDatas.size(); ++i) // 遍历组
             {
-                const auto& [id, verts, color] = vPolylineDatas[i];
+                const auto& [id, verts, color] = vPolylineDatas[i]; // tuple 多段线
 
                 if (verts.size() < 6 || verts.size() % 3 != 0)
                 {
                     validFlags[i] = false;
                     continue;
                 }
+
                 if (m_IDLocationMap.count(id))
                 {
-                    qWarning() << "addPolylinesBatch: ID already exists:" << id;
                     validFlags[i] = false;
                     continue;
                 }
 
-                size_t vertCount = verts.size() / 3;
+                size_t nVertCount = verts.size() / 3;
                 uint32_t key = color.toUInt32();
-                auto& group = colorGroups[key];
-                //if (group.color.isValid() == false) // 第一次遇到这个颜色
-                group.color = color;
 
-                group.indices.push_back(i);
-                group.totalVerts += vertCount;
-                group.totalIndices += vertCount;
+                auto& batchGroup = colorGroups[key];
+                batchGroup.color = color;
+
+                batchGroup.indices.push_back(i);
+                batchGroup.totalVerts += nVertCount;
+                batchGroup.totalIndices += nVertCount;
                 validCount++;
             }
         }
@@ -253,10 +258,9 @@ namespace GLRhi
         if (validCount == 0)
             return 0;
 
-        // Step 2: 升级为写锁，开始正式添加
         std::unique_lock<std::shared_mutex> writeLock(m_mutex);
 
-        size_t successCount = 0;
+        size_t nAdd = 0;
 
         for (auto& [key, group] : colorGroups)
         {
@@ -267,29 +271,29 @@ namespace GLRhi
                 continue;
             }
 
-            // 确保容量足够（只扩容一次！）
             checkBlockCapacity(block,
                 block->nVertexCount + group.totalVerts,
                 block->nIndexCount + group.totalIndices);
 
             // 预计算本次批次在块中的起始偏移
-            GLint baseVertexStart = static_cast<GLint>(block->nVertexCount);
-            size_t vertOffset = block->nVertexCount;     // 顶点偏移（单位：顶点）
-            size_t idxOffset = block->nIndexCount;      // 索引偏移（单位：uint）
+            GLint nBaseVertexStart = static_cast<GLint>(block->nVertexCount);
+            size_t nVertOffset = block->nVertexCount; // 顶点偏移
+            size_t nIdxOffset = block->nIndexCount;   // 索引偏移
 
             // 准备批量上传用的连续缓冲区
-            std::vector<float>         batchVerts;
-            std::vector<unsigned int>  batchIndices;
-            batchVerts.reserve(group.totalVerts * 3);
-            batchIndices.reserve(group.totalIndices);
+            std::vector<float> vBatchVerts;
+            std::vector<unsigned int> vBatchIndices;
+            vBatchVerts.reserve(group.totalVerts * 3);
+            vBatchIndices.reserve(group.totalIndices);
 
-            std::vector<PrimitiveInfo> newPrims;
-            newPrims.reserve(group.indices.size());
+            std::vector<PrimitiveInfo> vNewPrims;
+            vNewPrims.reserve(group.indices.size());
 
             // 遍历该颜色组所有图元
             for (size_t idx : group.indices)
             {
-                if (!validFlags[idx]) continue;
+                if (!validFlags[idx])
+                    continue;
 
                 const auto& [id, verts, color] = vPolylineDatas[idx];
                 size_t nVertCount = verts.size() / 3;
@@ -297,59 +301,59 @@ namespace GLRhi
                 PrimitiveInfo prim;
                 prim.id = id;
                 prim.nIndexCount = static_cast<GLsizei>(nVertCount);
-                prim.nBaseVertex = static_cast<GLint>(vertOffset);
+                prim.nBaseVertex = static_cast<GLint>(nVertOffset);
                 prim.bValid = true;
 
                 // 记录图元信息
-                size_t primIdxInBlock = block->vPrimitives.size() + newPrims.size();
-                newPrims.push_back(std::move(prim));
-                block->idToIndexMap[id] = primIdxInBlock;
+                size_t nPrimIdxInBlock = block->vPrimitives.size() + vNewPrims.size();
+                vNewPrims.push_back(std::move(prim));
+                block->idToIndexMap[id] = nPrimIdxInBlock;
 
                 // 缓存顶点（用于后续 update / compact）
                 m_vVertexCache[id] = verts;
 
                 // 填充批量缓冲区
-                batchVerts.insert(batchVerts.end(), verts.begin(), verts.end());
+                vBatchVerts.insert(vBatchVerts.end(), verts.begin(), verts.end());
                 for (size_t i = 0; i < nVertCount; ++i)
-                    batchIndices.push_back(static_cast<unsigned int>(vertOffset + i));
+                    vBatchIndices.push_back(static_cast<unsigned int>(nVertOffset + i));
 
-                // 更新位置映射（必须在锁内）
-                m_IDLocationMap[id] = { key, color, block, primIdxInBlock };
+                // 更新位置映射
+                m_IDLocationMap[id] = { key, color, block, nPrimIdxInBlock };
 
-                vertOffset += nVertCount;
-                idxOffset += nVertCount;
-                successCount++;
+                nVertOffset += nVertCount;
+                nIdxOffset += nVertCount;
+                nAdd++;
             }
 
-            // Step 3: 一次性上传顶点 + 索引（极致性能！）
-            if (!batchVerts.empty())
+            //  一次性上传
+            if (!vBatchVerts.empty())
             {
-                GLsizeiptr vertByteOffset = static_cast<GLsizeiptr>(baseVertexStart) * 3 * sizeof(float);
-                GLsizeiptr idxByteOffset = static_cast<GLsizeiptr>(baseVertexStart) * sizeof(unsigned int);
+                GLsizeiptr vertByteOffset = static_cast<GLsizeiptr>(nBaseVertexStart) * 3 * sizeof(float);
+                GLsizeiptr idxByteOffset = static_cast<GLsizeiptr>(nBaseVertexStart) * sizeof(unsigned int);
 
                 // 上传顶点
                 m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
                 m_gl->glBufferSubData(GL_ARRAY_BUFFER, vertByteOffset,
-                    static_cast<GLsizeiptr>(batchVerts.size() * sizeof(float)), batchVerts.data());
+                    static_cast<GLsizeiptr>(vBatchVerts.size() * sizeof(float)), vBatchVerts.data());
 
                 // 上传索引
                 m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->ebo);
                 m_gl->glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, idxByteOffset,
-                    static_cast<GLsizeiptr>(batchIndices.size() * sizeof(unsigned int)), batchIndices.data());
+                    static_cast<GLsizeiptr>(vBatchIndices.size() * sizeof(unsigned int)), vBatchIndices.data());
             }
 
             // 追加图元信息
             block->vPrimitives.insert(block->vPrimitives.end(),
-                std::make_move_iterator(newPrims.begin()),
-                std::make_move_iterator(newPrims.end()));
+                std::make_move_iterator(vNewPrims.begin()),
+                std::make_move_iterator(vNewPrims.end()));
 
             // 更新块统计
             block->nVertexCount += group.totalVerts;
             block->nIndexCount += group.totalIndices;
-            block->bDirty = true; // 需要重建绘制命令
+            block->bDirty = true;
         }
 
-        return successCount;
+        return nAdd;
     }
 
     /**
@@ -370,12 +374,12 @@ namespace GLRhi
 
         const Location& loc = it->second;
         ColorVBOBlock* block = loc.block;
-        size_t idx = loc.nPrimIdx;
+        PrimitiveInfo& prim = block->vPrimitives[loc.nPrimIdx];
 
-        block->vPrimitives[idx].bValid = false;
-        block->vPrimitives[idx].nIndexCount = 0;
+        prim.bValid = false;
+        prim.nIndexCount = 0;
         block->bDirty = true;
-        block->bNeedCompact = true;
+        block->bCompact = true;
 
         m_IDLocationMap.erase(it);
         m_vVertexCache.erase(id);
@@ -383,8 +387,8 @@ namespace GLRhi
 
         // 立即重新整理VBO数据，确保删除后顶点数据是连续的
         // 这样可以避免渲染时线段连接错误
-        compactBlock(block);
-        rebuildDrawCmds(block);
+        //compactBlock(block);
+        //rebuildDrawCmds(block);
         return true;
     }
 
@@ -393,11 +397,9 @@ namespace GLRhi
         if (vIds.empty())
             return true;
 
-        std::unique_lock<std::shared_mutex> lock(m_mutex);
-
-        std::unordered_set<ColorVBOBlock*> affectedBlocks;  // 收集受影响的块（去重）
-
+        std::unique_lock lock(m_mutex);
         size_t nDelCount = 0;
+
         for (long long id : vIds)
         {
             auto it = m_IDLocationMap.find(id);
@@ -406,31 +408,18 @@ namespace GLRhi
 
             const Location& loc = it->second;
             ColorVBOBlock* block = loc.block;
-            size_t idx = loc.nPrimIdx;
+            PrimitiveInfo& prim = block->vPrimitives[loc.nPrimIdx];
 
-            // 标记删除
-            block->vPrimitives[idx].bValid = false;
-            block->vPrimitives[idx].nIndexCount = 0;
+            prim.bValid = false;
+            prim.nIndexCount = 0;
             block->bDirty = true;
-            block->bNeedCompact = true;
+            block->bCompact = true;
 
-            // 清理缓存
             m_IDLocationMap.erase(it);
             m_vVertexCache.erase(id);
             block->idToIndexMap.erase(id);
-
-            // 收集受影响的 block
-            affectedBlocks.insert(block);
-
-            nDelCount++;
+            ++nDelCount;
         }
-
-        for (ColorVBOBlock* block : affectedBlocks)
-        {
-            compactBlock(block);         // 一次性整理碎片
-            rebuildDrawCmds(block);  // 一次性重建绘制命令
-        }
-
         return nDelCount;
     }
 
@@ -464,7 +453,7 @@ namespace GLRhi
 
         size_t nNewCount = vVerts.size() / 3;
 
-        size_t nOldVertCount = static_cast<size_t>(prim.nIndexCount);  // 旧顶点数
+        size_t nOldVertCount = static_cast<size_t>(prim.nIndexCount); // 旧顶点数
         size_t nNewVertCount = vVerts.size() / 3;
 
         if (nNewVertCount > nOldVertCount)
@@ -505,8 +494,8 @@ namespace GLRhi
 
         size_t nPrim = loc.nPrimIdx;
 
-        //bool bTest = loc.block->vPrimitives[nPrim].bValid;
-        //bVisible = !bTest;
+        // bool bTest = loc.block->vPrimitives[nPrim].bValid;
+        // bVisible = !bTest;
 
         loc.block->vPrimitives[loc.nPrimIdx].bValid = bVisible;
         loc.block->bDirty = true;
@@ -600,7 +589,7 @@ namespace GLRhi
                 if (block->bDirty)
                     rebuildDrawCmds(block);
 
-                if (block->bNeedCompact)
+                if (block->bCompact)
                     compactBlock(block);
 
                 if (block->vDrawCounts.empty())
@@ -634,7 +623,7 @@ namespace GLRhi
         m_gl->glGetIntegerv(GL_CURRENT_PROGRAM, &nProg);
         GLint uColorLoc = (nProg > 0) ? m_gl->glGetUniformLocation(nProg, "uColor") : -1;
 
-        static std::vector<const void*> vOffsets(100000, nullptr);
+        //static std::vector<const void*> vOffsets(100000, nullptr);
 
         for (const auto& pair : m_colorBlocksMap)
         {
@@ -651,7 +640,7 @@ namespace GLRhi
                 if (block->bDirty)
                     rebuildDrawCmds(block);
 
-                if (block->bNeedCompact)
+                if (block->bCompact)
                     compactBlock(block);
 
                 if (block->vDrawCounts.empty())
@@ -661,17 +650,21 @@ namespace GLRhi
 
                 GLsizei nPrimCount = static_cast<GLsizei>(block->vDrawCounts.size());
 
+                static thread_local std::vector<const void*> g_nullPointers;
+                if (g_nullPointers.size() < 200000)
+                    g_nullPointers.assign(200000, nullptr);
+
                 // 构造一个全是 nullptr 的指针数组
                 // 因为使用的是相对索引（0,1,2,...），所有 draw command 的 index offset 都是 0
-                const void** indicesArray = vOffsets.data();  // 直接复用
+                const void** ptrs = g_nullPointers.data();
 
                 m_gl->glMultiDrawElementsBaseVertex(
                     GL_LINE_STRIP,
-                    block->vDrawCounts.data(),     // nCount[]
+                    block->vDrawCounts.data(), // nCount[]
                     GL_UNSIGNED_INT,
-                    indicesArray,                  // 必须是 [nullptr, nullptr, ...]，长度 = primCount
-                    nPrimCount,                    // draw command 数量
-                    block->vBaseVertices.data()    // basevertex[]
+                    ptrs,               // 必须是 [nullptr, nullptr, ...]，长度 = primCount
+                    nPrimCount,                 // draw command 数量
+                    block->vBaseVertices.data() // basevertex[]
                 );
 
                 unbindBlock();
@@ -758,89 +751,116 @@ namespace GLRhi
      * 如果块空间不足，将重新分配更大的缓冲区并复制现有数据。
      *
      * @param block 要检查容量的VBO块
-     * @param needV 需要的顶点数量
-     * @param needI 需要的索引数量
+     * @param nNeedV 需要的顶点数量
+     * @param nNeedI 需要的索引数量
      */
-    void PolylinesVboManager::checkBlockCapacity(ColorVBOBlock* block, size_t needV, size_t needI)
+    void PolylinesVboManager::checkBlockCapacity(ColorVBOBlock* block, size_t nNeedV, size_t nNeedI)
     {
-        // // 检查顶点数量是否超过GLint最大值，防止溢出
-        // if (needV > static_cast<size_t>(std::numeric_limits<GLint>::max()) || 
-        //     needI > static_cast<size_t>(std::numeric_limits<GLint>::max())) {
-        //     qWarning("Vertices/indices count exceeds GLint limits");
-        //     return;
-        // }
-
-        if (needV <= block->nVertexCapacity && needI <= block->nIndexCapacity)
-            return;
-
-        size_t nNewV = block->nVertexCapacity;
-        size_t nNewI = block->nIndexCapacity;
-
-        while (nNewV < needV)
-            nNewV += GROW_STEP;
-        while (nNewI < needI)
-            nNewI += GROW_STEP;
-
-        // 保存旧容量信息，用于后续重新上传数据
-        size_t oldVertexCount = block->nVertexCount;
-        size_t oldIndexCount = block->nIndexCount;
-
-        block->nVertexCapacity = nNewV;
-        block->nIndexCapacity = nNewI;
-
-        // Orphaning 重新分配 - 但这次我们需要重新上传数据
-        m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-        m_gl->glBufferData(GL_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(nNewV * 3 * sizeof(float)), nullptr, GL_DYNAMIC_DRAW);
-
-        m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->ebo);
-        m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(nNewI * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
-
-        // 重新上传所有图元的数据
-        if (oldVertexCount > 0)
+        if (1)
         {
-            std::vector<float> allVertices;
-            std::vector<unsigned int> allIndices;
+            // Grok 优化版
+            if (nNeedV <= block->nVertexCapacity && nNeedI <= block->nIndexCapacity)
+                return;
 
-            allVertices.reserve(oldVertexCount * 3);
-            allIndices.reserve(oldIndexCount);
+            size_t nNewCap = block->nVertexCapacity * 2;
+            if (nNewCap < nNeedV)
+                nNewCap = nNeedV + GROW_STEP;
 
-            // 从顶点缓存中收集所有有效图元的数据
-            size_t currentBase = 0;
-            for (size_t i = 0; i < block->vPrimitives.size(); ++i)
-            {
-                const PrimitiveInfo& prim = block->vPrimitives[i];
-                if (prim.bValid)
-                {
-                    auto it = m_vVertexCache.find(prim.id);
-                    if (it != m_vVertexCache.end())
-                    {
-                        const std::vector<float>& vertices = it->second;
-                        size_t vertexCount = vertices.size() / 3;
+            block->nVertexCapacity = nNewCap;
+            block->nIndexCapacity = nNewCap;
 
-                        // 添加顶点数据
-                        allVertices.insert(allVertices.end(), vertices.begin(), vertices.end());
-
-                        // 添加索引数据
-                        for (size_t j = 0; j < vertexCount; ++j)
-                        {
-                            allIndices.push_back(static_cast<unsigned int>(currentBase + j));
-                        }
-
-                        currentBase += vertexCount;
-                    }
-                }
-            }
-
-            // 上传重新收集的数据
+            // Orphaning：只重新分配，不拷贝旧数据
             m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-            m_gl->glBufferSubData(GL_ARRAY_BUFFER, 0,
-                static_cast<GLsizeiptr>(allVertices.size() * sizeof(float)), allVertices.data());
+            m_gl->glBufferData(GL_ARRAY_BUFFER,
+                nNewCap * 3 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
             m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->ebo);
-            m_gl->glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-                static_cast<GLsizeiptr>(allIndices.size() * sizeof(unsigned int)), allIndices.data());
+            m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                nNewCap * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+            // 旧数据全丢！因为我们有 m_vVertexCache 缓存，下次 compact 时会重建
+            block->bCompact = true;  // 强制下次 compact 时重建
+
+            return;
+        }
+        else
+        {
+            // 没崩溃过
+            if (nNeedV <= block->nVertexCapacity && nNeedI <= block->nIndexCapacity)
+                return;
+
+            size_t nNewV = block->nVertexCapacity;
+            size_t nNewI = block->nIndexCapacity;
+
+            while (nNewV < nNeedV)
+                nNewV += GROW_STEP;
+            while (nNewI < nNeedI)
+                nNewI += GROW_STEP;
+
+            // 保存旧容量信息，用于后续重新上传数据
+            size_t nOldVertexCount = block->nVertexCount;
+            size_t nOldIndexCount = block->nIndexCount;
+
+            block->nVertexCapacity = nNewV;
+            block->nIndexCapacity = nNewI;
+
+            // Orphaning 重新分配 - 但这次我们需要重新上传数据
+            m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+            m_gl->glBufferData(GL_ARRAY_BUFFER,
+                static_cast<GLsizeiptr>(nNewV * 3 * sizeof(float)), nullptr, GL_DYNAMIC_DRAW);
+
+            m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->ebo);
+            m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                static_cast<GLsizeiptr>(nNewI * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+
+            // 重新上传所有图元的数据
+            if (nOldVertexCount > 0)
+            {
+                std::vector<float> allVertices;
+                std::vector<unsigned int> allIndices;
+
+                allVertices.reserve(nOldVertexCount * 3);
+                allIndices.reserve(nOldIndexCount);
+
+                // 从顶点缓存中收集所有有效图元的数据
+                // 每次扩容就重传整个 block（几百万顶点） !!!!
+                size_t currentBase = 0;
+                for (size_t i = 0; i < block->vPrimitives.size(); ++i)
+                {
+                    const PrimitiveInfo& prim = block->vPrimitives[i];
+                    if (prim.bValid)
+                    {
+                        auto it = m_vVertexCache.find(prim.id);
+                        if (it != m_vVertexCache.end())
+                        {
+                            const std::vector<float>& vertices = it->second;
+                            size_t vertexCount = vertices.size() / 3;
+
+                            // 添加顶点数据
+                            allVertices.insert(allVertices.end(), vertices.begin(), vertices.end());
+
+                            // 添加索引数据
+                            for (size_t j = 0; j < vertexCount; ++j)
+                            {
+                                allIndices.push_back(static_cast<unsigned int>(currentBase + j));
+                            }
+
+
+                            currentBase += vertexCount;
+                        }
+                    }
+                }
+
+                // 上传重新收集的数据
+                m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+                m_gl->glBufferSubData(GL_ARRAY_BUFFER, 0,
+                    static_cast<GLsizeiptr>(allVertices.size() * sizeof(float)), allVertices.data());
+
+                m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->ebo);
+                m_gl->glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
+                    static_cast<GLsizeiptr>(allIndices.size() * sizeof(unsigned int)), allIndices.data());
+            }
+            return;
         }
     }
 
@@ -901,67 +921,81 @@ namespace GLRhi
      */
     void PolylinesVboManager::compactBlock(ColorVBOBlock* block)
     {
-        if (!block->bNeedCompact)
+        if (!block->bCompact || block->nVertexCount == 0)
             return;
 
-        size_t nValidVerts = 0;
-        for (const PrimitiveInfo& p : block->vPrimitives)
-        {
-            if (p.bValid)
-                nValidVerts += p.nIndexCount;
-        }
+        std::vector<float> newVerts;
+        std::vector<unsigned int> newIndices;
+        newVerts.reserve(block->nVertexCount * 3 * 3 / 4);  // 预估 75% 存活
+        newIndices.reserve(block->nVertexCount);
 
-        if ((block->nVertexCount == 0) || (nValidVerts >= block->nVertexCount * COMPACT_THRESHOLD))
-        {
-            block->bNeedCompact = false;
-            return;
-        }
+        size_t currentBase = 0;
 
-        std::vector<float> nNewVerts;
-        std::vector<unsigned int> nNewIndices;
-        nNewVerts.reserve(nValidVerts * 3);
-        nNewIndices.reserve(nValidVerts);
-
-        size_t nVerts = 0;
         for (PrimitiveInfo& prim : block->vPrimitives)
         {
-            if (!prim.bValid)
+            if (!prim.bValid || prim.nIndexCount <= 1)
                 continue;
 
-            const std::vector<float>& vVerts = m_vVertexCache.at(prim.id);
-            size_t nCount = vVerts.size() / 3;
+            // Step 1: 先尝试从缓存拿（最快）
+            auto cacheIt = m_vVertexCache.find(prim.id);
+            const std::vector<float>* vertsPtr = nullptr;
+            std::vector<float> tempVerts;
 
-            nNewVerts.insert(nNewVerts.end(), vVerts.begin(), vVerts.end());
+            if (cacheIt != m_vVertexCache.end())
+            {
+                vertsPtr = &cacheIt->second;
+            }
+            else
+            {
+                // Step 2: 缓存没了？从当前 VBO 里把旧数据读回来！（关键兜底！）
+                // 这才是真正的「数据永不丢失」
+                size_t oldOffset = static_cast<size_t>(prim.nBaseVertex);
+                size_t vertCount = static_cast<size_t>(prim.nIndexCount);
 
+                tempVerts.resize(vertCount * 3);
+                m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+                m_gl->glGetBufferSubData(GL_ARRAY_BUFFER,
+                    oldOffset * 3 * sizeof(float),
+                    vertCount * 3 * sizeof(float),
+                    tempVerts.data());
+
+                vertsPtr = &tempVerts;
+
+                // 可选：重新放回缓存（防止下次又读）
+                // m_vVertexCache[prim.id] = std::move(tempVerts);
+                // touchCache(prim.id);
+            }
+
+            const auto& verts = *vertsPtr;
+            size_t nCount = verts.size() / 3;
+
+            // 写入新缓冲区
+            newVerts.insert(newVerts.end(), verts.begin(), verts.end());
             for (size_t i = 0; i < nCount; ++i)
-                nNewIndices.push_back(static_cast<unsigned int>(nVerts + i));
+                newIndices.push_back(static_cast<unsigned int>(currentBase + i));
 
-            prim.nBaseVertex = static_cast<GLint>(nVerts);
-            nVerts += nCount;
+            // 更新 base vertex
+            prim.nBaseVertex = static_cast<GLint>(currentBase);
+            currentBase += nCount;
         }
 
-        // Orphaning + 一次性上传
+        // 一次性上传新数据
         m_gl->glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-
         m_gl->glBufferData(GL_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(block->nVertexCapacity * 3 * sizeof(float)),
-            nullptr, GL_DYNAMIC_DRAW);
-
+            block->nVertexCapacity * 3 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
         m_gl->glBufferSubData(GL_ARRAY_BUFFER, 0,
-            static_cast<GLsizeiptr>(nNewVerts.size() * sizeof(float)), nNewVerts.data());
+            newVerts.size() * sizeof(float), newVerts.data());
 
         m_gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->ebo);
-
         m_gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(block->nIndexCapacity * sizeof(unsigned int)),
-            nullptr, GL_DYNAMIC_DRAW);
-
+            block->nIndexCapacity * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
         m_gl->glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-            static_cast<GLsizeiptr>(nNewIndices.size() * sizeof(unsigned int)), nNewIndices.data());
+            newIndices.size() * sizeof(unsigned int), newIndices.data());
 
-        block->nVertexCount = nNewVerts.size() / 3;
-        block->nIndexCount = nNewIndices.size();
-        block->bNeedCompact = false;
+        // 更新统计
+        block->nVertexCount = currentBase;
+        block->nIndexCount = currentBase;
+        block->bCompact = false;
         block->bDirty = true;
     }
 
@@ -982,6 +1016,18 @@ namespace GLRhi
         block->bDirty = false;
     }
 
+    void PolylinesVboManager::touchCache(long long id)
+    {
+        m_vertexCacheOrder.remove(id);
+        m_vertexCacheOrder.push_front(id);
+        if (m_vertexCacheOrder.size() > MAX_CACHE_SIZE)
+        {
+            long long old = m_vertexCacheOrder.back();
+            m_vertexCacheOrder.pop_back();
+            m_vVertexCache.erase(old);
+        }
+    }
+
     void PolylinesVboManager::bindBlock(ColorVBOBlock* block) const
     {
         m_gl->glBindVertexArray(block->vao);
@@ -994,22 +1040,64 @@ namespace GLRhi
 
     void PolylinesVboManager::startBackgroundDefrag()
     {
-        if (m_defragThread.joinable())
-            return;
 
-        m_bStopDefrag = false;
-        m_defragThread = std::thread([this] {
-            while (!m_bStopDefrag.load())
-            {
-                // 50次 × 300毫秒 / 次 = 15000毫秒 = 15秒
-                for (int i = 0; i < 30 && !m_bStopDefrag.load(); ++i)
-                    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        if (1)
+        {
 
-                std::shared_lock<std::shared_mutex> lock(m_mutex);
-                for (auto& pair : m_colorBlocksMap)
-                    for (ColorVBOBlock* b : pair.second)
-                        compactBlock(b);
-            } });
+            m_bStopDefrag = false;
+            m_defragThread = std::thread([this] {
+                while (!m_bStopDefrag)
+                {
+                    //std::this_thread::sleep_for(std::chrono::seconds(5));
+                    for (int i = 0; i < 30 && !m_bStopDefrag.load(); ++i)
+                    {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                        if (m_bStopDefrag)
+                            return;
+                    }
+
+                    std::shared_lock lock(m_mutex);
+                    for (auto& pair : m_colorBlocksMap)
+                    {
+                        for (ColorVBOBlock* block : pair.second)
+                        {
+                            // 只有使用率 < 50% 才值得整理
+                            if (block->bCompact && block->nVertexCount > 0)
+                            {
+                                double dUsage = double(block->nVertexCount) / block->nVertexCapacity;
+                                if (dUsage < 0.7)
+                                {
+                                    lock.unlock();
+                                    std::unique_lock writeLock(m_mutex);
+                                    compactBlock(block);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                });
+
+        }
+        else
+        {
+            if (m_defragThread.joinable())
+                return;
+
+            m_bStopDefrag = false;
+            m_defragThread = std::thread([this] {
+                while (!m_bStopDefrag.load())
+                {
+                    // 50次 × 300毫秒 / 次 = 15000毫秒 = 15秒
+                    for (int i = 0; i < 30 && !m_bStopDefrag.load(); ++i)
+                        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+                    std::shared_lock<std::shared_mutex> lock(m_mutex);
+                    for (auto& pair : m_colorBlocksMap)
+                        for (ColorVBOBlock* b : pair.second)
+                            compactBlock(b);
+                } });
+        }
     }
 
     void PolylinesVboManager::stopBackgroundDefrag()
