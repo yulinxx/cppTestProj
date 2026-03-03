@@ -1,14 +1,62 @@
 /**
  * @file voronoi_diagram.cpp
  * @brief CGAL Voronoi 图示例
- * 
- * Voronoi 图是将平面划分为区域的结构，每个区域包含到一个生成点最近的点
- * 应用场景：
- * 1. 最近邻搜索
- * 2. 位置服务（最近设施）
- * 3. 晶体结构建模
- * 4. 机器人路径规划
- * 5. 图像处理（分水岭算法）
+ *
+ * 什么是 CGAL Voronoi 图？
+ * ====================
+ * Voronoi 图（也称为 Dirichlet 镶嵌或 Thiessen 多边形）是将平面划分为
+ * 区域的结构，每个区域包含到一个生成点（site）最近的点。
+ *
+ * Voronoi 图的数学定义：
+ * - 对于点集 S = {p1, p2, ..., pn}，Voronoi 图将平面划分为 n 个区域
+ * - 第 i 个区域 V(pi) = {x | d(x, pi) ≤ d(x, pj), ∀j ≠ i}
+ * - 其中 d(x, p) 表示点 x 到点 p 的欧几里得距离
+ *
+ * Voronoi 图的重要性质：
+ * 1. 划分性质：Voronoi 区域将平面完全划分，不重叠
+ * 2. 最近性：每个区域内的点到对应生成点最近
+ * 3. 对偶性：与 Delaunay 三角剖分对偶
+ * 4. 凸性：每个 Voronoi 区域是凸多边形
+ * 5. 边的性质：Voronoi 边是两个生成点的垂直平分线的一部分
+ *
+ * Voronoi 图与 Delaunay 三角剖分的关系：
+ * - Delaunay 三角形 → Voronoi 顶点（三角形的外心）
+ * - Delaunay 边 → Voronoi 边（垂直平分线）
+ * - Delaunay 顶点 → Voronoi 区域
+ *
+ * Voronoi 图的扩展：
+ * 1. 加权 Voronoi 图：考虑生成点的权重
+ * 2. Apollonius 图：生成元是圆
+ * 3. 更高维 Voronoi 图：3D、4D等
+ * 4. 障碍 Voronoi 图：考虑障碍物
+ *
+ * Voronoi 图的应用场景：
+ * 1. 最近邻搜索：快速找到最近点
+ * 2. 位置服务：最近设施搜索
+ * 3. 晶体结构建模：原子配位
+ * 4. 机器人路径规划：安全路径
+ * 5. 图像处理：分水岭算法
+ * 6. 无线网络：覆盖分析
+ * 7. 生态学：领地划分
+ * 8. 零售分析：市场区域
+ *
+ * Voronoi 图的构造算法：
+ * 1. Fortune 算法（扫描线）：O(n log n)
+ * 2. 增量算法：O(n^2)
+ * 3. 分治算法：O(n log n)
+ * 4. 通过 Delaunay 三角剖分对偶构造
+ *
+ * 本示例演示：
+ * 1. Voronoi 图与 Delaunay 三角剖分的关系
+ * 2. Voronoi 单元的计算
+ * 3. 最近邻搜索应用
+ * 4. 位置服务应用
+ * 5. 机器人路径规划应用
+ * 6. 晶体结构建模应用
+ * 7. 图像处理应用
+ * 8. 加权 Voronoi 图
+ * 9. Apollonius 图
+ * 10. Voronoi 图的性质
  */
 
 #include <iostream>
