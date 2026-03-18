@@ -1,37 +1,21 @@
-#include <glad/glad.h>  // 添加这一行以包含GLAD库
-// 包含 GLFW 库,用于创建窗口和处理输入等操作
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-// 包含 stb_truetype 库,用于处理 TrueType 字体
-#include <stb_truetype.h>
-// 包含输入输出流库,用于输入输出操作
 #include <iostream>
-// 包含向量容器库,用于存储动态数组
 #include <vector>
-// 包含文件流库,用于文件操作
 #include <fstream>
-// 包含字符串流库,用于字符串操作
 #include <sstream>
-// 包含宽字符输入输出流库
 #include <cwchar>
 
-// 引入 freetype 库
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_OUTLINE_H
 
-// 定义窗口的宽度
 #define WINDOW_WIDTH 800
-// 定义窗口的高度
 #define WINDOW_HEIGHT 600
 
-/**
- * 顶点着色器代码,使用原始字符串字面量表示
- * 接收顶点位置,通过投影矩阵将其转换到裁剪空间
- */
 const char* vs = R"(
 #version 400
-// 顶点属性,位置坐标,在顶点缓冲区中的位置为 0
 layout (location = 0) in vec2 aPos;
-// 投影矩阵,用于将顶点从局部坐标转换到裁剪空间
 uniform mat4 projection;
 // 主函数,每个顶点都会执行此函数
 void main()
@@ -41,13 +25,8 @@ void main()
 }
 )";
 
-/**
- * 片段着色器代码,使用原始字符串字面量表示
- * 为每个片段输出白色颜色
- */
 const char* fs = R"(
 #version 400
-// 输出变量,最终的片段颜色
 out vec4 FragColor;
 // 主函数,每个片段都会执行此函数
 void main()
@@ -57,310 +36,355 @@ void main()
 }
 )";
 
-// 定义字体数据结构
-typedef struct
+/**
+ * @brief 字体数据结构,用于存储字体的OpenGL资源和对齐数据
+ */
+struct FontData
 {
-    // 顶点数组对象 ID
-    GLuint vao;
-    // 顶点缓冲对象 ID
-    GLuint vbo;
-    // 存储所有顶点的向量
-    std::vector<float> vertices;
-    // 存储每个字符的顶点数量的向量
-    std::vector<int> glyphVertexCounts;
-} FontData;
-
-// 全局字体数据对象
-FontData font;
+    GLuint vao;         // 顶点数组对象ID,用于OpenGL绑定顶点数据
+    GLuint vbo;        // 顶点缓冲对象ID,用于存储顶点数据到GPU
+    std::vector<float> vertices;      // 所有字符的顶点坐标(x,y)序列
+    std::vector<int> contourCounts;   // 每个轮廓的顶点数,用于绘制时区分不同字符
+} font;
 
 /**
- * 二阶贝塞尔曲线细分函数
- * @param x0 起点的 x 坐标
- * @param y0 起点的 y 坐标
- * @param cx 控制点的 x 坐标
- * @param cy 控制点的 y 坐标
- * @param x1 终点的 x 坐标
- * @param y1 终点的 y 坐标
- * @param scale 缩放因子
- * @param xOffset x 偏移量
- * @param yOffset y 偏移量
- * @param vertices 存储顶点的向量
- * @param segments 细分的段数,默认为 20
+ * @brief FT_Outline_Decompose回调函数的上下文结构体
+ *        用于在轮廓分解过程中传递和保存状态信息
  */
-void addBezierCurve(float x0, float y0, float cx, float cy, float x1, float y1, float scale, float xOffset, float yOffset,
-    std::vector<float>& vertices, int segments = 20)
+struct DecomposeContext
 {
-    // 遍历细分的段数
-    for (int i = 0; i <= segments; i++)
+    std::vector<float>* globalVerts;     // 指向全局顶点向量的指针,用于存储所有字符的顶点
+    std::vector<int>* contourCounts;      // 指向轮廓计数向量的指针,用于记录每个轮廓的顶点数
+    std::vector<float> curContour;       // 当前正在处理的轮廓的顶点数据
+    float scale;                         // 缩放因子,FreeType坐标到像素坐标的转换比例(1/64)
+    float xOffset;                       // 字符的X轴偏移量(像素坐标)
+    float yOffset;                       // 字符的Y轴偏移量(像素坐标)
+    FT_Vector last;                       // 上一个处理过的轮廓点坐标
+};
+
+/**
+ * @brief FT_Outline_Decompose的移动到回调函数
+ *        当FreeType开始一个新的轮廓时调用此函数
+ * @param to 目标位置的坐标
+ * @param user 用户数据指针,指向DecomposeContext结构体
+ * @return 返回0表示成功
+ */
+int moveTo(const FT_Vector* to, void* user)
+{
+    DecomposeContext* ctx = (DecomposeContext*)user;
+    // 如果当前轮廓不为空,说明前一个轮廓已处理完毕
+    // 将前一个轮廓的顶点数添加到计数向量
+    if (!ctx->curContour.empty())
     {
-        // 计算当前细分点的参数 t
-        float t = i / (float)segments;
-        // 计算 1 - t
-        float u = 1.0f - t;
-        // 根据贝塞尔曲线公式计算当前细分点的 x 坐标
-        float x = u * u * x0 + 2 * u * t * cx + t * t * x1;
-        // 根据贝塞尔曲线公式计算当前细分点的 y 坐标
-        float y = u * u * y0 + 2 * u * t * cy + t * t * y1;
-        // 将细分点的 x 坐标添加到顶点向量中,并考虑偏移和缩放
-        vertices.push_back(xOffset + x * scale);
-        // 将细分点的 y 坐标添加到顶点向量中,并考虑偏移和缩放
-        vertices.push_back(yOffset + y * scale);
+        // 每个顶点包含x和y两个坐标,所以顶点数要除以2
+        ctx->contourCounts->push_back(ctx->curContour.size() / 2);
+        // 将当前轮廓的所有顶点追加到全局顶点向量
+        ctx->globalVerts->insert(ctx->globalVerts->end(),
+            ctx->curContour.begin(), ctx->curContour.end());
+        // 清空当前轮廓,为下一个轮廓做准备
+        ctx->curContour.clear();
     }
+    // 更新last为当前目标点,作为下一个线段的起点
+    ctx->last = *to;
+    return 0;
 }
 
-// 使用 freetype 初始化字体
-void initFont(const char* fontPath, const wchar_t* text, float fontSize, float x, float y)
+/**
+ * @brief FT_Outline_Decompose的直线段回调函数
+ *        当FreeType遇到直线段时调用此函数
+ * @param to 直线段终点的坐标
+ * @param user 用户数据指针,指向DecomposeContext结构体
+ * @return 返回0表示成功
+ */
+int lineTo(const FT_Vector* to, void* user)
 {
+    DecomposeContext* ctx = (DecomposeContext*)user;
+    // 添加线段起点(上一个点)
+    ctx->curContour.push_back(ctx->xOffset + ctx->last.x * ctx->scale);
+    ctx->curContour.push_back(ctx->yOffset + ctx->last.y * ctx->scale);
+    // 添加线段终点(当前点)
+    ctx->curContour.push_back(ctx->xOffset + to->x * ctx->scale);
+    ctx->curContour.push_back(ctx->yOffset + to->y * ctx->scale);
+    // 更新last为当前点,作为下一段的起点
+    ctx->last = *to;
+    return 0;
+}
+
+/**
+ * @brief FT_Outline_Decompose的二次贝塞尔曲线回调函数
+ *        当FreeType遇到二次曲线(抛物线)时调用此函数
+ * @param control 二次贝塞尔曲线的控制点坐标
+ * @param to 曲线终点的坐标
+ * @param user 用户数据指针,指向DecomposeContext结构体
+ * @return 返回0表示成功
+ */
+int conicTo(const FT_Vector* control, const FT_Vector* to, void* user)
+{
+    DecomposeContext* ctx = (DecomposeContext*)user;
+    // 曲线控制点
+    FT_Vector p0 = ctx->last, p1 = *control, p2 = *to;
+    // 将二次贝塞尔曲线细分为多个直线段来近似表示
+    int segs = 16;  // 细分数,值越大曲线越平滑
+    for (int i = 0; i <= segs; ++i)
+    {
+        // 计算参数t (0到1之间)
+        float t = (float)i / segs;
+        // 计算1-t
+        float u = 1.0f - t;
+        // 二次贝塞尔曲线公式: B(t) = (1-t)²P0 + 2(1-t)tP1 + t²P2
+        float x = u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x;
+        float y = u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y;
+        // 添加细分后的顶点
+        ctx->curContour.push_back(ctx->xOffset + x * ctx->scale);
+        ctx->curContour.push_back(ctx->yOffset + y * ctx->scale);
+    }
+    // 更新last为曲线终点
+    ctx->last = *to;
+    return 0;
+}
+
+/**
+ * @brief FT_Outline_Decompose的三次贝塞尔曲线回调函数
+ *        当FreeType遇到三次曲线时调用此函数
+ *        此处简化为直线段近似,以保证兼容性
+ * @param c1 三次贝塞尔曲线的第一个控制点
+ * @param c2 三次贝塞尔曲线的第二个控制点
+ * @param to 曲线终点的坐标
+ * @param user 用户数据指针,指向DecomposeContext结构体
+ * @return 返回0表示成功
+ */
+int cubicTo(const FT_Vector* c1, const FT_Vector* c2, const FT_Vector* to, void* user)
+{
+    // 简单用直线近似三次曲线(可扩展为更精细的曲线细分算法)
+    DecomposeContext* ctx = (DecomposeContext*)user;
+    // 添加线段起点
+    ctx->curContour.push_back(ctx->xOffset + ctx->last.x * ctx->scale);
+    ctx->curContour.push_back(ctx->yOffset + ctx->last.y * ctx->scale);
+    // 添加线段终点
+    ctx->curContour.push_back(ctx->xOffset + to->x * ctx->scale);
+    ctx->curContour.push_back(ctx->yOffset + to->y * ctx->scale);
+    // 更新last
+    ctx->last = *to;
+    return 0;
+}
+
+/**
+ * @brief 使用FreeType初始化字体,解析字符轮廓并生成顶点数据
+ * @param fontPath 字体文件路径(如C:/Windows/Fonts/simhei.ttf)
+ * @param text 要渲染的字符序列(UTF-32编码)
+ * @param fontSize 字体大小(像素)
+ * @param x 初始X坐标位置
+ * @param y 初始Y坐标位置
+ */
+void initFont(const char* fontPath, const char32_t* text, float fontSize, float x, float y)
+{
+    // 初始化FreeType库
     FT_Library ft;
     if (FT_Init_FreeType(&ft))
     {
-        std::cerr << "Failed to initialize FreeType library!" << std::endl;
-        std::exit(1);
+        std::cerr << "FT init failed\n"; std::exit(1);
     }
 
+    // 从文件加载字体Face
     FT_Face face;
     if (FT_New_Face(ft, fontPath, 0, &face))
     {
-        std::cerr << "Failed to load font file!" << std::endl;
-        std::exit(1);
+        std::cerr << "Load font failed: " << fontPath << "\n"; std::exit(1);
     }
 
-    FT_Set_Pixel_Sizes(face, 0, fontSize);
+    // 设置字体大小,width设为0表示使用与height相同的宽高比
+    FT_Set_Pixel_Sizes(face, 0, (FT_UInt)fontSize);
 
-    float xpos = x;
+    // FreeType使用1/64像素作为基本单位,需要转换到像素坐标
+    float scale = 1.0f / 64.0f;
+    // 字符起始位置(像素坐标)
+    float xpos = x, ypos = y;
+
+    // 配置轮廓分解回调函数
+    FT_Outline_Funcs funcs;
+    funcs.move_to = moveTo;      // 新轮廓开始时调用
+    funcs.line_to = lineTo;     // 直线段处理
+    funcs.conic_to = conicTo;   // 二次曲线处理
+    funcs.cubic_to = cubicTo;   // 三次曲线处理
+    funcs.shift = 0;            // 坐标位移(无位移)
+    funcs.delta = 0;            // 坐标增量(无增量)
+
+    // 遍历每个字符
     while (*text)
     {
-        FT_UInt glyph_index = FT_Get_Char_Index(face, *text);
-        if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT))
+        // 获取当前字符的UTF-32编码,并移动到下一个字符
+        FT_ULong char_code = *text++;
+
+        // 根据字符编码查找对应的字形索引
+        FT_UInt glyph_index = FT_Get_Char_Index(face, char_code);
+        // 如果找不到对应字形,跳过此字符
+        if (glyph_index == 0)
         {
-            std::cerr << "Failed to load glyph!" << std::endl;
+            std::cerr << "Glyph not found for 0x" << std::hex << char_code << std::dec << std::endl;
+            // 移动到下一个字符的位置
+            xpos += face->glyph->advance.x * scale;
             continue;
         }
 
-        if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL))
+        // 加载字形(不使用位图,只获取轮廓)
+        if (FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_BITMAP))
         {
-            std::cerr << "Failed to render glyph!" << std::endl;
+            std::cerr << "Load glyph failed\n";
+            xpos += face->glyph->advance.x * scale;
             continue;
         }
 
+        // 获取字形的轮廓数据
         FT_Outline& outline = face->glyph->outline;
-        std::vector<float> glyphVertices;
-        float x0 = xpos;
-        float y0 = y;
-
-        for (int i = 0; i < outline.n_contours; ++i)
+        // 如果轮廓没有点,说明是空字符,直接跳过
+        if (outline.n_points <= 0)
         {
-            int start = (i == 0) ? 0 : outline.contours[i - 1] + 1;
-            int end = outline.contours[i];
-
-            for (int j = start; j < end; ++j)
-            {
-                FT_Vector& p = outline.points[j];
-                glyphVertices.push_back(x0 + p.x * 0.01f); // 简单缩放
-                glyphVertices.push_back(y0 + p.y * 0.01f);
-            }
-
-            if (!glyphVertices.empty())
-            {
-                glyphVertices.push_back(glyphVertices[0]);
-                glyphVertices.push_back(glyphVertices[1]);
-            }
+            xpos += face->glyph->advance.x * scale;
+            continue;
         }
 
-        if (!glyphVertices.empty())
+        // 初始化分解上下文
+        DecomposeContext ctx;
+        ctx.globalVerts = &font.vertices;      // 全局顶点存储
+        ctx.contourCounts = &font.contourCounts; // 轮廓计数存储
+        ctx.scale = scale;                      // 缩放因子
+        ctx.xOffset = xpos;                    // 当前字符的X偏移
+        ctx.yOffset = ypos;                    // 当前字符的Y偏移
+        ctx.last = FT_Vector();                 // 初始化起始点
+
+        // 执行轮廓分解,将曲线转换为直线段顶点
+        FT_Outline_Decompose(&outline, &funcs, &ctx);
+
+        // 处理最后一个轮廓(如果还有未保存的数据)
+        if (!ctx.curContour.empty())
         {
-            font.vertices.insert(font.vertices.end(), glyphVertices.begin(), glyphVertices.end());
-            font.glyphVertexCounts.push_back(glyphVertices.size() / 2);
+            font.contourCounts.push_back(ctx.curContour.size() / 2);
+            font.vertices.insert(font.vertices.end(),
+                ctx.curContour.begin(), ctx.curContour.end());
         }
 
-        xpos += face->glyph->advance.x >> 6;
-        ++text;
+        // 更新下一个字符的X位置(字形前进量)
+        xpos += face->glyph->advance.x * scale;
     }
 
+    // 释放FreeType资源
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
+    // 创建OpenGL顶点数组对象和缓冲对象
     glGenVertexArrays(1, &font.vao);
     glGenBuffers(1, &font.vbo);
 
+    // 绑定VAO,后续的顶点属性配置都将在此VAO中
     glBindVertexArray(font.vao);
+    // 绑定VBO,将顶点数据上传到GPU
     glBindBuffer(GL_ARRAY_BUFFER, font.vbo);
-    glBufferData(GL_ARRAY_BUFFER, font.vertices.size() * sizeof(float), font.vertices.data(), GL_STATIC_DRAW);
+    // 将顶点数据从CPU内存复制到GPU显存
+    glBufferData(GL_ARRAY_BUFFER, font.vertices.size() * sizeof(float),
+        font.vertices.data(), GL_STATIC_DRAW);
+
+    // 配置顶点属性(位置,2个float分量,步长2*sizeof(float))
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    // 启用顶点属性数组
     glEnableVertexAttribArray(0);
 }
 
 /**
- * 渲染线条文字
- * @param program 着色器程序 ID
+ * @brief 渲染文字函数
+ * @param program 着色器程序对象
  */
 void renderText(GLuint program)
 {
-    // 使用指定的着色器程序
+    // 激活着色器程序
     glUseProgram(program);
 
-    // 设置正交投影矩阵
-    // 位置和 OpenGL 一致
+    // 创建正交投影矩阵,将窗口坐标映射到裁剪空间(-1到1)
+    // 变换公式: clipX = (windowX / width) * 2 - 1
     float proj[16] = {
         2.0f / WINDOW_WIDTH, 0.0f, 0.0f, 0.0f,
         0.0f, 2.0f / WINDOW_HEIGHT, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         -1.0f, -1.0f, 0.0f, 1.0f
     };
-
-    // 设置投影矩阵的 uniform 变量
+    // 将投影矩阵传递给着色器
     glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, proj);
 
-    // 绑定顶点数组对象
+    // 绑定字体VAO
     glBindVertexArray(font.vao);
 
-    // 按字符逐个绘制,避免字符间连接
-    int vertexOffset = 0;
-    for (int count : font.glyphVertexCounts)
+    // 遍历每个轮廓,分别绘制
+    // 使用GL_LINE_LOOP绘制闭合的轮廓线
+    int offset = 0;  // 顶点偏移量
+    for (int count : font.contourCounts)
     {
-        // 绘制当前字符的顶点
-        glDrawArrays(GL_LINE_STRIP, vertexOffset, count);
-        // 更新顶点偏移量
-        vertexOffset += count;
+        glDrawArrays(GL_LINE_LOOP, offset, count);
+        offset += count;
     }
 }
 
-/**
- * 主函数,程序入口
- * @return 程序退出状态码
- */
 int main()
 {
-    // 初始化 GLFW 库
+    // 初始化GLFW库
     if (!glfwInit())
-    {
-        // 输出错误信息
-        printf("GLFW 初始化失败!\n");
-        // 返回错误状态码
         return -1;
-    }
 
-    // 设置 GLFW 上下文版本为 4.0
+    // 设置OpenGL上下文版本(主版本4.0,次版本0)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    // 创建 GLFW 窗口
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Outline Text Rendering", NULL, NULL);
-    // 检查窗口是否成功创建
+
+    // 创建窗口
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Outline Text", NULL, NULL);
     if (!window)
     {
-        // 终止 GLFW 库
         glfwTerminate();
-        // 返回错误状态码
         return -1;
     }
 
-    // 设置当前上下文为创建的窗口
+    // 设置当前OpenGL上下文
     glfwMakeContextCurrent(window);
+    // 初始化GLAD(OpenGL函数指针加载器)
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return -1;
 
-    // 初始化 GLAD 库
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        // 输出错误信息
-        printf("GLAD 初始化失败!\n");
-        // 返回错误状态码
-        return -1;
-    }
-
-    // 输出 OpenGL 信息
-    {
-        std::cout << "=== OpenGL Information ===" << std::endl;
-        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
-        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-        std::cout << "Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-        std::cout << "===================" << std::endl;
-    }
-
-    // 创建顶点着色器对象
+    // 创建和编译顶点着色器
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    // 设置顶点着色器源代码
     glShaderSource(vertexShader, 1, &vs, NULL);
-    // 编译顶点着色器
     glCompileShader(vertexShader);
 
-    // 检查顶点着色器编译错误
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        // 获取编译错误信息
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        // 输出编译错误信息
-        printf("顶点着色器编译失败:\n%s\n", infoLog);
-    }
-
-    // 创建片段着色器对象
+    // 创建和编译片段着色器
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    // 设置片段着色器源代码
     glShaderSource(fragmentShader, 1, &fs, NULL);
-    // 编译片段着色器
     glCompileShader(fragmentShader);
 
-    // 检查片段着色器编译错误
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        // 获取编译错误信息
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        // 输出编译错误信息
-        printf("片段着色器编译失败:\n%s\n", infoLog);
-    }
-
-    // 创建着色器程序对象
+    // 创建着色器程序并链接着色器
     GLuint shaderProgram = glCreateProgram();
-    // 附着顶点着色器到着色器程序
     glAttachShader(shaderProgram, vertexShader);
-    // 附着片段着色器到着色器程序
     glAttachShader(shaderProgram, fragmentShader);
-    // 链接着色器程序
     glLinkProgram(shaderProgram);
 
-    // 检查着色器程序链接错误
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        // 获取链接错误信息
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        // 输出链接错误信息
-        printf("着色器程序链接失败:\n%s\n", infoLog);
-    }
-
-    // 删除顶点着色器对象
+    // 删除已编译的着色器对象(不再需要)
     glDeleteShader(vertexShader);
-    // 删除片段着色器对象
     glDeleteShader(fragmentShader);
 
-    // 初始化字体并生成轮廓顶点
-    initFont("C:/Windows/Fonts/simhei.ttf", L"你好OpenGL", 64.0f, 100.0f, 300.0f);
+    // 初始化字体,解析文字生成顶点数据
+    initFont("C:/Windows/Fonts/simhei.ttf", U"你好OpenGL", 64.0f, 100.0f, 300.0f);
 
-    // 主循环,直到窗口关闭
+    // 主渲染循环
     while (!glfwWindowShouldClose(window))
     {
         // 清除颜色缓冲区
         glClear(GL_COLOR_BUFFER_BIT);
-
         // 渲染文字
         renderText(shaderProgram);
-
-        // 交换前后缓冲区
+        // 交换前后缓冲区(双缓冲)
         glfwSwapBuffers(window);
-        // 处理事件
+        // 处理窗口事件(按键、鼠标等)
         glfwPollEvents();
     }
 
-    // 删除顶点数组对象
+    // 清理OpenGL资源
     glDeleteVertexArrays(1, &font.vao);
-    // 删除顶点缓冲对象
     glDeleteBuffers(1, &font.vbo);
-    // 终止 GLFW 库
+    // 终止GLFW
     glfwTerminate();
-
-    // 返回成功状态码
     return 0;
 }
